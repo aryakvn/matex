@@ -41,6 +41,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Add a right-hand side panel for tools, opened from the toolbar; the first one, Header & footer scripts (`{ }` button), lists the `{{ }}` variables with this page's values, syntax and examples, each with an Insert button for the header/footer being edited.
 - Dock the side panel beside the pages instead of floating over them: the page area makes room and the page keeps its A4 width (a window too narrow for both scrolls the pages sideways). A ? button in the panel's header shows its help text.
 - Add a ? button to the Header/Footer tag shown while editing; it opens the side panel with the script help showing. The panel stays closed until asked for.
+- Add a Styles panel (Aa button), like Word's Styles gallery: Normal, Heading 1–3 and Code, each tile drawn in its own fonts; click to apply, pencil to change. Each style has a Latin font and a separate Persian font with its own size (e.g. Times New Roman 12 + B Nazanin 14), plus bold, italic and colour. Persian text in the page, headers/footers and table of contents gets the Persian font. Font boxes suggest common fonts and, where the webview allows, the installed ones. Saved in `page.json`.
 
 ### Changed
 - Replace the app icon with the new MaTex logo (desktop icons regenerated from `app-icon.png`, browser favicon, title strip) and show it at the top of the README.

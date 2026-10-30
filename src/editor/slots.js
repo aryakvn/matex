@@ -4,6 +4,7 @@
 import { Editor, getHTMLFromFragment } from '@tiptap/core'
 import { Node } from '@tiptap/pm/model'
 import { slotEditorOptions } from './extensions.js'
+import { markPersian } from './persian.js'
 
 let converter
 const parsed = new Map() // markdown → doc JSON
@@ -46,5 +47,9 @@ export function slotHtml(md, fill = (t) => t, suffix = '') {
     if (block) (block.content ??= []).push({ type: 'text', text: block.content.length ? ` ${suffix}` : suffix })
     else doc.content.push({ type: 'paragraph', content: [{ type: 'text', text: suffix }] })
   }
-  return getHTMLFromFragment(Node.fromJSON(converter.schema, doc).content, converter.schema)
+  const html = getHTMLFromFragment(Node.fromJSON(converter.schema, doc).content, converter.schema)
+  // Persian runs get their font here, as the editor's decorations give it to them while editing.
+  const tpl = document.createElement('template')
+  tpl.innerHTML = html
+  return markPersian(tpl.content) && tpl.innerHTML
 }

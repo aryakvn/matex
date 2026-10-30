@@ -8,6 +8,7 @@ import { createLowlight, common } from 'lowlight'
 import { UnlistedHeading, TableOfContents } from './toc.js'
 import { Pagination } from './pagination.js'
 import { Direction, DirectionMarkdown, withDirMark } from './direction.js'
+import { PersianFont } from './persian.js'
 
 // A paragraph whose text starts like block syntax ("2) ", "- ", "# ", "---", 4 spaces)
 // (or is "[TOC]") would reopen as a list/heading/rule/code block/table of contents,
@@ -31,6 +32,7 @@ export const extensions = [
   TableOfContents,
   Pagination,
   Direction,
+  PersianFont,
   // Mod-Shift-S belongs to Save as, so strike moves to Mod-Shift-X.
   Strike.extend({
     addKeyboardShortcuts() { return { 'Mod-Shift-x': () => this.editor.commands.toggleStrike() } },

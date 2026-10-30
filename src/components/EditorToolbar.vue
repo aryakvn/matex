@@ -4,10 +4,11 @@
 import { computed, ref, nextTick } from 'vue'
 import {
   Undo2, Redo2, Bold, Italic, Strikethrough, Code, Link, List, ListOrdered,
-  Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces,
+  Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, CaseSensitive,
 } from 'lucide-vue-next'
 import ToolbarMenu from './ToolbarMenu.vue'
 import { directionAt } from '../editor/direction.js'
+import { STYLES, styleAt, applyStyle } from '../utils/styles.js'
 import appIcon from '../../src-tauri/icons/64x64.png'
 
 const props = defineProps({
@@ -50,27 +51,7 @@ const directions = [
   { dir: 'rtl', label: 'Right-to-left text', icon: PilcrowLeft },
 ]
 
-const blockTypes = [
-  { value: 'p', label: 'Normal text' },
-  { value: 'h1', label: 'Heading 1' },
-  { value: 'h2', label: 'Heading 2' },
-  { value: 'h3', label: 'Heading 3' },
-  { value: 'code', label: 'Code block' },
-]
-
-const blockType = computed(() => {
-  const e = props.editor
-  if (!e) return 'p'
-  for (const level of [1, 2, 3]) if (e.isActive('heading', { level })) return `h${level}`
-  if (e.isActive('codeBlock')) return 'code'
-  return 'p'
-})
-
-function setBlockType(value) {
-  if (value === 'p') chain().setParagraph().run()
-  else if (value === 'code') chain().setCodeBlock().run()
-  else chain().setHeading({ level: Number(value[1]) }).run()
-}
+const blockType = computed(() => styleAt(props.editor))
 
 const inTable = computed(() => props.editor?.isActive('table') ?? false)
 const tableItems = computed(() => [
@@ -142,11 +123,17 @@ function onImagePicked(e) {
       <span class="tb-sep" />
 
       <span class="tb-select-wrap">
-        <select class="tb-select" aria-label="Text style" :value="blockType" @change="setBlockType($event.target.value)">
-          <option v-for="t in blockTypes" :key="t.value" :value="t.value">{{ t.label }}</option>
+        <select class="tb-select" aria-label="Text style" :value="blockType" @change="applyStyle(editor, $event.target.value)">
+          <option v-for="s in STYLES" :key="s.key" :value="s.key">{{ s.label }}</option>
         </select>
         <ChevronDown :size="16" aria-hidden="true" />
       </span>
+      <button
+        type="button" class="tb-btn" title="Styles and fonts" aria-label="Styles and fonts"
+        :aria-pressed="panel === 'styles'" @click="emit('panel', 'styles')"
+      >
+        <CaseSensitive :size="20" />
+      </button>
 
       <span class="tb-sep" />
 

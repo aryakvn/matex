@@ -21,6 +21,10 @@
   line-height: 1.6;
 }
 
+/* Persian runs (src/editor/persian.js) in the paragraph style's Persian font and size; the styles
+   themselves are CSS made by src/utils/styles.js. No --fa-font = the Latin font's stack. */
+.page .fa { font-family: var(--fa-font); font-size: calc(var(--fa-scale, 1) * 1em); }
+
 .page .ProseMirror { position: relative; outline: none; min-height: calc(297mm - var(--margin-top) - var(--margin-bottom)); }
 .page .ProseMirror > :first-child { margin-top: 0; }
 
@@ -76,7 +80,7 @@
 }
 /* Code reads left-to-right even inside a Persian document. */
 .page pre { direction: ltr; text-align: left; background: #f6f6f6; padding: 0.8em 1em; border-radius: 4px; overflow-x: auto; }
-.page pre code { background: none; padding: 0; }
+.page pre code { background: none; padding: 0; font-size: 1em; }
 /* Syntax colours (highlight.js classes), GitHub light palette: readable on white and in print. */
 .page pre .hljs-comment, .page pre .hljs-quote, .page pre .hljs-formula { color: #6e7781; font-style: italic; }
 .page pre .hljs-keyword, .page pre .hljs-doctag, .page pre .hljs-template-tag, .page pre .hljs-variable.language_, .page pre .hljs-type { color: #cf222e; }

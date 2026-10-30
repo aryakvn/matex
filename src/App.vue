@@ -8,6 +8,8 @@ import EditorToolbar from './components/EditorToolbar.vue'
 import PageSetup from './components/PageSetup.vue'
 import SidePanel from './components/SidePanel.vue'
 import ScriptReference from './components/ScriptReference.vue'
+import StylesPanel from './components/StylesPanel.vue'
+import { normalizeStyles, stylesCss } from './utils/styles.js'
 import { fillTokens, slotNumber, ALIGNS } from './utils/layout.js'
 import { useDocument } from './composables/useDocument.js'
 import { onCloseRequest } from './utils/platform.js'
@@ -49,8 +51,15 @@ const { name, dirty, layout, scriptsOn } = doc
 const setup = ref(null)
 const fileActions = { new: doc.newDoc, open: doc.openDoc, save: doc.save, saveAs: doc.saveAs, pageSetup: () => setup.value.open() }
 
-// Header and footer heights are the page's top and bottom margins, so changing them re-flows the pages.
-watch(() => [layout.headerHeight, layout.footerHeight], () => nextTick(() => editor.value?.storage.pagination.refresh?.()))
+// Paragraph styles (fonts, sizes) as a stylesheet over document.css; it prints too.
+const stylesSheet = document.head.appendChild(document.createElement('style'))
+const css = computed(() => stylesCss(normalizeStyles(layout.styles)))
+watch(css, (text) => { stylesSheet.textContent = text }, { immediate: true })
+onBeforeUnmount(() => stylesSheet.remove())
+
+// Header and footer heights are the page's top and bottom margins, and styles change line heights,
+// so both re-flow the pages.
+watch(() => [layout.headerHeight, layout.footerHeight, css.value], () => nextTick(() => editor.value?.storage.pagination.refresh?.()))
 // Each slot is Markdown. Per sheet: {{ }} scripts run (if allowed), {page}/{pages} fill in, the page
 // number joins its slot. Slots with none of that render once and are shared by every sheet.
 const scriptVars = (n) => ({
@@ -153,7 +162,7 @@ function stopEditing() {
 }
 
 // Right-hand side panel: one at a time, by name; the toolbar button toggles it.
-const PANELS = { scripts: 'Header & footer scripts' }
+const PANELS = { styles: 'Styles', scripts: 'Header & footer scripts' }
 const panel = ref(null) // closed until asked for
 const panelHelp = ref(false) // the panel's help text is showing
 const togglePanel = (key) => (panel.value = panel.value === key ? null : key)
@@ -240,6 +249,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   </main>
   <SidePanel v-model:show-help="panelHelp" :open="!!panel" :title="PANELS[panel] ?? ''" help @update:open="panel = null">
     <template #default="{ showHelp }">
+      <StylesPanel v-if="panel === 'styles'" :editor="activeEditor" :styles="layout.styles" :show-help="showHelp" />
       <ScriptReference
         v-if="panel === 'scripts'"
         :vars="scriptVars(editing?.n ?? 1)" :can-insert="!!focusedSlot" :scripts-on="scriptsOn" :show-help="showHelp"

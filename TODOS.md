@@ -6,7 +6,7 @@ MaTex exists because writing a Persian thesis offline on Linux, with your own fo
 
 - [ ] **Custom fonts.** Let a document use any font file (e.g. Vazirmatn, B Nazanin, IRANSans).
   - Store font files inside the `.matex` archive (`assets/fonts/`) and load them with `@font-face`, so the document prints the same on any machine.
-  - Optionally add a font picker in the toolbar for the body and heading families.
+  - [x] Font picker per paragraph style, with separate Latin and Persian fonts (Styles panel). Fonts must still be installed.
 - [ ] **Per-document CSS.** Add a `style.css` inside the `.matex` archive, applied on top of `document.css`.
   - Edit it in an in-app CSS editor with live preview.
   - This is the programmer feature: page size, margins, heading numbering, and how tables and code look are all just CSS.

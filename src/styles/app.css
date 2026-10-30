@@ -89,6 +89,37 @@ body {
 .side-enter-active, .side-leave-active { transition: opacity 150ms ease, translate 150ms ease; }
 .side-enter-from, .side-leave-to { opacity: 0; translate: 16px 0; }
 
+/* Styles gallery (StylesPanel.vue): tiles drawn in each style's fonts, like Word's Styles gallery. */
+.style-list { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.style-item { border: 1px solid var(--stroke); border-radius: 4px; overflow: hidden; }
+/* The 2px ring is border + outline: an outline paints over the white tile, an inset shadow would paint under it. */
+.style-item.current { border-color: var(--brand-ink); outline: 1px solid var(--brand-ink); outline-offset: -2px; }
+/* The whole row is white like the page, pencil included, so previews show their real colours in dark mode too. */
+.style-tile { display: flex; align-items: center; gap: 2px; padding-inline-end: 4px; background: #fff; }
+.style-tile .tb-btn { color: #616161; }
+.style-tile .tb-btn:hover { background: rgba(0, 0, 0, 0.06); color: #242424; }
+.style-tile .tb-btn[aria-expanded="true"] { background: rgba(0, 0, 0, 0.08); color: #0f6cbd; }
+.style-apply {
+  flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  min-height: 44px; padding: 6px 10px; border: 0; border-radius: 0;
+  background: none; cursor: pointer; text-align: start; overflow: hidden; white-space: nowrap;
+}
+.style-apply:hover:not(:disabled) { background: rgba(0, 0, 0, 0.04); }
+.style-apply:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.style-apply span { overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
+.style-form { display: grid; grid-template-columns: 1fr 72px; gap: 8px; padding: 8px 10px 10px; border-top: 1px solid var(--stroke); }
+.style-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+.style-form label.check { flex-direction: row; align-items: center; gap: 6px; font-size: 14px; color: var(--ink); }
+.style-form input[type="text"], .style-form input[type="number"] {
+  width: 100%; min-width: 0; height: 32px; padding: 0 8px;
+  border: 1px solid var(--stroke-ctl); border-bottom-color: var(--stroke-access); border-radius: 4px;
+  background: var(--surface); color: var(--ink); font-size: 14px;
+}
+.style-form input:focus { outline: none; border-bottom-color: var(--brand-ink); box-shadow: inset 0 -1px 0 var(--brand-ink); }
+.style-form input[type="color"] { width: 32px; height: 24px; padding: 0; border: 1px solid var(--stroke-ctl); border-radius: 4px; background: none; }
+.style-row { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.style-reset { margin-inline-start: auto; }
+
 /* Script reference (ScriptReference.vue) */
 .ref-text, .ref-hint, .ref-warn { margin: 0 0 8px; }
 .ref-hint { color: var(--muted); font-size: 12px; }

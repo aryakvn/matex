@@ -9,6 +9,7 @@ import { Ellipsis, EyeOff } from 'lucide-vue-next'
 import ToolbarMenu from './ToolbarMenu.vue'
 import { tocEntries } from '../editor/toc.js'
 import { pageOf } from '../editor/pagination.js'
+import { persianRuns } from '../editor/persian.js'
 
 const props = defineProps(nodeViewProps)
 
@@ -54,7 +55,7 @@ const includeItems = computed(() => excluded.value.map((e) => ({ label: `Include
     <!-- dir="auto" on the list: the first heading sets which side the page numbers sit on. -->
     <ol v-else class="toc-list" dir="auto">
       <li v-for="entry in listed" :key="entry.pos" :class="['toc-item', `toc-l${entry.level}`]">
-        <a href="#" dir="auto" @click.prevent="jump(entry)">{{ entry.text }}</a>
+        <a href="#" dir="auto" @click.prevent="jump(entry)"><span v-for="(r, i) in persianRuns(entry.text)" :key="i" :class="{ fa: r.fa }">{{ r.text }}</span></a>
         <span class="toc-dots" aria-hidden="true" />
         <span class="toc-page">{{ entry.page }}</span>
         <ToolbarMenu label="Heading options" :items="excludeItems(entry)" :chevron="false" class="toc-more">

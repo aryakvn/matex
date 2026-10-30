@@ -13,7 +13,8 @@ const zones = [
   { key: 'header', title: 'Header' },
   { key: 'footer', title: 'Footer' },
 ]
-const reset = () => Object.assign(props.layout, defaultLayout())
+// Styles have their own panel, so Reset here leaves them alone.
+const reset = () => Object.assign(props.layout, { ...defaultLayout(), styles: props.layout.styles })
 </script>
 
 <template>
