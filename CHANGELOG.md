@@ -28,3 +28,4 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Add `.matex` documents: a zip with `DOCUMENT.md` plus `assets/` for images; New, Open, Save, Save as with Ctrl/Cmd shortcuts and an unsaved-changes guard.
 - Add Tauri desktop shell and GitHub Actions build for `.deb`, macOS `.app`, Windows `.msi` and `.exe` (draft release on `v*` tags).
 - Add README (project story, file format, development and release steps) and TODOS roadmap.
+- Add CLAUDE.md with commands and architecture notes for Claude Code.
