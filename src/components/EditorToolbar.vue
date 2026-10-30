@@ -4,9 +4,10 @@
 import { computed, ref, nextTick } from 'vue'
 import {
   Undo2, Redo2, Bold, Italic, Strikethrough, Code, Link, List, ListOrdered,
-  Quote, Minus, Image, Table, TableOfContents, ChevronDown,
+  Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft,
 } from 'lucide-vue-next'
 import ToolbarMenu from './ToolbarMenu.vue'
+import { directionAt } from '../editor/direction.js'
 import appIcon from '../../src-tauri/icons/64x64.png'
 
 const props = defineProps({
@@ -38,6 +39,12 @@ const blocks = [
   { name: 'bulletList', label: 'Bulleted list', icon: List, run: () => chain().toggleBulletList().run() },
   { name: 'orderedList', label: 'Numbered list', icon: ListOrdered, run: () => chain().toggleOrderedList().run() },
   { name: 'blockquote', label: 'Quote', icon: Quote, run: () => chain().toggleBlockquote().run() },
+]
+
+// Word's ¶ buttons: force a direction on the selected paragraphs; pressing the lit one returns to auto.
+const directions = [
+  { dir: 'ltr', label: 'Left-to-right text', icon: PilcrowRight },
+  { dir: 'rtl', label: 'Right-to-left text', icon: PilcrowLeft },
 ]
 
 const blockTypes = [
@@ -174,6 +181,16 @@ function onImagePicked(e) {
       </button>
       <button type="button" class="tb-btn" title="Divider line" aria-label="Divider line" @click="chain().setHorizontalRule().run()">
         <Minus :size="20" />
+      </button>
+
+      <span class="tb-sep" />
+
+      <button
+        v-for="d in directions" :key="d.dir" type="button" class="tb-btn"
+        :title="d.label" :aria-label="d.label" :aria-pressed="directionAt(editor.state) === d.dir"
+        @click="chain().toggleDirection(d.dir).run()"
+      >
+        <component :is="d.icon" :size="20" />
       </button>
 
       <span class="tb-sep" />

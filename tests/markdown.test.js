@@ -105,3 +105,57 @@ describe('code blocks', () => {
     expect(editor.getMarkdown().trim()).toBe(md)
   })
 })
+
+describe('manual direction', () => {
+  const RLM = String.fromCharCode(0x200f)
+  const LRM = String.fromCharCode(0x200e)
+
+  it('saves a forced direction as a leading mark and reads it back', () => {
+    const md = `${RLM}hello\n\n## ${LRM}سلام {.unlisted}\n\n- ${RLM}item\n\nplain`
+    const editor = make(md)
+    const dirs = []
+    editor.state.doc.descendants((n) => { if (n.isTextblock) dirs.push([n.textContent, n.attrs.dir]) })
+    expect(dirs).toEqual([['hello', 'rtl'], ['سلام', 'ltr'], ['item', 'rtl'], ['plain', 'auto']])
+    expect(editor.getMarkdown().trim()).toBe(md)
+  })
+
+  it('toggles: same button twice goes back to auto', () => {
+    const editor = make('hello')
+    editor.commands.toggleDirection('rtl')
+    expect(editor.getMarkdown()).toBe(`${RLM}hello`)
+    editor.commands.toggleDirection('ltr')
+    expect(editor.getMarkdown()).toBe(`${LRM}hello`)
+    editor.commands.toggleDirection('ltr')
+    expect(editor.getMarkdown()).toBe('hello')
+  })
+
+  it('keeps the direction of empty paragraphs and block-like text', () => {
+    const json = { type: 'doc', content: [
+      { type: 'paragraph', attrs: { dir: 'rtl' }, content: [{ type: 'text', text: '# x' }] },
+      { type: 'paragraph', attrs: { dir: 'rtl' } },
+      { type: 'paragraph', attrs: { dir: 'rtl' } },
+      { type: 'paragraph', content: [{ type: 'text', text: 'end' }] },
+    ] }
+    const editor = new Editor({ ...editorOptions, element: document.createElement('div'), content: json, contentType: 'json' })
+    const reopened = make(editor.getMarkdown()).getJSON().content
+    expect(reopened.map((n) => [n.type, n.attrs.dir, n.content?.[0]?.text])).toEqual([
+      ['paragraph', 'rtl', '# x'], ['paragraph', 'rtl', undefined], ['paragraph', 'rtl', undefined], ['paragraph', 'auto', 'end'],
+    ])
+  })
+})
+
+describe('manual direction in tables', () => {
+  it('keeps a forced direction inside a table cell', () => {
+    const editor = make('| A | B |\n| --- | --- |\n| x | y |')
+    let cell
+    editor.state.doc.descendants((n, pos) => { if (n.textContent === 'y' && n.type.name === 'paragraph') cell = pos })
+    editor.commands.setTextSelection(cell + 1)
+    editor.commands.toggleDirection('rtl')
+    const md = editor.getMarkdown()
+    const reopened = make(md)
+    const dirs = []
+    reopened.state.doc.descendants((n) => { if (n.type.name === 'paragraph' && n.textContent) dirs.push([n.textContent, n.attrs.dir]) })
+    expect(dirs).toEqual([['A', 'auto'], ['B', 'auto'], ['x', 'auto'], ['y', 'rtl']])
+    expect(reopened.getMarkdown()).toBe(md)
+  })
+})

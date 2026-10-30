@@ -12,7 +12,7 @@ MaTex is the editor she needed. It's small, it works offline on Linux, macOS and
 
 - **Visual editing:** a clean page with a Docs-style toolbar. No split pane, no source view.
 - **Markdown as you type:** `## ` becomes a heading, `**bold**` becomes bold, `- ` starts a list, three backticks start a code block. The toolbar does the same for anything you don't remember.
-- **Mixed Persian and English:** each paragraph picks its own direction from its first letter. English words inside a Persian paragraph read in the right order.
+- **Mixed Persian and English:** each paragraph picks its own direction from its first letter. English words inside a Persian paragraph read in the right order. The ¶ buttons force a paragraph left-to-right or right-to-left when the first letter guesses wrong.
 - **Basics:**
   - headings, bold, italic, strikethrough, inline code
   - links, lists, quotes, code blocks, divider lines

@@ -5,9 +5,9 @@ import Image from '@tiptap/extension-image'
 import { TableKit } from '@tiptap/extension-table'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { createLowlight, common } from 'lowlight'
-import { Markdown } from '@tiptap/markdown'
 import { UnlistedHeading, TableOfContents } from './toc.js'
 import { Pagination } from './pagination.js'
+import { Direction, DirectionMarkdown, withDirMark } from './direction.js'
 
 // A paragraph whose text starts like block syntax ("2) ", "- ", "# ", "---", 4 spaces)
 // (or is "[TOC]") would reopen as a list/heading/rule/code block/table of contents,
@@ -20,7 +20,7 @@ export function escapeBlockStart(md) {
 
 const SafeParagraph = Paragraph.extend({
   renderMarkdown(node, h, ctx) {
-    return escapeBlockStart(this.parent(node, h, ctx))
+    return withDirMark(escapeBlockStart(this.parent(node, h, ctx)), node.attrs?.dir)
   },
 })
 
@@ -30,6 +30,7 @@ export const extensions = [
   UnlistedHeading,
   TableOfContents,
   Pagination,
+  Direction,
   // Mod-Shift-S belongs to Save as, so strike moves to Mod-Shift-X.
   Strike.extend({
     addKeyboardShortcuts() { return { 'Mod-Shift-x': () => this.editor.commands.toggleStrike() } },
@@ -42,9 +43,9 @@ export const extensions = [
   TableKit.configure({ table: { resizable: false } }),
   // ponytail: HTML with no matching extension (span, div align, mark) keeps its text but
   // loses the tag on save. Add a node/mark per HTML feature once the toolbar can make it.
-  Markdown,
+  DirectionMarkdown,
 ]
 
 // Spread into every `new Editor` / `useEditor`. `dir="auto"` per block = direction
-// from the first strong letter; it lives only in the DOM, never in the Markdown.
+// from the first strong letter, never saved. A manual override is saved (see direction.js).
 export const editorOptions = { extensions, textDirection: 'auto', contentType: 'markdown' }

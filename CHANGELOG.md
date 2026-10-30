@@ -33,6 +33,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Show a dot leader and printed page number after each table of contents entry; pages are estimated from the A4 layout and update as the document changes.
 - Lay the document out on separate A4 sheets like Microsoft Word: text flows from sheet to sheet, paragraphs split at line level, headings stay with the next block, margins repeat on every sheet, and each sheet prints as exactly one page. Table of contents page numbers now come from these page breaks.
 - Add syntax highlighting to code blocks (highlight.js common languages, bundled for offline use): the language comes from the Markdown fence (```js), blocks without one are auto-detected; colours print.
+- Add left-to-right and right-to-left buttons (¶ arrows, like Word) that force a paragraph's or heading's direction over auto-detection; press the lit one again to return to auto. New lines keep the direction, and it is saved as an invisible LRM/RLM mark at the start of the line, which GitHub and other viewers also respect.
 
 ### Changed
 - Excluded headings now leave the table of contents on screen too (it shows what will print); bring them back from the excluded-headings menu beside the title.

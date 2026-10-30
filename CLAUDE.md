@@ -29,7 +29,8 @@ Releases come from `.github/workflows/release.yml`. Pushing a `v*` tag creates a
 - `src/composables/useDocument.js` drives both flows and owns the asset store, the dirty flag and the window title.
 
 **Editor setup lives in one place.** Every editor is created with `...editorOptions` from `src/editor/extensions.js`: extensions + `textDirection: 'auto'` + `contentType: 'markdown'`.
-- Per-paragraph RTL/LTR comes from `dir="auto"` in the DOM only. It is never written to the Markdown.
+- Per-paragraph RTL/LTR comes from `dir="auto"` in the DOM only. Auto is never written to the Markdown.
+  - A manual override (toolbar ¶ buttons, `toggleDirection('ltr'|'rtl')`) is the node's `dir` attr, saved as a leading LRM/RLM mark. `src/editor/direction.js` adds the mark in paragraph/heading `renderMarkdown` and removes it in one wrapper around `editor.markdown.parse`, because list items and table cells build paragraphs without the paragraph parser.
 - Markdown round-trip safety is enforced in that file and pinned by `tests/markdown.test.js`:
   - `escapeBlockStart` escapes paragraph text that would reparse as a heading, list, rule or code block.
   - Tables save in Tiptap's canonical padded form.

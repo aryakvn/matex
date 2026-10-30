@@ -2,6 +2,7 @@ import { Node } from '@tiptap/core'
 import Heading from '@tiptap/extension-heading'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import TocView from '../components/TocView.vue'
+import { withDirMark } from './direction.js'
 
 // Pandoc's marker for "leave this heading out of the table of contents".
 const UNLISTED = /\s*\{\.unlisted\}\s*$/
@@ -27,7 +28,7 @@ export const UnlistedHeading = Heading.extend({
     return node
   },
   renderMarkdown(node, h, ctx) {
-    const md = this.parent(node, h, ctx)
+    const md = withDirMark(this.parent(node, h, ctx), node.attrs?.dir)
     if (!md) return md
     if (node.attrs.unlisted) return `${md} {.unlisted}`
     // A heading that literally ends in "{.unlisted}" must not reopen as unlisted.
