@@ -5,6 +5,7 @@ import { editorOptions } from './editor/extensions.js'
 import EditorToolbar from './components/EditorToolbar.vue'
 import { useDocument } from './composables/useDocument.js'
 import { onCloseRequest } from './utils/platform.js'
+import { fileAction } from './utils/keys.js'
 
 const images = (list) => [...(list ?? [])].filter((f) => f.type.startsWith('image/'))
 
@@ -35,9 +36,7 @@ const { name, dirty } = doc
 const fileActions = { new: doc.newDoc, open: doc.openDoc, save: doc.save, saveAs: doc.saveAs }
 
 function onKey(e) {
-  if (!(e.ctrlKey || e.metaKey) || e.altKey) return
-  const key = e.key.toLowerCase()
-  const action = key === 's' ? (e.shiftKey ? 'saveAs' : 'save') : !e.shiftKey && { n: 'new', o: 'open' }[key]
+  const action = fileAction(e)
   if (!action) return
   e.preventDefault()
   fileActions[action]()

@@ -32,4 +32,13 @@ describe('asset store', () => {
     expect(markdown).toBe(original)
     expect([...files['assets/a.png']]).toEqual([7, 8])
   })
+
+  it('keeps loaded assets referenced in forms it does not rewrite', async () => {
+    const store = createAssetStore()
+    const md = '![a](./assets/a.png)\n\n[r]: assets/b.png'
+    const loaded = store.load(md, { 'assets/a.png': new Uint8Array([1]), 'assets/b.png': new Uint8Array([2]) })
+    expect(loaded).toMatch(/!\[a\]\(blob:/)
+    const { files } = await store.collect(loaded)
+    expect(Object.keys(files).sort()).toEqual(['assets/a.png', 'assets/b.png'])
+  })
 })

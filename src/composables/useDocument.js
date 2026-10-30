@@ -1,6 +1,7 @@
 // The open document: its name, path, unsaved state, images, and the
 // New / Open / Save / Save as commands. Works on a Tiptap editor ref.
 import { ref, watch, watchEffect } from 'vue'
+import { EditorState } from '@tiptap/pm/state'
 import { pack, unpack } from '../utils/archive.js'
 import { createAssetStore } from '../utils/assets.js'
 import { openFile, saveFile, ask, showError, setTitle } from '../utils/platform.js'
@@ -22,8 +23,11 @@ export function useDocument(editor) {
   }
 
   function show(markdown, file) {
-    editor.value.commands.setContent(markdown, { contentType: 'markdown', emitUpdate: false })
-    editor.value.commands.focus('start')
+    const e = editor.value
+    e.commands.setContent(markdown, { contentType: 'markdown', emitUpdate: false })
+    // Fresh state = empty undo history, so Ctrl+Z can't bring back the previous document.
+    e.view.updateState(EditorState.create({ doc: e.state.doc, plugins: e.state.plugins }))
+    e.commands.focus('start')
     name.value = file.name
     path.value = file.path
     dirty.value = false

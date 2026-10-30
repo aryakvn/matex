@@ -4,9 +4,9 @@
 const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 // Swap `from` for `to` only where it is a link/image target:
-// after "](" or src=" / src=', and before ")", whitespace or a quote.
+// after "](" or src=" / src=' (optionally "./"), and before ")", whitespace or a quote.
 function replaceTargets(text, from, to) {
-  const re = new RegExp(`(\\]\\(|src=["'])${escape(from)}(?=[)\\s"'])`, 'g')
+  const re = new RegExp(`(\\]\\(|src=["'])(?:\\./)?${escape(from)}(?=[)\\s"'])`, 'g')
   return text.replace(re, (_, lead) => lead + to)
 }
 
@@ -55,9 +55,10 @@ export function createAssetStore() {
     async collect(markdown) {
       const files = {}
       for (const [url, { name, blob }] of byUrl) {
-        if (!markdown.includes(url)) continue
         const path = `assets/${name}`
-        markdown = replaceTargets(markdown, url, path)
+        if (markdown.includes(url)) markdown = replaceTargets(markdown, url, path)
+        // Kept as written by another tool (e.g. a reference-style link): still store it.
+        else if (!markdown.includes(path)) continue
         files[path] = new Uint8Array(await blob.arrayBuffer())
       }
       return { markdown, files }

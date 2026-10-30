@@ -10,7 +10,7 @@
     "frontendDist": "../dist"
   },
   "app": {
-    "windows": [{ "title": "MaTex", "width": 1100, "height": 800, "minWidth": 480, "minHeight": 400 }],
+    "windows": [{ "title": "MaTex", "width": 1100, "height": 800, "minWidth": 480, "minHeight": 400, "dragDropEnabled": false }],
     "security": { "csp": null }
   },
   "bundle": {

@@ -55,6 +55,15 @@ describe('markdown', () => {
     expect(editor.getMarkdown().trim()).toBe('- a\n  - b')
   })
 
+  it('paragraph text that looks like block syntax stays a paragraph', () => {
+    const texts = ['2) paren', '1. x', '- x', '+ x', '* x', '# x', '> q', '---', '    indented']
+    const json = { type: 'doc', content: texts.map((text) => ({ type: 'paragraph', content: [{ type: 'text', text }] })) }
+    const md = new Editor({ ...editorOptions, contentType: 'json', element: document.createElement('div'), content: json }).getMarkdown()
+    const back = make(md).getJSON().content.filter((n) => n.content)
+    expect(back.map((n) => n.type)).toEqual(texts.map(() => 'paragraph'))
+    expect(back.map((n) => n.content.map((c) => c.text).join(''))).toEqual(texts)
+  })
+
   it('keeps mixed Persian/English text', () => {
     const md = 'سلام MaTex دنیا\n\nHello سلام'
     expect(roundTrip(md).trim()).toBe(md)

@@ -18,3 +18,16 @@ describe('useDocument', () => {
     expect(md).toContain('![b.png](blob:')
   })
 })
+
+describe('useDocument history', () => {
+  it('undo does not cross New', async () => {
+    window.confirm = () => true
+    const editor = new Editor({ ...editorOptions, element: document.createElement('div'), content: '' })
+    const doc = useDocument(shallowRef(editor))
+    editor.commands.insertContent('old document text')
+    await doc.newDoc()
+    expect(editor.can().undo()).toBe(false)
+    editor.commands.undo()
+    expect(editor.getMarkdown()).not.toContain('old document text')
+  })
+})

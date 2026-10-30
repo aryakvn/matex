@@ -1,11 +1,27 @@
 import StarterKit from '@tiptap/starter-kit'
 import Strike from '@tiptap/extension-strike'
+import Paragraph from '@tiptap/extension-paragraph'
 import Image from '@tiptap/extension-image'
 import { TableKit } from '@tiptap/extension-table'
 import { Markdown } from '@tiptap/markdown'
 
+// A paragraph whose text starts like block syntax ("2) ", "- ", "# ", "---", 4 spaces)
+// would reopen as a list/heading/rule/code block, so the leading character is escaped.
+export function escapeBlockStart(md) {
+  if (/^ {4}/.test(md)) return '&#32;' + md.slice(1)
+  if (/^(#{1,6}|[>+*-])(\s|$)/.test(md) || /^([-*_])( *\1){2,} *$/.test(md)) return '\\' + md
+  return md.replace(/^(\d{1,9})([.)])(?=\s|$)/, '$1\\$2')
+}
+
+const SafeParagraph = Paragraph.extend({
+  renderMarkdown(node, h, ctx) {
+    return escapeBlockStart(this.parent(node, h, ctx))
+  },
+})
+
 export const extensions = [
-  StarterKit.configure({ link: { openOnClick: false }, strike: false }),
+  StarterKit.configure({ link: { openOnClick: false }, strike: false, paragraph: false }),
+  SafeParagraph,
   // Mod-Shift-S belongs to Save as, so strike moves to Mod-Shift-X.
   Strike.extend({
     addKeyboardShortcuts() { return { 'Mod-Shift-x': () => this.editor.commands.toggleStrike() } },
