@@ -65,25 +65,26 @@ body {
 .desk .page { position: relative; isolation: isolate; background: none; }
 .sheet { position: absolute; inset-inline: 0; z-index: -1; height: 297mm; background: #fff; box-shadow: var(--shadow-4); }
 /* A page break inside a block with a background or side border (code, quote) would drag it across
-   the gap. The spacer paints over the full sheet width: the block runs to the bottom margin, then
-   white margin, canvas gap, white top margin, and the block resumes on the next sheet. */
+   the gap. The block keeps running through both sheets' margins; only the gap is painted back to
+   canvas, with the sheet's bottom shadow redrawn at its top edge. */
 .page-gap::before {
   content: "";
   position: absolute;
   inset-inline: calc(-1 * var(--margin-x));
   height: inherit;
   background: linear-gradient(
-    transparent calc(100% - var(--page-gap) - 2 * var(--margin-y)),
-    #fff 0 calc(100% - var(--page-gap) - var(--margin-y)),
-    var(--canvas) 0 calc(100% - var(--margin-y)),
-    #fff 0
+    transparent calc(100% - var(--page-gap) - var(--margin-y)),
+    color-mix(in srgb, var(--canvas), #000 12%) 0,
+    var(--canvas) calc(100% - var(--page-gap) - var(--margin-y) + 4px),
+    var(--canvas) calc(100% - var(--margin-y)),
+    transparent 0
   );
 }
 
 @media print {
   :root { --page-gap: 0px; }
   body, .desk { background: none; padding: 0; }
-  .toolbar, .sheet, .toc-more { display: none !important; }
+  .toolbar, .sheet, .toc-more, .page-gap::before { display: none !important; }
   .toc-empty { visibility: hidden; }
 }
 

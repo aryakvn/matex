@@ -39,3 +39,4 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 
 ### Fixed
 - Stop code block backgrounds and quote borders from running through the bottom margin and the gap between sheets when they split across pages.
+- Let a code block or quote split across pages run through both sheets' margins, clearing only the gap between sheets.
