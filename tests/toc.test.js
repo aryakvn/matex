@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { Editor } from '@tiptap/core'
 import { editorOptions } from '../src/editor/extensions.js'
-import { tocEntries, pageAt } from '../src/editor/toc.js'
+import { tocEntries } from '../src/editor/toc.js'
+import { pageOf } from '../src/editor/pagination.js'
 
 const make = (md) => new Editor({ ...editorOptions, element: document.createElement('div'), content: md })
 const roundTrip = (md) => make(md).getMarkdown()
@@ -51,12 +52,12 @@ describe('table of contents', () => {
   })
 })
 
-describe('pageAt', () => {
-  const mm = (n) => (n * 96) / 25.4
-  it('counts A4 sheets after the 20mm top padding', () => {
-    expect(pageAt(0)).toBe(1)
-    expect(pageAt(mm(276))).toBe(1)
-    expect(pageAt(mm(278))).toBe(2)
-    expect(pageAt(mm(277 + 297) + 1)).toBe(3)
+describe('pageOf', () => {
+  it('counts the page breaks at or before a heading', () => {
+    const breaks = [{ pos: 10 }, { pos: 41 }]
+    expect(pageOf(breaks, 0)).toBe(1)
+    expect(pageOf(breaks, 9)).toBe(2) // break inside the heading at 9 (its first line moved)
+    expect(pageOf(breaks, 20)).toBe(2)
+    expect(pageOf(breaks, 50)).toBe(3)
   })
 })

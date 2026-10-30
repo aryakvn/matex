@@ -23,6 +23,7 @@
   --shadow-4: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.14);
   --shadow-16: 0 0 2px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.14);
   --ease-out: cubic-bezier(0.1, 0.9, 0.2, 1);
+  --page-gap: 16px; /* grey gap between A4 sheets; 0 in print */
   --font-ui: 14px/20px "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", sans-serif;
   color-scheme: light;
 }
@@ -60,13 +61,15 @@ body {
 #app { min-height: 100%; display: flex; flex-direction: column; }
 
 .desk { flex: 1; padding: 12px 16px 64px; }
-.desk .page { box-shadow: var(--shadow-4); }
+/* The page is a transparent column; App.vue draws one white .sheet per A4 page behind the text. */
+.desk .page { position: relative; isolation: isolate; background: none; }
+.sheet { position: absolute; inset-inline: 0; z-index: -1; height: 297mm; background: #fff; box-shadow: var(--shadow-4); }
 
 @media print {
+  :root { --page-gap: 0px; }
   body, .desk { background: none; padding: 0; }
-  .toolbar { display: none !important; }
-  .desk .page { box-shadow: none; }
-  .toc-more, .toc-empty, .toc .unlisted { display: none !important; }
+  .toolbar, .sheet, .toc-more { display: none !important; }
+  .toc-empty { visibility: hidden; }
 }
 
 /* Header: title strip + command bar, both sitting on the canvas */
@@ -233,13 +236,12 @@ body {
   *, *::before, *::after { transition: none !important; }
 }
 
-/* Table of contents editing bits inside the white page: the "…" menu and excluded entries. */
-/* The "…" sits in the page margin, so the list lines up on screen as it does on paper. */
-.toc-item { position: relative; }
+/* Table of contents menus sit in the page margin, out of the text flow, so they never move page breaks. */
+.toc, .toc-item { position: relative; }
 .toc-more { position: absolute; inset-inline-end: -32px; top: 50%; translate: 0 -50%; font: var(--font-ui); opacity: 0; transition: opacity 100ms ease; }
-.toc-item:hover .toc-more, .toc-more:focus-within, .toc-more:has([aria-expanded="true"]) { opacity: 1; }
+.toc-item:hover .toc-more, .toc:hover .toc-excluded, .toc-more:focus-within, .toc-more:has([aria-expanded="true"]) { opacity: 1; }
 .toc-more .tb-btn { height: 24px; min-width: 24px; padding: 0 2px; color: #616161; }
 .toc-more .tb-btn:hover, .toc-more .tb-btn[aria-expanded="true"] { background: rgba(0, 0, 0, 0.06); color: #242424; }
 .toc-more .menu-list { left: auto; inset-inline-end: 0; white-space: nowrap; }
-.page .toc .unlisted > a { opacity: 0.45; text-decoration: line-through; }
+.toc-excluded { top: 0; translate: none; }
 .toc-empty { color: #616161; font-style: italic; }

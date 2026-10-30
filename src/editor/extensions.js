@@ -5,6 +5,7 @@ import Image from '@tiptap/extension-image'
 import { TableKit } from '@tiptap/extension-table'
 import { Markdown } from '@tiptap/markdown'
 import { UnlistedHeading, TableOfContents } from './toc.js'
+import { Pagination } from './pagination.js'
 
 // A paragraph whose text starts like block syntax ("2) ", "- ", "# ", "---", 4 spaces)
 // (or is "[TOC]") would reopen as a list/heading/rule/code block/table of contents,
@@ -26,6 +27,7 @@ export const extensions = [
   SafeParagraph,
   UnlistedHeading,
   TableOfContents,
+  Pagination,
   // Mod-Shift-S belongs to Save as, so strike moves to Mod-Shift-X.
   Strike.extend({
     addKeyboardShortcuts() { return { 'Mod-Shift-x': () => this.editor.commands.toggleStrike() } },

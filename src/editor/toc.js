@@ -47,13 +47,6 @@ export function tocEntries(doc) {
   return list
 }
 
-// Printed page that a point `y` CSS px below the top of the text falls on. Mirrors the print
-// rules in document.css: A4 sheets, `@page { margin: 0 }`, 20mm padding before the first line.
-// ponytail: an estimate from the on-screen layout. It drifts when print moves content (a line or
-// image pushed to the next sheet). Swap for real page breaks once printing paginates (TODOS).
-const MM = 96 / 25.4
-export const pageAt = (y) => Math.floor((20 * MM + Math.max(0, y)) / (297 * MM)) + 1
-
 // Auto table of contents, saved as a `[TOC]` line.
 export const TableOfContents = Node.create({
   name: 'tableOfContents',

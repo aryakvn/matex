@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import { editorOptions } from './editor/extensions.js'
 import EditorToolbar from './components/EditorToolbar.vue'
@@ -30,6 +30,10 @@ const editor = useEditor({
   },
 })
 
+// A4 sheets drawn behind the text; the Pagination extension says how many.
+const pages = ref(1)
+watch(editor, (e) => e?.on('paginate', (found) => { pages.value = found.pages }))
+
 const doc = useDocument(editor)
 const { name, dirty } = doc
 
@@ -52,7 +56,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 <template>
   <EditorToolbar :editor="editor" :name="name" :dirty="dirty" @file="fileActions[$event]()" @image="doc.insertImage" />
   <main class="desk">
-    <article class="page">
+    <article class="page" :style="{ minHeight: `calc(${pages} * (297mm + var(--page-gap)) - var(--page-gap))` }">
+      <div v-for="n in pages" :key="n" class="sheet" :style="{ top: `calc(${n - 1} * (297mm + var(--page-gap)))` }" />
       <EditorContent :editor="editor" />
     </article>
   </main>

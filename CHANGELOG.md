@@ -31,6 +31,8 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Add CLAUDE.md with commands and architecture notes for Claude Code.
 - Add auto table of contents (toolbar button, saved as `[TOC]`) listing all headings live; each entry's "…" menu excludes or re-includes that heading, saved as `## Title {.unlisted}`.
 - Show a dot leader and printed page number after each table of contents entry; pages are estimated from the A4 layout and update as the document changes.
+- Lay the document out on separate A4 sheets like Microsoft Word: text flows from sheet to sheet, paragraphs split at line level, headings stay with the next block, margins repeat on every sheet, and each sheet prints as exactly one page. Table of contents page numbers now come from these page breaks.
 
 ### Changed
+- Excluded headings now leave the table of contents on screen too (it shows what will print); bring them back from the excluded-headings menu beside the title.
 - Restyle app chrome after Microsoft Fluent 2: grey canvas, title strip with app icon, file name and unsaved state, floating rounded command bar, Fluent dropdown, menus, inputs and buttons in light and dark.
