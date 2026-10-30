@@ -48,7 +48,14 @@ function findBreaks(view, page) {
   function textblock(node, pos) {
     const start = pos + 1
     const end = pos + node.nodeSize - 1
-    const bottom = (p) => at(view.coordsAtPos(p).bottom)
+    // coordsAtPos gives the glyph box; a line box is taller by the half-leading above and below.
+    // The first line box starts at the block's content top, which gives that offset (`lead`).
+    // Spacers must end exactly on a line box top, or the gap drawn over them sits off the sheet gap.
+    const el = view.nodeDOM(pos)
+    const css = getComputedStyle(el)
+    const contentTop = at(el.getBoundingClientRect().top) + parseFloat(css.borderTopWidth) + parseFloat(css.paddingTop)
+    const lead = Math.max(0, at(view.coordsAtPos(start).top) - contentTop)
+    const bottom = (p) => at(view.coordsAtPos(p).bottom) + lead
     let from = start
     while (bottom(end) > sheetBottom(k)) {
       // First position whose line crosses the bottom margin.
@@ -59,14 +66,14 @@ function findBreaks(view, page) {
         if (bottom(mid) > sheetBottom(k)) hi = mid
         else lo = mid + 1
       }
-      const top = at(view.coordsAtPos(lo).top)
+      const top = at(view.coordsAtPos(lo).top) - lead
       if (top <= sheetTop(k) + 1) break // a single line taller than a sheet
       if (lo === start) breakBefore(start, top, true)
       else breakAt(lo, top, true)
       from = lo
     }
     // ponytail: no widow/orphan control; a paragraph may leave one line on either sheet.
-    heading = node.type.name === 'heading' && from === start ? { pos: start, top: at(view.coordsAtPos(start).top), page: k } : null
+    heading = node.type.name === 'heading' && from === start ? { pos: start, top: at(view.coordsAtPos(start).top) - lead, page: k } : null
   }
 
   function whole(node, pos) {
