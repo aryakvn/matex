@@ -3,6 +3,8 @@ import Strike from '@tiptap/extension-strike'
 import Paragraph from '@tiptap/extension-paragraph'
 import Image from '@tiptap/extension-image'
 import { TableKit } from '@tiptap/extension-table'
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import { createLowlight, common } from 'lowlight'
 import { Markdown } from '@tiptap/markdown'
 import { UnlistedHeading, TableOfContents } from './toc.js'
 import { Pagination } from './pagination.js'
@@ -23,7 +25,7 @@ const SafeParagraph = Paragraph.extend({
 })
 
 export const extensions = [
-  StarterKit.configure({ link: { openOnClick: false }, strike: false, paragraph: false, heading: false }),
+  StarterKit.configure({ link: { openOnClick: false }, strike: false, paragraph: false, heading: false, codeBlock: false }),
   SafeParagraph,
   UnlistedHeading,
   TableOfContents,
@@ -33,6 +35,9 @@ export const extensions = [
     addKeyboardShortcuts() { return { 'Mod-Shift-x': () => this.editor.commands.toggleStrike() } },
   }),
   Image,
+  // Syntax colours from highlight.js's common languages (bundled, offline). Language comes from
+  // the fence (```js); a block without one is guessed. Colours live in document.css.
+  CodeBlockLowlight.configure({ lowlight: createLowlight(common) }),
   // Column widths can't be stored in Markdown, so no resizing.
   TableKit.configure({ table: { resizable: false } }),
   // ponytail: HTML with no matching extension (span, div align, mark) keeps its text but

@@ -53,6 +53,21 @@
 /* Code reads left-to-right even inside a Persian document. */
 .page pre { direction: ltr; text-align: left; background: #f6f6f6; padding: 0.8em 1em; border-radius: 4px; overflow-x: auto; }
 .page pre code { background: none; padding: 0; }
+/* Syntax colours (highlight.js classes), GitHub light palette: readable on white and in print. */
+.page pre .hljs-comment, .page pre .hljs-quote, .page pre .hljs-formula { color: #6e7781; font-style: italic; }
+.page pre .hljs-keyword, .page pre .hljs-doctag, .page pre .hljs-template-tag, .page pre .hljs-variable.language_, .page pre .hljs-type { color: #cf222e; }
+.page pre .hljs-title, .page pre .hljs-title.class_, .page pre .hljs-title.function_ { color: #8250df; }
+.page pre .hljs-attr, .page pre .hljs-attribute, .page pre .hljs-literal, .page pre .hljs-meta, .page pre .hljs-number,
+.page pre .hljs-operator, .page pre .hljs-variable, .page pre .hljs-selector-attr, .page pre .hljs-selector-class,
+.page pre .hljs-selector-id, .page pre .hljs-property { color: #0550ae; }
+.page pre .hljs-string, .page pre .hljs-regexp, .page pre .hljs-meta .hljs-string { color: #0a3069; }
+.page pre .hljs-built_in, .page pre .hljs-symbol, .page pre .hljs-bullet, .page pre .hljs-params { color: #953800; }
+.page pre .hljs-name, .page pre .hljs-selector-tag, .page pre .hljs-selector-pseudo, .page pre .hljs-tag { color: #116329; }
+.page pre .hljs-section { color: #0550ae; font-weight: bold; }
+.page pre .hljs-emphasis { font-style: italic; }
+.page pre .hljs-strong { font-weight: bold; }
+.page pre .hljs-addition { color: #116329; background: #f0fff4; }
+.page pre .hljs-deletion { color: #82071e; background: #ffebe9; }
 .page hr { border: 0; border-top: 1px solid #ccc; margin: 1.5em 0; }
 /* No image taller than a sheet's text area, so every image fits on one page. */
 .page img { display: block; max-width: 100%; max-height: 247mm; height: auto; margin: 0 0 0.8em; }

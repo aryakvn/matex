@@ -95,3 +95,13 @@ describe('shortcuts', () => {
     expect(editor.isActive('strike')).toBe(true)
   })
 })
+
+describe('code blocks', () => {
+  it('colour code by its fence language and keep the fence on save', () => {
+    const md = '```js\nconst x = 1 // note\n```'
+    const editor = make(md)
+    const spans = [...editor.view.dom.querySelectorAll('pre span[class^="hljs-"]')].map((s) => s.className)
+    expect(spans).toEqual(expect.arrayContaining(['hljs-keyword', 'hljs-number', 'hljs-comment']))
+    expect(editor.getMarkdown().trim()).toBe(md)
+  })
+})
