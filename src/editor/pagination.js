@@ -152,6 +152,7 @@ export const Pagination = Extension.create({
             cancelAnimationFrame(frame)
             frame = requestAnimationFrame(run)
           }
+          storage.refresh = schedule // margins are CSS the doc doesn't know about; the page setup calls this
           // Edits re-flow the text; images loading, fonts and window width change its size.
           const resized = new ResizeObserver(schedule)
           resized.observe(view.dom)

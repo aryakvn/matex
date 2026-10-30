@@ -4,7 +4,7 @@
 import { computed, ref, nextTick } from 'vue'
 import {
   Undo2, Redo2, Bold, Italic, Strikethrough, Code, Link, List, ListOrdered,
-  Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft,
+  Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces,
 } from 'lucide-vue-next'
 import ToolbarMenu from './ToolbarMenu.vue'
 import { directionAt } from '../editor/direction.js'
@@ -14,8 +14,9 @@ const props = defineProps({
   editor: { type: Object, default: null },
   name: { type: String, default: '' },
   dirty: { type: Boolean, default: false },
+  panel: { type: String, default: null }, // the side panel that is open, if any
 })
-const emit = defineEmits(['file', 'image'])
+const emit = defineEmits(['file', 'image', 'panel'])
 
 const mod = /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘' : 'Ctrl+'
 const chain = () => props.editor.chain().focus()
@@ -26,6 +27,8 @@ const fileItems = [
   null,
   { label: 'Save', hint: `${mod}S`, run: () => emit('file', 'save') },
   { label: 'Save as…', hint: `${mod}Shift+S`, run: () => emit('file', 'saveAs') },
+  null,
+  { label: 'Page setup…', run: () => emit('file', 'pageSetup') },
 ]
 
 const marks = [
@@ -200,13 +203,24 @@ function onImagePicked(e) {
       </button>
       <input ref="imageInput" type="file" accept="image/*" hidden @change="onImagePicked" />
 
-      <button type="button" class="tb-btn" title="Table of contents" aria-label="Table of contents" @click="chain().insertTableOfContents().run()">
+      <button
+        v-if="editor.commands.insertTableOfContents"
+        type="button" class="tb-btn" title="Table of contents" aria-label="Table of contents" @click="chain().insertTableOfContents().run()">
         <TableOfContents :size="20" />
       </button>
 
       <ToolbarMenu label="Table" :items="tableItems">
         <Table :size="20" aria-hidden="true" />
       </ToolbarMenu>
+
+      <span class="tb-sep" />
+
+      <button
+        type="button" class="tb-btn" title="Header and footer scripts" aria-label="Header and footer scripts"
+        :aria-pressed="panel === 'scripts'" @click="emit('panel', 'scripts')"
+      >
+        <Braces :size="20" />
+      </button>
     </div>
   </header>
 </template>

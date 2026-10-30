@@ -43,25 +43,28 @@ export function createAssetStore() {
       return register(blob, uniqueName(safeName(name)))
     },
 
+    // `markdown` is one string or a list (body + header/footer slots); returns the same shape.
     load(markdown, files) {
       clear()
+      let list = [].concat(markdown)
       for (const [path, bytes] of Object.entries(files)) {
-        const name = path.slice('assets/'.length)
-        markdown = replaceTargets(markdown, path, register(new Blob([bytes]), name))
+        const url = register(new Blob([bytes]), path.slice('assets/'.length))
+        list = list.map((md) => replaceTargets(md, path, url))
       }
-      return markdown
+      return Array.isArray(markdown) ? list : list[0]
     },
 
     async collect(markdown) {
       const files = {}
+      let list = [].concat(markdown)
       for (const [url, { name, blob }] of byUrl) {
         const path = `assets/${name}`
-        if (markdown.includes(url)) markdown = replaceTargets(markdown, url, path)
+        if (list.some((md) => md.includes(url))) list = list.map((md) => replaceTargets(md, url, path))
         // Kept as written by another tool (e.g. a reference-style link): still store it.
-        else if (!markdown.includes(path)) continue
+        else if (!list.some((md) => md.includes(path))) continue
         files[path] = new Uint8Array(await blob.arrayBuffer())
       }
-      return { markdown, files }
+      return { markdown: Array.isArray(markdown) ? list : list[0], files }
     },
 
     clear,

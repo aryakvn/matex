@@ -23,6 +23,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 ## [Unreleased]
 
 ### Added
+- Add header, footer and page numbers (File → Page setup…): text in left/centre/right slots with `{page}`/`{pages}`, adjustable heights (which are the page margins) and text size, number position, format, start value, Persian digits, skip first page. Saved as `page.json` in the `.matex` archive.
 - Add WYSIWYG editor: Markdown typed as you write becomes formatting, Docs-style toolbar (text style, bold/italic/strike/code, links, lists, quotes, divider, images, tables).
 - Detect text direction per paragraph so Persian and English can be mixed in one document.
 - Add `.matex` documents: a zip with `DOCUMENT.md` plus `assets/` for images; New, Open, Save, Save as with Ctrl/Cmd shortcuts and an unsaved-changes guard.
@@ -34,6 +35,12 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Lay the document out on separate A4 sheets like Microsoft Word: text flows from sheet to sheet, paragraphs split at line level, headings stay with the next block, margins repeat on every sheet, and each sheet prints as exactly one page. Table of contents page numbers now come from these page breaks.
 - Add syntax highlighting to code blocks (highlight.js common languages, bundled for offline use): the language comes from the Markdown fence (```js), blocks without one are auto-detected; colours print.
 - Add left-to-right and right-to-left buttons (¶ arrows, like Word) that force a paragraph's or heading's direction over auto-detection; press the lit one again to return to auto. New lines keep the direction, and it is saved as an invisible LRM/RLM mark at the start of the line, which GitHub and other viewers also respect.
+- Edit the header and footer in place like Microsoft Word: double-click a sheet's top or bottom margin to type into its left/centre/right slots (the body dims), double-click the body or press Esc to go back.
+- Make each header/footer slot a rich editor: the main toolbar formats the focused slot (bold, links, lists, images, tables...); slots are saved as Markdown, and their images go into `assets/` like the body's.
+- Run JavaScript in header/footer text with `{{ code }}` (variables `page`, `pages`, `number`, `title`, `date`; an expression or statements with `return`), filled in per page. Opening a document whose header or footer has scripts asks before running them.
+- Add a right-hand side panel for tools, opened from the toolbar; the first one, Header & footer scripts (`{ }` button), lists the `{{ }}` variables with this page's values, syntax and examples, each with an Insert button for the header/footer being edited.
+- Dock the side panel beside the pages instead of floating over them: the page area makes room and the page keeps its A4 width (a window too narrow for both scrolls the pages sideways). A ? button in the panel's header shows its help text.
+- Add a ? button to the Header/Footer tag shown while editing; it opens the side panel with the script help showing. The panel stays closed until asked for.
 
 ### Changed
 - Replace the app icon with the new MaTex logo (desktop icons regenerated from `app-icon.png`, browser favicon, title strip) and show it at the top of the README.

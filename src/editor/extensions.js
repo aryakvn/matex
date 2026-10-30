@@ -49,3 +49,9 @@ export const extensions = [
 // Spread into every `new Editor` / `useEditor`. `dir="auto"` per block = direction
 // from the first strong letter, never saved. A manual override is saved (see direction.js).
 export const editorOptions = { extensions, textDirection: 'auto', contentType: 'markdown' }
+
+// Header/footer slots: the body's editor without sheets or a table of contents.
+export const slotEditorOptions = {
+  ...editorOptions,
+  extensions: extensions.filter((e) => e !== Pagination && e !== TableOfContents),
+}

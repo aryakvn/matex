@@ -60,7 +60,51 @@ body {
 }
 #app { min-height: 100%; display: flex; flex-direction: column; }
 
-.desk { flex: 1; padding: 12px 16px 64px; }
+.workspace { flex: 1; display: flex; align-items: flex-start; }
+.desk { flex: 1; min-width: 0; padding: 12px 16px 64px; }
+
+/* Side panel (SidePanel.vue): a Fluent card docked beside the pages, sticky under the toolbar; the
+   desk gives up the room. --chrome-h is the toolbar's height, measured in App.vue. The page keeps
+   its A4 width (page breaks must match print), so a window too narrow for both scrolls the desk sideways. */
+.with-side .desk { overflow-x: auto; }
+.with-side .desk .page { max-width: none; }
+.side {
+  position: sticky;
+  top: var(--chrome-h, 100px);
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  max-height: calc(100vh - var(--chrome-h, 100px) - 12px);
+  margin: 12px 12px 12px 0;
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 8px;
+  box-shadow: var(--shadow-4);
+}
+.side-head { display: flex; align-items: center; gap: 2px; padding: 8px 8px 4px 16px; }
+.side-head h2 { margin: 0 4px 0 0; font-size: 16px; line-height: 22px; font-weight: 600; }
+.side-close { margin-inline-start: auto; }
+.side-body { overflow: auto; padding: 0 16px 16px; }
+.side-enter-active, .side-leave-active { transition: opacity 150ms ease, translate 150ms ease; }
+.side-enter-from, .side-leave-to { opacity: 0; translate: 16px 0; }
+
+/* Script reference (ScriptReference.vue) */
+.ref-text, .ref-hint, .ref-warn { margin: 0 0 8px; }
+.ref-hint { color: var(--muted); font-size: 12px; }
+.ref-warn { padding: 8px 10px; border-radius: 4px; background: color-mix(in srgb, #f7630c, transparent 85%); }
+.ref-h { margin: 16px 0 6px; font-size: 14px; font-weight: 600; }
+.ref-list { margin: 0; padding: 0; list-style: none; }
+.ref-list dt { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
+.ref-list dd { margin: 2px 0 0; color: var(--muted); }
+.ref-type { color: var(--muted); font-size: 12px; }
+.ref-now { display: block; overflow-wrap: anywhere; }
+.side .ref-insert { margin-inline-start: auto; min-width: 0; height: 24px; padding: 0 8px; font-size: 12px; line-height: 22px; }
+.ref-examples li { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--stroke); }
+.ref-examples span { grid-column: 1; color: var(--muted); font-size: 12px; }
+.ref-examples .ref-insert { grid-column: 2; grid-row: 1 / span 2; }
+.ref-code { overflow-wrap: anywhere; }
+.side code { font-family: Consolas, "Cascadia Mono", Menlo, monospace; font-size: 12px; }
 /* The page is a transparent column; App.vue draws one white .sheet per A4 page behind the text. */
 .desk .page { position: relative; isolation: isolate; background: none; }
 .sheet { position: absolute; inset-inline: 0; z-index: -1; height: 297mm; background: #fff; box-shadow: var(--shadow-4); }
@@ -73,18 +117,67 @@ body {
   inset-inline: calc(-1 * var(--margin-x));
   height: inherit;
   background: linear-gradient(
-    transparent calc(100% - var(--page-gap) - var(--margin-y)),
+    transparent calc(100% - var(--page-gap) - var(--margin-top)),
     color-mix(in srgb, var(--canvas), #000 12%) 0,
-    var(--canvas) calc(100% - var(--page-gap) - var(--margin-y) + 4px),
-    var(--canvas) calc(100% - var(--margin-y)),
+    var(--canvas) calc(100% - var(--page-gap) - var(--margin-top) + 4px),
+    var(--canvas) calc(100% - var(--margin-top)),
     transparent 0
   );
 }
 
+/* Header/footer being edited in place (App.vue): above the text, with Word's dashed line and tag. */
+.sheet-edit { position: absolute; inset-inline: 0; z-index: 1; height: 297mm; pointer-events: none; }
+.page .sheet-edit .hf { pointer-events: auto; overflow: visible; background: #fff; }
+.hf-edit.hf-header { border-bottom: 1px dashed var(--brand); }
+.hf-edit.hf-footer { border-top: 1px dashed var(--brand); }
+.hf-tag {
+  position: absolute;
+  inset-inline-start: var(--margin-x);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 3px 0 8px;
+  border-radius: 0 0 4px 4px;
+  background: var(--brand);
+  color: #fff;
+  font: var(--font-ui);
+  font-size: 12px;
+  line-height: 18px;
+  text-transform: capitalize;
+}
+.hf-header .hf-tag { top: 100%; }
+.hf-footer .hf-tag { bottom: 100%; border-radius: 4px 4px 0 0; }
+.hf-help {
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--brand);
+  font: var(--font-ui);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 14px;
+  cursor: pointer;
+}
+.hf-help:hover { background: color-mix(in srgb, #fff, var(--brand) 20%); }
+.hf-help:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+.hf-edit .hf-slot { display: flex; align-items: center; gap: 0.3em; }
+.hf-edit .hf-slot > :first-child { flex: 1; min-width: 0; }
+.hf-edit .ProseMirror { padding: 2px 4px; border-radius: 2px; }
+.hf-edit .ProseMirror:hover { outline: 1px dashed #bbb; }
+.hf-edit .ProseMirror-focused { outline: 1px solid var(--brand) !important; }
+.hf-number { flex: none; padding: 0 4px; border-radius: 2px; background: #eee; }
+.page.hf-mode .ProseMirror:not(.hf .ProseMirror) { opacity: 0.45; }
+
 @media print {
   :root { --page-gap: 0px; }
+  .sheet-edit { display: none; }
+  .page.hf-mode .ProseMirror:not(.hf .ProseMirror) { opacity: 1; }
   body, .desk { background: none; padding: 0; }
-  .toolbar, .sheet, .toc-more, .page-gap::before { display: none !important; }
+  .sheet { background: none; box-shadow: none; } /* stays, for the header and footer */
+  .toolbar, .side, .toc-more, .page-gap::before { display: none !important; }
   .toc-empty { visibility: hidden; }
 }
 
@@ -261,3 +354,41 @@ body {
 .toc-more .menu-list { left: auto; inset-inline-end: 0; white-space: nowrap; }
 .toc-excluded { top: 0; translate: none; }
 .toc-empty { color: #616161; font-style: italic; }
+
+/* Page setup dialog */
+.setup {
+  width: min(560px, calc(100vw - 32px));
+  padding: 20px 24px;
+  border: 1px solid var(--stroke);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-16);
+}
+.setup::backdrop { background: rgba(0, 0, 0, 0.35); }
+.setup h2 { margin: 0 0 12px; font-size: 20px; line-height: 28px; font-weight: 600; }
+.setup fieldset { margin: 0 0 12px; padding: 8px 12px 12px; border: 1px solid var(--stroke); border-radius: 4px; }
+.setup legend { padding: 0 4px; font-weight: 600; }
+.setup-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+.setup label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); text-transform: capitalize; }
+.setup label.grow { flex: 1 1 120px; }
+.setup label.check { flex-direction: row; align-items: center; gap: 8px; font-size: 14px; color: var(--ink); text-transform: none; }
+.setup input[type="number"], .setup input[type="text"], .setup select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 90px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--stroke-ctl);
+  border-bottom-color: var(--stroke-access);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  font: var(--font-ui);
+  text-transform: none;
+}
+.setup input:focus, .setup select:focus { outline: none; border-bottom-color: var(--brand-ink); box-shadow: inset 0 -1px 0 var(--brand-ink); }
+.setup input:disabled, .setup select:disabled { opacity: 0.5; }
+.setup-hint { margin: 0 0 12px; font-size: 12px; color: var(--muted); }
+.setup-actions { display: flex; justify-content: flex-end; gap: 8px; }
+@media print { .setup { display: none; } }

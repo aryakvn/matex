@@ -1,28 +1,38 @@
 // The open document: its name, path, unsaved state, images, and the
 // New / Open / Save / Save as commands. Works on a Tiptap editor ref.
-import { ref, watch, watchEffect } from 'vue'
+import { ref, reactive, watch, watchEffect } from 'vue'
 import { EditorState } from '@tiptap/pm/state'
 import { pack, unpack } from '../utils/archive.js'
 import { createAssetStore } from '../utils/assets.js'
+import { defaultLayout, normalizeLayout } from '../utils/layout.js'
+import { hasScripts } from '../utils/scripts.js'
 import { openFile, saveFile, ask, showError, setTitle } from '../utils/platform.js'
 
 const UNTITLED = 'Untitled.matex'
 const DISCARD = 'Discard unsaved changes?'
+const RUN_SCRIPTS =
+  'This document has scripts ({{ }}) in its header or footer. Scripts can do anything this app can, ' +
+  'including reading and writing your files. Run them only if you trust where the document came from.\n\nRun the scripts?'
 
 export function useDocument(editor) {
   const name = ref(UNTITLED)
   const path = ref(null)
   const dirty = ref(false)
   const assets = createAssetStore()
+  const layout = reactive(defaultLayout()) // headers, footers, page numbers; edited by the page setup dialog
+  // Whether {{ }} scripts run. Yes for your own documents; asked for each opened one that has any.
+  const scriptsOn = ref(true)
 
   watch(editor, (e) => e?.on('update', () => (dirty.value = true)), { immediate: true })
+  watch(layout, () => (dirty.value = true), { deep: true, flush: 'sync' }) // sync: show() resets dirty right after loading
   watchEffect(() => setTitle(`${dirty.value ? '• ' : ''}${name.value} — MaTex`))
 
   async function okToDiscard() {
     return !dirty.value || ask(DISCARD)
   }
 
-  function show(markdown, file) {
+  function show(markdown, file, saved = null) {
+    Object.assign(layout, normalizeLayout(saved))
     const e = editor.value
     e.commands.setContent(markdown, { contentType: 'markdown', emitUpdate: false })
     // Fresh state = empty undo history, so Ctrl+Z can't bring back the previous document.
@@ -36,6 +46,7 @@ export function useDocument(editor) {
   async function newDoc() {
     if (!(await okToDiscard())) return
     assets.clear()
+    scriptsOn.value = true
     show('', { name: UNTITLED, path: null })
   }
 
@@ -44,8 +55,14 @@ export function useDocument(editor) {
     try {
       const file = await openFile()
       if (!file) return
-      const { markdown, files } = unpack(file.bytes) // throws before anything changes
-      show(assets.load(markdown, files), file)
+      const { markdown, files, layout: saved } = unpack(file.bytes) // throws before anything changes
+      const lay = normalizeLayout(saved)
+      const [body, ...slots] = assets.load([markdown, ...lay.header, ...lay.footer], files)
+      Object.assign(lay, { header: slots.slice(0, 3), footer: slots.slice(3) })
+      const risky = slots.some(hasScripts)
+      scriptsOn.value = !risky // off until answered, so nothing runs behind the question
+      show(body, file, lay)
+      if (risky) scriptsOn.value = await ask(RUN_SCRIPTS)
     } catch (err) {
       showError(`Could not open the file. ${err.message}`)
     }
@@ -53,9 +70,10 @@ export function useDocument(editor) {
 
   async function write(saveAs) {
     try {
-      const { markdown, files } = await assets.collect(editor.value.getMarkdown())
+      const { markdown: [markdown, ...slots], files } = await assets.collect([editor.value.getMarkdown(), ...layout.header, ...layout.footer])
+      const savedLayout = { ...JSON.parse(JSON.stringify(layout)), header: slots.slice(0, 3), footer: slots.slice(3) }
       const fileName = name.value.endsWith('.matex') ? name.value : `${name.value}.matex`
-      const saved = await saveFile(pack({ markdown, files }), { path: path.value, name: fileName, saveAs })
+      const saved = await saveFile(pack({ markdown, files, layout: savedLayout }), { path: path.value, name: fileName, saveAs })
       if (!saved) return
       name.value = saved.name
       path.value = saved.path
@@ -67,11 +85,12 @@ export function useDocument(editor) {
 
   // pos: where to insert (e.g. the drop point). Default is the end of the selection,
   // so a just-inserted (still selected) image is never replaced by the next one.
-  function insertImage(file, pos) {
+  // target: the editor to insert into (a header/footer slot); default is the body.
+  function insertImage(file, pos, target = editor.value) {
     const src = assets.add(file, file.name)
-    const at = pos ?? editor.value.state.selection.to
-    editor.value.chain().focus().insertContentAt(at, { type: 'image', attrs: { src, alt: file.name } }).run()
+    const at = pos ?? target.state.selection.to
+    target.chain().focus().insertContentAt(at, { type: 'image', attrs: { src, alt: file.name } }).run()
   }
 
-  return { name, dirty, newDoc, openDoc, save: () => write(false), saveAs: () => write(true), insertImage }
+  return { name, dirty, layout, scriptsOn, newDoc, openDoc, save: () => write(false), saveAs: () => write(true), insertImage }
 }

@@ -1,10 +1,13 @@
 // A .matex file is a plain zip: DOCUMENT.md at the root plus assets/<name> files.
 import { zipSync, unzipSync, strToU8, strFromU8 } from 'fflate'
+import { normalizeLayout, isDefaultLayout } from './layout.js'
 
 const DOC = 'DOCUMENT.md'
+const LAYOUT = 'page.json' // header/footer/page numbers; absent = defaults
 
-export function pack({ markdown, files }) {
-  return zipSync({ [DOC]: strToU8(markdown), ...files })
+export function pack({ markdown, files, layout }) {
+  const extra = layout && !isDefaultLayout(layout) ? { [LAYOUT]: strToU8(JSON.stringify(layout)) } : {}
+  return zipSync({ [DOC]: strToU8(markdown), ...extra, ...files })
 }
 
 export function unpack(bytes) {
@@ -19,5 +22,9 @@ export function unpack(bytes) {
   for (const [path, data] of Object.entries(entries)) {
     if (path.startsWith('assets/') && !path.endsWith('/')) files[path] = data
   }
-  return { markdown: strFromU8(entries[DOC]), files }
+  let layout = null
+  try {
+    if (LAYOUT in entries) layout = normalizeLayout(JSON.parse(strFromU8(entries[LAYOUT])))
+  } catch {} // a damaged page.json costs the layout, not the document
+  return { markdown: strFromU8(entries[DOC]), files, layout }
 }
