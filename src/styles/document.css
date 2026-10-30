@@ -58,9 +58,13 @@
 .page .toc.ProseMirror-selectednode { outline: 2px solid #1a55c4; outline-offset: 4px; }
 .page .toc-title { font-size: 1.25em; font-weight: bold; margin-bottom: 0.4em; }
 .page .toc-list { list-style: none; margin: 0; padding: 0; }
-.page .toc-item { display: flex; align-items: center; gap: 0.5em; min-height: 1.8em; }
+.page .toc-item { display: flex; align-items: baseline; gap: 0.4em; min-height: 1.8em; }
 .page .toc-item a { color: inherit; text-decoration: none; }
 .page .toc-item a:hover { text-decoration: underline; }
+/* Dot leader: a long row of dots, clipped to whatever room is left between title and number. */
+.page .toc-dots { flex: 1; min-width: 1.5em; overflow: hidden; white-space: nowrap; font-weight: normal; }
+.page .toc-dots::before { content: "................................................................................................................................................................................................"; letter-spacing: 0.3em; }
+.page .toc-page { min-width: 1.5em; text-align: end; font-variant-numeric: tabular-nums; }
 .page .toc-l1 { font-weight: bold; }
 .page .toc-l2 { padding-inline-start: 1.5em; }
 .page .toc-l3 { padding-inline-start: 3em; }

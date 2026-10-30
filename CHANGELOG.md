@@ -30,6 +30,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Add README (project story, file format, development and release steps) and TODOS roadmap.
 - Add CLAUDE.md with commands and architecture notes for Claude Code.
 - Add auto table of contents (toolbar button, saved as `[TOC]`) listing all headings live; each entry's "…" menu excludes or re-includes that heading, saved as `## Title {.unlisted}`.
+- Show a dot leader and printed page number after each table of contents entry; pages are estimated from the A4 layout and update as the document changes.
 
 ### Changed
 - Restyle app chrome after Microsoft Fluent 2: grey canvas, title strip with app icon, file name and unsaved state, floating rounded command bar, Fluent dropdown, menus, inputs and buttons in light and dark.

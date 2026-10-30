@@ -234,7 +234,9 @@ body {
 }
 
 /* Table of contents editing bits inside the white page: the "…" menu and excluded entries. */
-.toc-more { margin-inline-start: auto; font: var(--font-ui); opacity: 0; transition: opacity 100ms ease; }
+/* The "…" sits in the page margin, so the list lines up on screen as it does on paper. */
+.toc-item { position: relative; }
+.toc-more { position: absolute; inset-inline-end: -32px; top: 50%; translate: 0 -50%; font: var(--font-ui); opacity: 0; transition: opacity 100ms ease; }
 .toc-item:hover .toc-more, .toc-more:focus-within, .toc-more:has([aria-expanded="true"]) { opacity: 1; }
 .toc-more .tb-btn { height: 24px; min-width: 24px; padding: 0 2px; color: #616161; }
 .toc-more .tb-btn:hover, .toc-more .tb-btn[aria-expanded="true"] { background: rgba(0, 0, 0, 0.06); color: #242424; }
