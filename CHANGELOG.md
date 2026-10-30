@@ -36,3 +36,6 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 ### Changed
 - Excluded headings now leave the table of contents on screen too (it shows what will print); bring them back from the excluded-headings menu beside the title.
 - Restyle app chrome after Microsoft Fluent 2: grey canvas, title strip with app icon, file name and unsaved state, floating rounded command bar, Fluent dropdown, menus, inputs and buttons in light and dark.
+
+### Fixed
+- Stop code block backgrounds and quote borders from running through the bottom margin and the gap between sheets when they split across pages.

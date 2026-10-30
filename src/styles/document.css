@@ -10,7 +10,9 @@
   max-width: 100%;
   min-height: 297mm;
   margin: 0 auto;
-  padding: 25mm 20mm;
+  --margin-y: 25mm;
+  --margin-x: 20mm;
+  padding: var(--margin-y) var(--margin-x);
   background: #fff;
   color: #1a1a1a;
   font-family: Georgia, "Times New Roman", Tahoma, serif;
@@ -18,7 +20,7 @@
   line-height: 1.6;
 }
 
-.page .ProseMirror { outline: none; min-height: 247mm; }
+.page .ProseMirror { position: relative; outline: none; min-height: 247mm; }
 .page .ProseMirror > :first-child { margin-top: 0; }
 
 /* Page breaks (src/editor/pagination.js): spacers that carry the next line to the next sheet.
