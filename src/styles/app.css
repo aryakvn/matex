@@ -1,0 +1,42 @@
+/* App chrome only. The page itself is styled by document.css and stays white in both themes. */
+:root {
+  --desk: #eef0f3;
+  --bar: #f8f9fb;
+  --ink: #202124;
+  --muted: #5f6368;
+  --line: #dadce0;
+  --hover: #e8eaed;
+  --active: #d3e3fd;
+  --accent: #1a55c4;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --desk: #1e1f22;
+    --bar: #2b2d31;
+    --ink: #e8eaed;
+    --muted: #a0a4ab;
+    --line: #3c4043;
+    --hover: #3a3c41;
+    --active: #3b4a66;
+    --accent: #8ab4f8;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--desk);
+  color: var(--ink);
+  font: 14px/1.4 system-ui, "Segoe UI", Roboto, Tahoma, sans-serif;
+}
+#app { min-height: 100%; display: flex; flex-direction: column; }
+
+.desk { flex: 1; padding: 24px 16px 64px; }
+.desk .page { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.06); }
+
+@media print {
+  body, .desk { background: none; padding: 0; }
+  .toolbar { display: none !important; }
+}

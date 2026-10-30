@@ -1,0 +1,60 @@
+/*
+  The document's only stylesheet. Kept free of app chrome so a future
+  print/PDF step can render DOCUMENT.md to HTML and apply this file alone.
+*/
+@page { size: A4; margin: 0; }
+
+.page {
+  box-sizing: border-box;
+  width: 210mm;
+  max-width: 100%;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 25mm 20mm;
+  background: #fff;
+  color: #1a1a1a;
+  font-family: Georgia, "Times New Roman", Tahoma, serif;
+  font-size: 12pt;
+  line-height: 1.6;
+}
+
+.page .ProseMirror { outline: none; min-height: 247mm; }
+.page .ProseMirror > :first-child { margin-top: 0; }
+
+/* Logical properties so RTL blocks indent and border on the right side. */
+.page h1, .page h2, .page h3, .page h4 { line-height: 1.25; margin: 1.4em 0 0.5em; }
+.page h1 { font-size: 2em; }
+.page h2 { font-size: 1.5em; }
+.page h3 { font-size: 1.25em; }
+.page p { margin: 0 0 0.8em; }
+.page ul, .page ol { margin: 0 0 0.8em; padding-inline-start: 1.6em; }
+.page li > p { margin: 0; }
+.page blockquote {
+  margin: 0 0 0.8em;
+  padding-inline-start: 1em;
+  border-inline-start: 3px solid #ccc;
+  color: #555;
+}
+.page a { color: #1a55c4; }
+.page code {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.9em;
+  background: #f2f2f2;
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+}
+/* Code reads left-to-right even inside a Persian document. */
+.page pre { direction: ltr; text-align: left; background: #f6f6f6; padding: 0.8em 1em; border-radius: 4px; overflow-x: auto; }
+.page pre code { background: none; padding: 0; }
+.page hr { border: 0; border-top: 1px solid #ccc; margin: 1.5em 0; }
+.page img { max-width: 100%; height: auto; }
+.page img.ProseMirror-selectednode { outline: 2px solid #1a55c4; }
+.page table { border-collapse: collapse; width: 100%; margin: 0 0 0.8em; }
+.page th, .page td { border: 1px solid #bbb; padding: 0.3em 0.6em; vertical-align: top; text-align: start; }
+.page th { background: #f2f2f2; }
+.page td > p, .page th > p { margin: 0; }
+.page .selectedCell { background: #dbe7fb; }
+
+@media print {
+  .page { width: auto; min-height: 0; padding: 20mm; box-shadow: none; }
+}

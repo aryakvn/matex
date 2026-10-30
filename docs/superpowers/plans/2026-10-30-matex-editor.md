@@ -187,7 +187,7 @@
   - `lib.rs` registers `tauri_plugin_dialog::init()` and `tauri_plugin_fs::init()`.
   - `tauri.conf.json`:
     - `productName` `MaTex`, `identifier` `com.aryakvn.matex`, `version` `0.1.0`.
-    - `build.frontendDist` `../dist`, `devUrl` `http://localhost:5173`, `beforeBuildCommand` `npm run build`, `beforeDevCommand` `npm run dev`.
+    - `build.frontendDist` `../dist`, `devUrl` `http://localhost:1420`, `beforeBuildCommand` `npm run build`, `beforeDevCommand` `npm run dev`.
     - Window `title` `MaTex`, size 1100×800.
     - `bundle.targets` `["deb", "app", "msi", "nsis"]`.
   - The capability `default` covers the main window with: `core:default`, `core:window:allow-set-title`, `core:window:allow-destroy`, `dialog:default`, `fs:allow-read-file`, `fs:allow-write-file`, and an fs scope that allows `**` (paths come only from the user's own dialog choices).
