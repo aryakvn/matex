@@ -21,3 +21,9 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 -->
 
 ## [Unreleased]
+
+### Added
+- Add WYSIWYG editor: Markdown typed as you write becomes formatting, Docs-style toolbar (text style, bold/italic/strike/code, links, lists, quotes, divider, images, tables).
+- Detect text direction per paragraph so Persian and English can be mixed in one document.
+- Add `.matex` documents: a zip with `DOCUMENT.md` plus `assets/` for images; New, Open, Save, Save as with Ctrl/Cmd shortcuts and an unsaved-changes guard.
+- Add Tauri desktop shell and GitHub Actions build for `.deb`, macOS `.app`, Windows `.msi` and `.exe` (draft release on `v*` tags).

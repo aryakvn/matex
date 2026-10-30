@@ -1,0 +1,14 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Main window. File access is limited to paths the user picks in a dialog (the dialog plugin adds them to the fs scope).",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-set-title",
+    "core:window:allow-destroy",
+    "dialog:default",
+    "fs:allow-read-file",
+    "fs:allow-write-file"
+  ]
+}
