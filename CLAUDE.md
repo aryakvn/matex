@@ -42,7 +42,7 @@ Releases come from `.github/workflows/release.yml`. Pushing a `v*` tag creates a
 
 **Styling is split between document and app chrome.**
 - `src/styles/document.css` is the document's only stylesheet. It is scoped to `.page`, sized for A4 with `@page`, and uses logical properties for RTL.
-- App chrome (toolbar, menus, light/dark tokens) lives in `src/styles/app.css` and is hidden in print.
+- App chrome (toolbar, menus, light/dark tokens) lives in `src/styles/app.css` and is hidden in print. It follows Microsoft Fluent 2 (Office 2023 look); reuse its tokens (`--surface`, `--stroke`, `--brand`, `--shadow-4`/`--shadow-16`, ...) instead of new colours.
 - Keep the document HTML + CSS only, with no canvas rendering, so it prints and converts to PDF through the webview.
 
 **Behaviors that span files:**

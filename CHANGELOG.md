@@ -29,3 +29,6 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Add Tauri desktop shell and GitHub Actions build for `.deb`, macOS `.app`, Windows `.msi` and `.exe` (draft release on `v*` tags).
 - Add README (project story, file format, development and release steps) and TODOS roadmap.
 - Add CLAUDE.md with commands and architecture notes for Claude Code.
+
+### Changed
+- Restyle app chrome after Microsoft Fluent 2: grey canvas, title strip with app icon, file name and unsaved state, floating rounded command bar, Fluent dropdown, menus, inputs and buttons in light and dark.

@@ -1,12 +1,13 @@
 <script setup>
-// Docs-style toolbar for a Tiptap editor. Formatting runs straight on the editor;
+// Title strip + Fluent-style command bar for a Tiptap editor. Formatting runs straight on the editor;
 // file actions and picked images go up as events so the owner decides what they mean.
 import { computed, ref, nextTick } from 'vue'
 import {
   Undo2, Redo2, Bold, Italic, Strikethrough, Code, Link, List, ListOrdered,
-  Quote, Minus, Image, Table,
+  Quote, Minus, Image, Table, ChevronDown,
 } from 'lucide-vue-next'
 import ToolbarMenu from './ToolbarMenu.vue'
+import appIcon from '../../src-tauri/icons/64x64.png'
 
 const props = defineProps({
   editor: { type: Object, default: null },
@@ -109,75 +110,82 @@ function onImagePicked(e) {
 </script>
 
 <template>
-  <header v-if="editor" class="toolbar" role="toolbar" aria-label="Formatting">
-    <ToolbarMenu label="File" :items="fileItems" />
-
-    <span class="tb-sep" />
-
-    <button type="button" class="tb-btn" title="Undo" aria-label="Undo" :disabled="!editor.can().undo()" @click="chain().undo().run()">
-      <Undo2 :size="18" />
-    </button>
-    <button type="button" class="tb-btn" title="Redo" aria-label="Redo" :disabled="!editor.can().redo()" @click="chain().redo().run()">
-      <Redo2 :size="18" />
-    </button>
-
-    <span class="tb-sep" />
-
-    <select class="tb-select" aria-label="Text style" :value="blockType" @change="setBlockType($event.target.value)">
-      <option v-for="t in blockTypes" :key="t.value" :value="t.value">{{ t.label }}</option>
-    </select>
-
-    <span class="tb-sep" />
-
-    <button
-      v-for="m in marks" :key="m.name" type="button" class="tb-btn"
-      :title="`${m.label} (${m.hint})`" :aria-label="m.label"
-      :aria-pressed="editor.isActive(m.name)" @click="m.run"
-    >
-      <component :is="m.icon" :size="18" />
-    </button>
-
-    <div class="link-wrap">
-      <button
-        type="button" class="tb-btn" title="Link" aria-label="Link"
-        :aria-pressed="editor.isActive('link')" :aria-expanded="linkOpen" @click="linkOpen ? (linkOpen = false) : openLink()"
-      >
-        <Link :size="18" />
-      </button>
-      <Transition name="menu">
-        <form v-if="linkOpen" class="link-pop" @submit.prevent="applyLink" @keydown.esc="linkOpen = false">
-          <input ref="linkInput" v-model="linkUrl" type="url" placeholder="https://" aria-label="Link address" dir="ltr" />
-          <button type="submit" class="pop-btn primary">Apply</button>
-          <button v-if="editor.isActive('link')" type="button" class="pop-btn" @click="removeLink">Remove</button>
-        </form>
-      </Transition>
+  <header v-if="editor" class="toolbar">
+    <div class="titlebar">
+      <img :src="appIcon" alt="" width="20" height="20" />
+      <span class="doc-name">{{ name }}</span>
+      <span v-if="dirty" class="doc-state">Unsaved changes</span>
     </div>
 
-    <span class="tb-sep" />
+    <div class="cmdbar" role="toolbar" aria-label="Formatting">
+      <ToolbarMenu label="File" :items="fileItems" />
 
-    <button
-      v-for="b in blocks" :key="b.name" type="button" class="tb-btn"
-      :title="b.label" :aria-label="b.label" :aria-pressed="editor.isActive(b.name)" @click="b.run"
-    >
-      <component :is="b.icon" :size="18" />
-    </button>
-    <button type="button" class="tb-btn" title="Divider line" aria-label="Divider line" @click="chain().setHorizontalRule().run()">
-      <Minus :size="18" />
-    </button>
+      <span class="tb-sep" />
 
-    <span class="tb-sep" />
+      <button type="button" class="tb-btn" title="Undo" aria-label="Undo" :disabled="!editor.can().undo()" @click="chain().undo().run()">
+        <Undo2 :size="20" />
+      </button>
+      <button type="button" class="tb-btn" title="Redo" aria-label="Redo" :disabled="!editor.can().redo()" @click="chain().redo().run()">
+        <Redo2 :size="20" />
+      </button>
 
-    <button type="button" class="tb-btn" title="Insert image" aria-label="Insert image" @click="imageInput.click()">
-      <Image :size="18" />
-    </button>
-    <input ref="imageInput" type="file" accept="image/*" hidden @change="onImagePicked" />
+      <span class="tb-sep" />
 
-    <ToolbarMenu label="Table" :items="tableItems">
-      <Table :size="18" aria-hidden="true" />
-    </ToolbarMenu>
+      <span class="tb-select-wrap">
+        <select class="tb-select" aria-label="Text style" :value="blockType" @change="setBlockType($event.target.value)">
+          <option v-for="t in blockTypes" :key="t.value" :value="t.value">{{ t.label }}</option>
+        </select>
+        <ChevronDown :size="16" aria-hidden="true" />
+      </span>
 
-    <span v-if="name" class="doc-name" :title="dirty ? 'Unsaved changes' : 'Saved'">
-      <span class="dot" :class="{ on: dirty }" aria-hidden="true" />{{ name }}
-    </span>
+      <span class="tb-sep" />
+
+      <button
+        v-for="m in marks" :key="m.name" type="button" class="tb-btn"
+        :title="`${m.label} (${m.hint})`" :aria-label="m.label"
+        :aria-pressed="editor.isActive(m.name)" @click="m.run"
+      >
+        <component :is="m.icon" :size="20" />
+      </button>
+
+      <div class="link-wrap">
+        <button
+          type="button" class="tb-btn" title="Link" aria-label="Link"
+          :aria-pressed="editor.isActive('link')" :aria-expanded="linkOpen" @click="linkOpen ? (linkOpen = false) : openLink()"
+        >
+          <Link :size="20" />
+        </button>
+        <Transition name="menu">
+          <form v-if="linkOpen" class="link-pop" @submit.prevent="applyLink" @keydown.esc="linkOpen = false">
+            <input ref="linkInput" v-model="linkUrl" type="url" placeholder="https://" aria-label="Link address" dir="ltr" />
+            <button type="submit" class="pop-btn primary">Apply</button>
+            <button v-if="editor.isActive('link')" type="button" class="pop-btn" @click="removeLink">Remove</button>
+          </form>
+        </Transition>
+      </div>
+
+      <span class="tb-sep" />
+
+      <button
+        v-for="b in blocks" :key="b.name" type="button" class="tb-btn"
+        :title="b.label" :aria-label="b.label" :aria-pressed="editor.isActive(b.name)" @click="b.run"
+      >
+        <component :is="b.icon" :size="20" />
+      </button>
+      <button type="button" class="tb-btn" title="Divider line" aria-label="Divider line" @click="chain().setHorizontalRule().run()">
+        <Minus :size="20" />
+      </button>
+
+      <span class="tb-sep" />
+
+      <button type="button" class="tb-btn" title="Insert image" aria-label="Insert image" @click="imageInput.click()">
+        <Image :size="20" />
+      </button>
+      <input ref="imageInput" type="file" accept="image/*" hidden @change="onImagePicked" />
+
+      <ToolbarMenu label="Table" :items="tableItems">
+        <Table :size="20" aria-hidden="true" />
+      </ToolbarMenu>
+    </div>
   </header>
 </template>
