@@ -1,10 +1,15 @@
 import StarterKit from '@tiptap/starter-kit'
+import Strike from '@tiptap/extension-strike'
 import Image from '@tiptap/extension-image'
 import { TableKit } from '@tiptap/extension-table'
 import { Markdown } from '@tiptap/markdown'
 
 export const extensions = [
-  StarterKit.configure({ link: { openOnClick: false } }),
+  StarterKit.configure({ link: { openOnClick: false }, strike: false }),
+  // Mod-Shift-S belongs to Save as, so strike moves to Mod-Shift-X.
+  Strike.extend({
+    addKeyboardShortcuts() { return { 'Mod-Shift-x': () => this.editor.commands.toggleStrike() } },
+  }),
   Image,
   // Column widths can't be stored in Markdown, so no resizing.
   TableKit.configure({ table: { resizable: false } }),

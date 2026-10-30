@@ -42,6 +42,19 @@ describe('markdown', () => {
     expect(roundTrip(once)).toBe(once)
   })
 
+  it('round-trips nested lists without stray blank lines', () => {
+    const md = '- a\n  - b\n- c'
+    expect(roundTrip(md).trim()).toBe(md)
+    expect(roundTrip(roundTrip(md)).trim()).toBe(md)
+  })
+
+  it('indenting a list item gives clean nested markdown', () => {
+    const editor = make('- a\n- b')
+    editor.commands.focus('end')
+    editor.commands.sinkListItem('listItem')
+    expect(editor.getMarkdown().trim()).toBe('- a\n  - b')
+  })
+
   it('keeps mixed Persian/English text', () => {
     const md = 'سلام MaTex دنیا\n\nHello سلام'
     expect(roundTrip(md).trim()).toBe(md)
@@ -57,5 +70,19 @@ describe('markdown', () => {
     const out = roundTrip('Text <span class="x">kept</span> end')
     expect(out).toContain('kept')
     expect(out).toContain('end')
+  })
+})
+
+describe('shortcuts', () => {
+  const key = (editor, k) =>
+    editor.view.someProp('handleKeyDown', (f) => f(editor.view, new KeyboardEvent('keydown', { key: k, ctrlKey: true, shiftKey: true })))
+
+  it('Ctrl+Shift+S is left for Save as, Ctrl+Shift+X toggles strike', () => {
+    const editor = make('word')
+    editor.commands.selectAll()
+    key(editor, 's')
+    expect(editor.isActive('strike')).toBe(false)
+    key(editor, 'x')
+    expect(editor.isActive('strike')).toBe(true)
   })
 })
