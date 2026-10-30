@@ -8,6 +8,7 @@ defineProps({
   label: { type: String, required: true },
   // [{ label, hint?, disabled?, run }] ; null = divider
   items: { type: Array, required: true },
+  chevron: { type: Boolean, default: true },
 })
 
 const open = ref(false)
@@ -43,7 +44,7 @@ onBeforeUnmount(close)
   <div ref="root" class="menu">
     <button type="button" class="tb-btn menu-btn" :aria-label="label" :title="label" :aria-expanded="open" aria-haspopup="menu" @click="toggle">
       <slot>{{ label }}</slot>
-      <ChevronDown :size="14" aria-hidden="true" />
+      <ChevronDown v-if="chevron" :size="14" aria-hidden="true" />
     </button>
     <Transition name="menu">
       <ul v-if="open" class="menu-list" role="menu" :aria-label="label">

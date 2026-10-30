@@ -23,6 +23,7 @@
   --shadow-4: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.14);
   --shadow-16: 0 0 2px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.14);
   --ease-out: cubic-bezier(0.1, 0.9, 0.2, 1);
+  --font-ui: 14px/20px "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", sans-serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -53,7 +54,7 @@ html, body { margin: 0; height: 100%; }
 body {
   background: var(--canvas);
   color: var(--ink);
-  font: 14px/20px "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", sans-serif;
+  font: var(--font-ui);
   -webkit-font-smoothing: antialiased;
 }
 #app { min-height: 100%; display: flex; flex-direction: column; }
@@ -65,6 +66,7 @@ body {
   body, .desk { background: none; padding: 0; }
   .toolbar { display: none !important; }
   .desk .page { box-shadow: none; }
+  .toc-more, .toc-empty, .toc .unlisted { display: none !important; }
 }
 
 /* Header: title strip + command bar, both sitting on the canvas */
@@ -230,3 +232,12 @@ body {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; }
 }
+
+/* Table of contents editing bits inside the white page: the "…" menu and excluded entries. */
+.toc-more { margin-inline-start: auto; font: var(--font-ui); opacity: 0; transition: opacity 100ms ease; }
+.toc-item:hover .toc-more, .toc-more:focus-within, .toc-more:has([aria-expanded="true"]) { opacity: 1; }
+.toc-more .tb-btn { height: 24px; min-width: 24px; padding: 0 2px; color: #616161; }
+.toc-more .tb-btn:hover, .toc-more .tb-btn[aria-expanded="true"] { background: rgba(0, 0, 0, 0.06); color: #242424; }
+.toc-more .menu-list { left: auto; inset-inline-end: 0; white-space: nowrap; }
+.page .toc .unlisted > a { opacity: 0.45; text-decoration: line-through; }
+.toc-empty { color: #616161; font-style: italic; }

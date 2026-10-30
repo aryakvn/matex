@@ -4,7 +4,7 @@
 import { computed, ref, nextTick } from 'vue'
 import {
   Undo2, Redo2, Bold, Italic, Strikethrough, Code, Link, List, ListOrdered,
-  Quote, Minus, Image, Table, ChevronDown,
+  Quote, Minus, Image, Table, TableOfContents, ChevronDown,
 } from 'lucide-vue-next'
 import ToolbarMenu from './ToolbarMenu.vue'
 import appIcon from '../../src-tauri/icons/64x64.png'
@@ -182,6 +182,10 @@ function onImagePicked(e) {
         <Image :size="20" />
       </button>
       <input ref="imageInput" type="file" accept="image/*" hidden @change="onImagePicked" />
+
+      <button type="button" class="tb-btn" title="Table of contents" aria-label="Table of contents" @click="chain().insertTableOfContents().run()">
+        <TableOfContents :size="20" />
+      </button>
 
       <ToolbarMenu label="Table" :items="tableItems">
         <Table :size="20" aria-hidden="true" />
