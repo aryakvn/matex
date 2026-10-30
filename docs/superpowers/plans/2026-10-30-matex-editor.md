@@ -176,7 +176,7 @@
 **Files:**
 - Create:
   - `src-tauri/Cargo.toml`, `src-tauri/build.rs`, `src-tauri/src/main.rs`, `src-tauri/src/lib.rs`, `src-tauri/tauri.conf.json`, `src-tauri/capabilities/default.json`
-  - `src-tauri/icons/*` (generated), `app-icon.svg`
+  - `src-tauri/icons/*` (generated), `app-icon.png`
   - `.github/workflows/release.yml`
 - Modify: `package.json` (add `@tauri-apps/cli` dev dep, `@tauri-apps/api`, `@tauri-apps/plugin-dialog`, `@tauri-apps/plugin-fs`; script `"tauri": "tauri"`), `CHANGELOG.md`, `~/.claude/CLAUDE.md` (component index)
 
@@ -192,7 +192,7 @@
     - `bundle.targets` `["deb", "app", "msi", "nsis"]`.
   - The capability `default` covers the main window with: `core:default`, `core:window:allow-set-title`, `core:window:allow-destroy`, `dialog:default`, `fs:allow-read-file`, `fs:allow-write-file`, and an fs scope that allows `**` (paths come only from the user's own dialog choices).
 
-- [ ] **Step 2: Icons.** Write a simple `app-icon.svg` (an "M" on a page), then run `npx tauri icon app-icon.svg`. Expected: `src-tauri/icons/` holds png/ico/icns.
+- [ ] **Step 2: Icons.** Write a simple `app-icon.png` (an "M" on a page), then run `npx tauri icon app-icon.svg`. Expected: `src-tauri/icons/` holds png/ico/icns.
 
 - [ ] **Step 3: Workflow** `.github/workflows/release.yml`.
   - Triggers: `push` tags `v*` and `workflow_dispatch`. Permissions: `contents: write`.

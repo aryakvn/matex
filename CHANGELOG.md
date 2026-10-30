@@ -36,6 +36,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Add left-to-right and right-to-left buttons (¶ arrows, like Word) that force a paragraph's or heading's direction over auto-detection; press the lit one again to return to auto. New lines keep the direction, and it is saved as an invisible LRM/RLM mark at the start of the line, which GitHub and other viewers also respect.
 
 ### Changed
+- Replace the app icon with the new MaTex logo (desktop icons regenerated from `app-icon.png`, browser favicon, title strip) and show it at the top of the README.
 - Excluded headings now leave the table of contents on screen too (it shows what will print); bring them back from the excluded-headings menu beside the title.
 - Restyle app chrome after Microsoft Fluent 2: grey canvas, title strip with app icon, file name and unsaved state, floating rounded command bar, Fluent dropdown, menus, inputs and buttons in light and dark.
 

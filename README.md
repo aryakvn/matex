@@ -1,3 +1,5 @@
+<p align="center"><img src="app-icon.png" alt="MaTex logo" width="128" /></p>
+
 # MaTex
 
 A lightweight, offline, cross-platform word processor for programmers. You write in Markdown and HTML, style with CSS, and get a document ready to print. Persian (RTL) and English (LTR) can share a page.
