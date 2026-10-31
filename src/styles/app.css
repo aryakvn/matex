@@ -24,6 +24,7 @@
   --shadow-16: 0 0 2px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.14);
   --ease-out: cubic-bezier(0.1, 0.9, 0.2, 1);
   --page-gap: 16px; /* grey gap between A4 sheets; 0 in print */
+  --status-h: 24px;
   --font-ui: 14px/20px "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", sans-serif;
   color-scheme: light;
 }
@@ -63,6 +64,23 @@ body {
 :root { scrollbar-color: var(--stroke-ctl) transparent; }
 html, .side-body, .with-side .desk { scrollbar-width: thin; }
 
+/* Word's status bar: page and word count, pinned to the bottom of the window on the canvas. */
+.statusbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  gap: 16px;
+  height: var(--status-h);
+  padding: 0 16px;
+  align-items: center;
+  background: var(--canvas);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+@media print { .statusbar { display: none; } }
+
 .workspace { flex: 1; display: flex; align-items: flex-start; }
 .desk { flex: 1; min-width: 0; padding: 12px 16px 64px; }
 
@@ -78,7 +96,7 @@ html, .side-body, .with-side .desk { scrollbar-width: thin; }
   display: flex;
   flex-direction: column;
   width: 320px;
-  max-height: calc(100vh - var(--chrome-h, 100px) - 12px);
+  max-height: calc(100vh - var(--chrome-h, 100px) - var(--status-h) - 12px);
   margin: 12px 12px 12px 0;
   background: var(--surface);
   color: var(--ink);

@@ -56,6 +56,13 @@ watch(editor, (e) => e?.on('paginate', (found) => {
   breaks.value = found.breaks
 }))
 
+// Status bar: the page the cursor is on, and the word count. Tiptap's state is reactive; `doc` keeps
+// its identity across selection-only changes, so words are recounted only when the text changes.
+// ponytail: recounts the whole text per edit; fine for a book, go incremental if typing lags.
+const caretPage = computed(() => (editor.value ? Math.min(pageAt(breaks.value, editor.value.state.selection.head), pages.value) : 1))
+const bodyDoc = computed(() => editor.value?.state.doc)
+const words = computed(() => bodyDoc.value?.textBetween(0, bodyDoc.value.content.size, ' ', ' ').match(/\S+/g)?.length ?? 0)
+
 // Footnotes and references (editor/notes.js), in order of first use. Footnotes are drawn at the
 // bottom of the sheet their marker is on and edited there; any marker (or references entry) clicked
 // opens a popup under it with the note's text.
@@ -444,5 +451,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
     </template>
   </SidePanel>
   </div>
+  <footer class="statusbar">
+    <span>Page {{ caretPage }} of {{ pages }}</span>
+    <span>{{ words.toLocaleString('en') }} {{ words === 1 ? 'word' : 'words' }}</span>
+  </footer>
   <PageSetup ref="setup" :layout="layout" />
 </template>
