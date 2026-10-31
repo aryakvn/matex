@@ -154,6 +154,13 @@
 .page sup.note[data-kind="reference"]::after { content: "[" attr(data-n) "]"; }
 .page sup.note.ProseMirror-selectednode { outline: 1px solid #1a55c4; outline-offset: 1px; }
 
+/* Captions and cross-references (src/editor/captions.js). A reference shows its caption's label,
+   a decoration's data-label. */
+.page .caption { text-align: center; font-size: 0.9em; margin-block-start: 0.4em; }
+.page .caption-label { font-weight: bold; }
+.page .media-ref::after { content: attr(data-label); }
+.page .media-ref.ProseMirror-selectednode { outline: 1px solid #1a55c4; outline-offset: 1px; }
+
 /* Footnotes: at the bottom of each sheet's text area, above the footer, under a short divider
    (drawn by App.vue; pagination.js keeps the text above them). */
 .page .fn-area {

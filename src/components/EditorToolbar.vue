@@ -4,11 +4,12 @@
 import { computed, ref, nextTick } from 'vue'
 import {
   Undo2, Redo2, Bold, Italic, Strikethrough, Code, Link, List, ListOrdered,
-  Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, FileCode, CodeXml, CaseSensitive, Superscript, Columns2,
+  Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, FileCode, CodeXml, CaseSensitive, Superscript, Columns2, Captions,
 } from 'lucide-vue-next'
 import ToolbarMenu from './ToolbarMenu.vue'
 import { directionAt } from '../editor/direction.js'
 import { noteEntries } from '../editor/notes.js'
+import { captionEntries } from '../editor/captions.js'
 import { sectionAt, MAX_COLUMNS } from '../editor/sections.js'
 import { canWrapColumns } from '../utils/layout.js'
 import { STYLES, styleAt, applyStyle } from '../utils/styles.js'
@@ -79,6 +80,16 @@ function noteItems() {
     ...(refs.length ? [null, ...refs.map((r) => ({ label: `Cite [${r.number}] ${excerpt(r.text)}`, run: () => emit('note', { kind: 'reference', id: r.id }) }))] : []),
     null,
     { label: 'References list', run: () => chain().insertReferenceList().run() },
+  ]
+}
+
+// Captions (captions.js): add one under the selected image/table/HTML block, or refer to one.
+function captionItems() {
+  const can = props.editor.can().insertCaption()
+  const captions = captionEntries(props.editor.state.doc)
+  return [
+    { label: can ? 'Add caption' : 'Add caption (select an image, table or HTML block)', disabled: !can, run: () => chain().insertCaption().run() },
+    ...(captions.length ? [null, ...captions.map((c) => ({ label: `Refer to ${excerpt(c.text) || c.ref}`, hint: `[${c.ref}]`, run: () => chain().insertMediaRef(c.ref).run() }))] : []),
   ]
 }
 
@@ -240,6 +251,10 @@ function onImagePicked(e) {
 
       <ToolbarMenu v-if="editor.commands.insertNote" label="Footnotes and references" :items="noteItems()">
         <Superscript :size="20" aria-hidden="true" />
+      </ToolbarMenu>
+
+      <ToolbarMenu v-if="editor.commands.insertCaption" label="Captions and cross-references" :items="captionItems()">
+        <Captions :size="20" aria-hidden="true" />
       </ToolbarMenu>
 
       <ToolbarMenu v-if="editor.commands.insertSection" label="Layout: columns and sections" :items="layoutItems()">
