@@ -92,16 +92,38 @@ html, .side-body, .desk { scrollbar-width: thin; }
   line-height: 16px;
 }
 @media print { .statusbar { display: none; } }
+/* Word's zoom control, at the right end of the status bar. */
+.zoom { display: flex; align-items: center; gap: 2px; margin-inline-start: auto; }
+.zoom-btn {
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 20px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.zoom-btn:hover:not(:disabled) { background: var(--hover); color: var(--ink); }
+.zoom-btn:active:not(:disabled) { background: var(--pressed); }
+.zoom-btn:disabled { opacity: 0.4; cursor: default; }
+.zoom-btn:focus-visible, .zoom-slider:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.zoom-pct { min-width: 44px; font-variant-numeric: tabular-nums; }
+.zoom-slider { width: 100px; margin: 0 4px; accent-color: var(--brand); }
 
 .workspace { flex: 1; display: flex; align-items: flex-start; }
-.desk { flex: 1; min-width: 0; padding: 12px 16px 64px; }
+.desk { flex: 1; min-width: 0; padding: 12px 16px 64px; overflow-x: auto; }
+/* App.vue's zoom: the page keeps its print width and is scaled from its top-left corner; the box
+   around it takes up the scaled size, so the desk scrolls (sideways too) only as far as the pages go. */
+.zoom-box { width: calc(var(--box-w) * var(--zoom)); height: calc(var(--box-h) * var(--zoom)); margin: 0 auto; }
+.zoom-box > .page { max-width: none; transform: scale(var(--zoom)); transform-origin: 0 0; }
 
 /* Side panel (SidePanel.vue): a Fluent card docked beside the pages, sticky under the toolbar; the
    desk gives up the room. --chrome-h is the toolbar's height, measured in App.vue. The page keeps
    its A4 width (page breaks must match print), so a window too narrow for both scrolls the desk sideways. */
-/* :has(> .side), not a class from App.vue, so it holds until the panel has finished sliding out. */
-.workspace:has(> .side) .desk { overflow-x: auto; }
-.workspace:has(> .side) .desk .page { max-width: none; }
 .side {
   position: sticky;
   top: var(--chrome-h, 100px);
@@ -344,6 +366,8 @@ html, .side-body, .desk { scrollbar-width: thin; }
   .page.hf-mode .ProseMirror:not(.hf .ProseMirror) { opacity: 1; }
   .desk .page .section::before { display: none !important; }
   body, .desk { background: none; padding: 0; }
+  .zoom-box { width: auto; height: auto; }
+  .zoom-box > .page { transform: none; }
   .sheet { background: none; box-shadow: none; } /* stays, for the header and footer */
   .toolbar, .side, .toc-more, .page-gap::before { display: none !important; }
   .toc-empty { visibility: hidden; }

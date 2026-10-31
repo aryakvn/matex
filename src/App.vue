@@ -12,7 +12,7 @@ import StylesPanel from './components/StylesPanel.vue'
 import NoteField from './components/NoteField.vue'
 import CssPanel from './components/CssPanel.vue'
 import ToolbarMenu from './components/ToolbarMenu.vue'
-import { Ellipsis } from 'lucide-vue-next'
+import { Ellipsis, Minus, Plus } from 'lucide-vue-next'
 import { pinSelection } from './editor/ids.js'
 import { pinSection } from './editor/sections.js'
 import { clampWidth } from './editor/image.js'
@@ -21,7 +21,7 @@ import { normalizeStyles, stylesCss, scopeCss } from './utils/styles.js'
 import { fillTokens, slotNumber, ALIGNS, sheetSize } from './utils/layout.js'
 import { useDocument } from './composables/useDocument.js'
 import { onCloseRequest } from './utils/platform.js'
-import { fileAction } from './utils/keys.js'
+import { fileAction, zoomKey } from './utils/keys.js'
 
 const images = (list) => [...(list ?? [])].filter((f) => f.type.startsWith('image/'))
 
@@ -91,7 +91,8 @@ function openPopup({ id, pos = null, el }) {
   closeNotes()
   const page = pageEl.value.getBoundingClientRect()
   const r = el.getBoundingClientRect()
-  popup.value = { id, pos, left: Math.max(0, Math.min(r.left - page.left, page.width - 340)), top: r.bottom - page.top + 6 }
+  const z = zoom.value
+  popup.value = { id, pos, left: Math.max(0, Math.min((r.left - page.left) / z, page.width / z - 340)), top: (r.bottom - page.top) / z + 6 }
 }
 function editFootnote(id) {
   if (editingNote.value === id) return
@@ -244,8 +245,8 @@ function zoneAt(e) {
   for (const [i, sheet] of sheets.entries()) {
     const r = sheet.getBoundingClientRect()
     if (e.clientY < r.top || e.clientY > r.bottom) continue
-    const zone = e.clientY < r.top + parseFloat(pad.paddingTop) ? 'header'
-      : e.clientY > r.bottom - parseFloat(pad.paddingBottom) ? 'footer' : null
+    const zone = e.clientY < r.top + parseFloat(pad.paddingTop) * zoom.value ? 'header'
+      : e.clientY > r.bottom - parseFloat(pad.paddingBottom) * zoom.value ? 'footer' : null
     const slot = Math.max(0, Math.min(2, Math.floor(((e.clientX - r.left) / r.width) * 3)))
     return zone && { zone, n: i + 1, slot }
   }
@@ -306,7 +307,8 @@ watch(editor, (e) => e?.on('selectionUpdate', () => {
   if (empty) return (selMenu.value = null)
   const page = pageEl.value.getBoundingClientRect()
   const at = e.view.coordsAtPos(to)
-  selMenu.value = { left: Math.min(at.right - page.left + 4, page.width - 32), top: at.top - page.top - 30 }
+  const z = zoom.value
+  selMenu.value = { left: Math.min((at.right - page.left) / z + 4, page.width / z - 32), top: (at.top - page.top) / z - 30 }
 }))
 async function styleSelection() {
   const ids = pinSelection(editor.value)
@@ -340,7 +342,8 @@ function placeImageBox() {
   if (!img.complete) img.addEventListener('load', placeImageBox, { once: true }) // a new src (rotate) has no size yet
   const page = pageEl.value.getBoundingClientRect()
   const r = img.getBoundingClientRect()
-  imgBox.value = { left: r.left - page.left, top: r.top - page.top, width: r.width, height: r.height }
+  const z = zoom.value
+  imgBox.value = { left: (r.left - page.left) / z, top: (r.top - page.top) / z, width: r.width / z, height: r.height / z }
 }
 watch(editor, (e) => {
   e?.on('transaction', () => nextTick(placeImageBox))
@@ -366,7 +369,7 @@ function startResize(down, side) {
   const centred = e.state.doc.nodeAt(pos).attrs.align === 'center'
   let pct = null
   const move = (m) => {
-    pct = clampWidth(((box.width + (m.clientX - down.clientX) * side * (centred ? 2 : 1)) / full) * 100)
+    pct = clampWidth(((box.width + ((m.clientX - down.clientX) / zoom.value) * side * (centred ? 2 : 1)) / full) * 100)
     const width = (pct / 100) * full
     const left = centred ? box.left + (box.width - width) / 2 : side > 0 ? box.left : box.left + box.width - width
     ghost.value = { left, top: box.top, width, height: (width * box.height) / box.width }
@@ -391,7 +394,32 @@ onMounted(() => {
 })
 onBeforeUnmount(() => chromeResize?.disconnect())
 
+// Zoom, as in Word: the status bar's slider, Ctrl + = / - / 0 and Ctrl + wheel over the pages.
+// The page is scaled with a transform, so lines and page breaks stay exactly as printed; positions
+// read off the screen inside the page are divided by it. `.zoom-box` takes up the scaled size.
+const ZOOM_MIN = 0.25
+const ZOOM_MAX = 3
+const zoom = ref(1)
+const setZoom = (z) => { zoom.value = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(z * 100) / 100)) }
+// One step = the next multiple of 10%, so odd values from the slider land back on the grid.
+const stepZoom = (dir) => setZoom((Math.round(zoom.value * 10) + dir) / 10)
+function onWheel(e) {
+  if (!(e.ctrlKey || e.metaKey)) return
+  e.preventDefault()
+  stepZoom(e.deltaY < 0 ? 1 : -1)
+}
+watch(zoom, () => nextTick(() => {
+  closeNotes()
+  selMenu.value = null
+  placeImageBox()
+}))
+
 function onKey(e) {
+  const step = zoomKey(e)
+  if (step != null) {
+    e.preventDefault()
+    return step ? stepZoom(step) : setZoom(1)
+  }
   const action = fileAction(e)
   if (!action) return
   e.preventDefault()
@@ -411,7 +439,15 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
     @file="fileActions[$event]()" @image="doc.insertImage($event, undefined, activeEditor)" @panel="togglePanel" @note="insertNote" @section-css="styleSection" @rotate="doc.rotateImage($event, activeEditor)"
   />
   <div class="workspace">
-  <main class="desk">
+  <main class="desk" @wheel="onWheel">
+    <div
+      class="zoom-box"
+      :style="{
+        '--zoom': zoom,
+        '--box-w': `${sheet.width}mm`,
+        '--box-h': `calc(${pages} * (${sheet.height}mm + var(--page-gap)) - var(--page-gap))`,
+      }"
+    >
     <article
       ref="pageEl"
       :class="['page', { 'hf-mode': editing }]"
@@ -503,6 +539,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       </div>
       <EditorContent :editor="editor" />
     </article>
+    </div>
   </main>
   <SidePanel v-model:show-help="panelHelp" :open="!!panel" :title="PANELS[panel] ?? ''" help @update:open="panel = null">
     <template #default="{ showHelp }">
@@ -519,6 +556,19 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   <footer class="statusbar">
     <span>Page {{ caretPage }} of {{ pages }}</span>
     <span>{{ words.toLocaleString('en') }} {{ words === 1 ? 'word' : 'words' }}</span>
+    <div class="zoom" role="group" aria-label="Zoom">
+      <button type="button" class="zoom-btn" title="Zoom out (Ctrl+-)" aria-label="Zoom out" :disabled="zoom <= ZOOM_MIN" @click="stepZoom(-1)">
+        <Minus :size="14" aria-hidden="true" />
+      </button>
+      <input
+        type="range" class="zoom-slider" :min="ZOOM_MIN * 100" :max="ZOOM_MAX * 100" step="5" aria-label="Zoom level"
+        :value="Math.round(zoom * 100)" @input="setZoom($event.target.value / 100)"
+      >
+      <button type="button" class="zoom-btn" title="Zoom in (Ctrl+=)" aria-label="Zoom in" :disabled="zoom >= ZOOM_MAX" @click="stepZoom(1)">
+        <Plus :size="14" aria-hidden="true" />
+      </button>
+      <button type="button" class="zoom-btn zoom-pct" title="Reset to 100% (Ctrl+0)" @click="setZoom(1)">{{ Math.round(zoom * 100) }}%</button>
+    </div>
   </footer>
   <PageSetup ref="setup" :layout="layout" />
 </template>

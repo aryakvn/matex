@@ -17,24 +17,30 @@ import { noteEntries } from './notes.js'
 
 const A4_HEIGHT = (297 * 96) / 25.4 // CSS px
 // Height of one sheet in CSS px: App.vue draws them; the A4 fallback is for a page without sheets.
-const sheetHeight = (page) => page.querySelector(':scope > .sheet')?.getBoundingClientRect().height || A4_HEIGHT
+const sheetHeight = (page, z) => (page.querySelector(':scope > .sheet')?.getBoundingClientRect().height ?? 0) / z || A4_HEIGHT
+// The page's on-screen zoom (App.vue scales it with a transform). Client rects are scaled by it,
+// computed styles aren't, so every rect read here is divided by it: breaks don't depend on zoom.
+export const zoomOf = (el) => {
+  const t = getComputedStyle(el).transform
+  return t && t !== 'none' ? new DOMMatrixReadOnly(t).a || 1 : 1
+}
 const key = new PluginKey('pagination')
 
 // Page (1-based) that the node at `pos` starts on, given the current breaks.
 export const pageOf = (breaks, pos) => 1 + breaks.filter((b) => b.pos <= pos + 1).length
 
 // { gap, height: Map id → px }: the footnote area's own padding/divider, and each footnote's height.
-function footnoteHeights(page) {
+function footnoteHeights(page, z) {
   const box = page.querySelector('.fn-measure')
   const height = new Map()
   if (!box) return { gap: 0, height }
   let sum = 0
   for (const li of box.children) {
-    const h = li.getBoundingClientRect().height
+    const h = li.getBoundingClientRect().height / z
     height.set(li.dataset.note, h)
     sum += h
   }
-  return { gap: box.getBoundingClientRect().height - sum, height }
+  return { gap: box.getBoundingClientRect().height / z - sum, height }
 }
 
 function findBreaks(view, page) {
@@ -42,14 +48,15 @@ function findBreaks(view, page) {
   const marginTop = parseFloat(style.paddingTop)
   const marginBottom = parseFloat(style.paddingBottom)
   const gap = parseFloat(style.getPropertyValue('--page-gap')) || 0
-  const SHEET_HEIGHT = sheetHeight(page)
+  const z = zoomOf(page)
+  const SHEET_HEIGHT = sheetHeight(page, z)
   const stride = SHEET_HEIGHT + gap
   const origin = page.getBoundingClientRect().top
   const sheetTop = (k) => k * (SHEET_HEIGHT + gap) + marginTop
   const sheetBottom = (k) => k * (SHEET_HEIGHT + gap) + SHEET_HEIGHT - marginBottom
 
   const notes = noteEntries(view.state.doc).filter((e) => e.kind === 'footnote')
-  const fn = notes.length ? footnoteHeights(page) : null
+  const fn = notes.length ? footnoteHeights(page, z) : null
   let sheetStart = 0 // doc position where the current sheet's text starts
   // Room taken on the current sheet by the footnotes whose markers sit before `to`.
   // ponytail: scans every footnote per call; index by position if documents get hundreds.
@@ -64,7 +71,7 @@ function findBreaks(view, page) {
   let k = 0 // current sheet
   let shift = 0 // how far the spacers so far push the rest down
   let heading = null // the block just placed, if it's a heading that should travel with the next block
-  const at = (clientY) => clientY - origin + shift
+  const at = (clientY) => (clientY - origin) / z + shift
 
   // Spacer at `pos` moving content whose top is `top` to the next sheet. `extra` = margin the spacer
   // stops from collapsing.
