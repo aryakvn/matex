@@ -152,13 +152,16 @@ function onImagePicked(e) {
   <header v-if="editor" class="toolbar">
     <div class="titlebar">
       <img :src="appIcon" alt="" width="20" height="20" />
-      <span class="doc-name">{{ name }}</span>
-      <span v-if="dirty" class="doc-state">Unsaved changes</span>
+      <!-- Office keeps the document name centred in the title bar, its save state beside it. -->
+      <span class="doc-title">
+        <span class="doc-name">{{ name }}</span>
+        <span v-if="dirty" class="doc-state">Unsaved changes</span>
+      </span>
     </div>
 
-    <!-- Menu row above the ribbon, where Word keeps its tabs. -->
+    <!-- Menu row above the ribbon, where Word keeps its tabs; drawn as Fluent tabs. -->
     <nav class="menubar" aria-label="Menu">
-      <ToolbarMenu label="File" :items="fileItems" />
+      <ToolbarMenu label="File" :items="fileItems" :chevron="false" />
     </nav>
 
     <div class="cmdbar" role="toolbar" aria-label="Formatting">

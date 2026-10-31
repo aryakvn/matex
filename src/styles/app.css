@@ -59,6 +59,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 #app { min-height: 100%; display: flex; flex-direction: column; }
+/* Thin, quiet scrollbars like Windows 11's, instead of the wide classic ones. */
+:root { scrollbar-color: var(--stroke-ctl) transparent; }
+html, .side-body, .with-side .desk { scrollbar-width: thin; }
 
 .workspace { flex: 1; display: flex; align-items: flex-start; }
 .desk { flex: 1; min-width: 0; padding: 12px 16px 64px; }
@@ -292,24 +295,41 @@ body {
   padding: 0 12px 8px;
   background: var(--canvas);
 }
+/* Office title bar: icon at the start, document name centred on the window. */
 .titlebar {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr minmax(0, auto) 1fr;
   align-items: center;
-  gap: 8px;
   height: 40px;
   padding: 0 4px;
-  min-width: 0;
 }
 .titlebar img { flex: none; }
+.doc-title { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
 .doc-name {
-  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .doc-state { flex: none; color: var(--muted); font-size: 12px; }
 
+/* Tab row (File): Fluent tabs, text only, with the 3px rounded indicator under the label:
+   grey on hover, brand while its menu is open. */
 .menubar { display: flex; gap: 2px; padding: 0 0 4px; }
+.menubar .tb-btn { position: relative; height: 32px; padding: 0 10px; }
+.menubar .tb-btn:hover:not(:disabled), .menubar .tb-btn[aria-expanded="true"] { background: none; }
+.menubar .tb-btn[aria-expanded="true"] { color: var(--ink); }
+.menubar .tb-btn::after {
+  content: "";
+  position: absolute;
+  inset-inline: 10px;
+  bottom: 2px;
+  height: 3px;
+  border-radius: 2px;
+  background: transparent;
+  transition: background-color 100ms ease;
+}
+.menubar .tb-btn:hover::after { background: var(--stroke-ctl); }
+.menubar .tb-btn[aria-expanded="true"]::after { background: var(--brand-ink); }
 
 /* Word-style ribbon: groups of two rows, a caption under each, a thin rule between groups */
 .cmdbar {
@@ -323,13 +343,22 @@ body {
   box-shadow: var(--shadow-4);
 }
 .tb-group {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 2px;
   padding: 0 8px;
-  border-inline-end: 1px solid var(--stroke);
 }
-.tb-group:last-child { border-inline-end: 0; }
+/* Office's group divider stops short of the ribbon's edges. */
+.tb-group:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 1px;
+  background: var(--stroke);
+}
 .tb-row { display: flex; align-items: center; gap: 2px; }
 .tb-label {
   margin-top: auto;
@@ -358,7 +387,7 @@ body {
   cursor: pointer;
   transition: background-color 100ms ease, color 100ms ease;
 }
-.tb-btn svg { stroke-width: 1.6; }
+.tb-btn svg { stroke-width: 1.5; } /* close to Fluent's regular icon weight */
 .tb-btn:hover:not(:disabled) { background: var(--hover); }
 .tb-btn:active:not(:disabled) { background: var(--pressed); }
 .tb-btn[aria-pressed="true"], .tb-btn[aria-expanded="true"] { background: var(--selected); color: var(--brand-ink); }
