@@ -64,6 +64,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - A section's CSS background now fills its whole sheets, margins included (and prints), instead of only the text area.
 - The toolbar is a Word-style ribbon: a menu row (File) on top, then Undo, Font, Paragraph, Insert and Layout groups, each two rows of buttons with a caption underneath.
 - Closer to Office 2023 / Fluent 2: the document name is centred in the title bar, File is a Fluent tab (underline indicator on hover and while open), ribbon group dividers stop short of the edges, icons are drawn thinner, and scrollbars are thin.
+- Side panels slide in and out, pushing the pages aside smoothly, instead of the pages jumping to make room when one opens or closes.
 ### Fixed
 - Pasting text copied from a MaTex document no longer starts a new section; it joins the section it is pasted into.
 - Stop code block backgrounds and quote borders from running through the bottom margin and the gap between sheets when they split across pages.

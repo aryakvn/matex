@@ -23,6 +23,7 @@
   --shadow-4: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.14);
   --shadow-16: 0 0 2px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.14);
   --ease-out: cubic-bezier(0.1, 0.9, 0.2, 1);
+  --ease-easy: cubic-bezier(0.33, 0, 0.67, 1); /* Fluent curveEasyEase, for things that move other things */
   --page-gap: 16px; /* grey gap between A4 sheets; 0 in print */
   --status-h: 24px;
   --font-ui: 14px/20px "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", sans-serif;
@@ -62,7 +63,7 @@ body {
 #app { min-height: 100%; display: flex; flex-direction: column; }
 /* Thin, quiet scrollbars like Windows 11's, instead of the wide classic ones. */
 :root { scrollbar-color: var(--stroke-ctl) transparent; }
-html, .side-body, .with-side .desk { scrollbar-width: thin; }
+html, .side-body, .desk { scrollbar-width: thin; }
 
 /* Word's status bar: page and word count, pinned to the bottom of the window on the canvas. */
 .statusbar {
@@ -87,28 +88,43 @@ html, .side-body, .with-side .desk { scrollbar-width: thin; }
 /* Side panel (SidePanel.vue): a Fluent card docked beside the pages, sticky under the toolbar; the
    desk gives up the room. --chrome-h is the toolbar's height, measured in App.vue. The page keeps
    its A4 width (page breaks must match print), so a window too narrow for both scrolls the desk sideways. */
-.with-side .desk { overflow-x: auto; }
-.with-side .desk .page { max-width: none; }
+/* :has(> .side), not a class from App.vue, so it holds until the panel has finished sliding out. */
+.workspace:has(> .side) .desk { overflow-x: auto; }
+.workspace:has(> .side) .desk .page { max-width: none; }
 .side {
   position: sticky;
   top: var(--chrome-h, 100px);
   flex: none;
   display: flex;
-  flex-direction: column;
+  justify-content: flex-end; /* content pinned to the right edge, so it slides in rather than squeezes */
   width: 320px;
-  max-height: calc(100vh - var(--chrome-h, 100px) - var(--status-h) - 12px);
   margin: 12px 12px 12px 0;
+  overflow: clip;
   background: var(--surface);
   color: var(--ink);
   border-radius: 8px;
   box-shadow: var(--shadow-4);
 }
+.side-inner {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  max-height: calc(100vh - var(--chrome-h, 100px) - var(--status-h) - 12px);
+}
 .side-head { display: flex; align-items: center; gap: 2px; padding: 8px 8px 4px 16px; }
 .side-head h2 { margin: 0 4px 0 0; font-size: 16px; line-height: 22px; font-weight: 600; }
 .side-close { margin-inline-start: auto; }
 .side-body { overflow: auto; padding: 0 16px 16px; }
-.side-enter-active, .side-leave-active { transition: opacity 150ms ease, translate 150ms ease; }
-.side-enter-from, .side-leave-to { opacity: 0; translate: 16px 0; }
+/* Opening grows the panel from nothing, so the desk narrows and the centred pages glide aside.
+   Fluent's symmetric easy-ease, not decelerate: the pages only move while the desk is wider than
+   them, and a front-loaded curve packs that into a couple of frames. The page keeps its width, so
+   nothing re-paginates. */
+.side-enter-active, .side-leave-active {
+  transition: width 300ms var(--ease-easy), margin-inline-end 300ms var(--ease-easy), opacity 200ms linear;
+}
+.side-leave-active { transition-duration: 250ms, 250ms, 200ms; }
+.side-enter-from, .side-leave-to { width: 0; margin-inline-end: 0; opacity: 0; }
 
 /* Styles gallery (StylesPanel.vue): tiles drawn in each style's fonts, like Word's Styles gallery. */
 .style-list { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; }

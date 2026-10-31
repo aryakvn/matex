@@ -353,7 +353,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
     :editor="activeEditor" :name="name" :dirty="dirty" :panel="panel"
     @file="fileActions[$event]()" @image="doc.insertImage($event, undefined, activeEditor)" @panel="togglePanel" @note="insertNote" @section-css="styleSection"
   />
-  <div :class="['workspace', { 'with-side': panel }]">
+  <div class="workspace">
   <main class="desk">
     <article
       ref="pageEl"

@@ -16,6 +16,8 @@ const showHelp = defineModel('showHelp', { type: Boolean, default: false })
 <template>
   <Transition name="side">
     <aside v-if="open" class="side" :aria-label="title" @keydown.esc="open = false">
+      <!-- The aside's width animates (pushing the pages aside); this keeps the content full width. -->
+      <div class="side-inner">
       <header class="side-head">
         <h2>{{ title }}</h2>
         <button
@@ -29,6 +31,7 @@ const showHelp = defineModel('showHelp', { type: Boolean, default: false })
         </button>
       </header>
       <div class="side-body"><slot :show-help="showHelp" /></div>
+      </div>
     </aside>
   </Transition>
 </template>
