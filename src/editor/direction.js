@@ -6,6 +6,9 @@ import { Markdown } from '@tiptap/markdown'
 // RLM for RTL and LRM for LTR, which other dir="auto" viewers (GitHub) also obey.
 const MARKS = { rtl: String.fromCharCode(0x200f), ltr: String.fromCharCode(0x200e) }
 const TYPES = ['paragraph', 'heading']
+// A list item's bullet and indent follow the item's own `dir`, not its paragraph's, so an item
+// takes the forced direction of its first paragraph (never saved: the paragraph's mark is).
+const ITEMS = ['listItem', 'taskItem']
 
 // Markdown of a block + its direction mark (after `## ` for headings).
 export function withDirMark(md, dir) {
@@ -29,6 +32,8 @@ export function takeDirMark(node) {
 function takeDirMarks(node) {
   if (TYPES.includes(node.type)) node = takeDirMark(node)
   if (node.content) node.content = node.content.map(takeDirMarks)
+  const dir = node.content?.[0]?.attrs?.dir
+  if (ITEMS.includes(node.type) && MARKS[dir]) node = { ...node, attrs: { ...node.attrs, dir } }
   return node
 }
 
@@ -69,7 +74,12 @@ export const Direction = Extension.create({
         const blocks = blocksIn(state)
         if (!blocks.length) return false
         const next = blocks.every(({ node }) => node.attrs.dir === dir) ? 'auto' : dir
-        if (dispatch) blocks.forEach(({ node, pos }) => tr.setNodeMarkup(pos, undefined, { ...node.attrs, dir: next }))
+        if (!dispatch) return true
+        for (const { node, pos } of blocks) {
+          tr.setNodeMarkup(pos, undefined, { ...node.attrs, dir: next })
+          const $pos = tr.doc.resolve(pos)
+          if (ITEMS.includes($pos.parent.type.name) && $pos.index() === 0) tr.setNodeAttribute($pos.before(), 'dir', next)
+        }
         return true
       },
     }

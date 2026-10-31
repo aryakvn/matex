@@ -62,7 +62,10 @@
 .page h2 { font-size: 1.5em; }
 .page h3 { font-size: 1.25em; }
 .page p { margin: 0 0 0.8em; }
-.page ul, .page ol { margin: 0 0 0.8em; padding-inline-start: 1.6em; }
+.page ul, .page ol { margin: 0 0 0.8em; padding: 0; }
+/* Indent on the item, not the list: an item forced right-to-left in a left-to-right list
+   (or the reverse) then gets its bullet and indent on its own side. */
+.page :is(ul, ol):not(.toc-list) > li { margin-inline-start: 1.6em; }
 .page li > p { margin: 0; }
 .page blockquote {
   margin: 0 0 0.8em;

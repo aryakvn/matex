@@ -119,6 +119,18 @@ describe('manual direction', () => {
     expect(editor.getMarkdown().trim()).toBe(md)
   })
 
+  it('gives a list item its first paragraph\'s direction, so the bullet moves side too', () => {
+    const items = (editor) => [...editor.view.dom.querySelectorAll('li')].map((li) => li.getAttribute('dir'))
+    const editor = make(`- ${RLM}one\n- two`)
+    expect(items(editor)).toEqual(['rtl', 'auto'])
+    editor.commands.setTextSelection(editor.state.doc.content.size - 2) // in "two"
+    editor.commands.toggleDirection('rtl')
+    expect(items(editor)).toEqual(['rtl', 'rtl'])
+    editor.commands.toggleDirection('rtl')
+    expect(items(editor)).toEqual(['rtl', 'auto'])
+    expect(editor.getMarkdown().trim()).toBe(`- ${RLM}one\n- two`)
+  })
+
   it('toggles: same button twice goes back to auto', () => {
     const editor = make('hello')
     editor.commands.toggleDirection('rtl')
