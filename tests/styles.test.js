@@ -49,6 +49,6 @@ describe('Persian runs', () => {
   })
 
   it('marks Persian in rendered header/footer HTML', () => {
-    expect(slotHtml('Page **صفحه** x')).toMatch(/<strong><span class="fa">صفحه<\/span><\/strong>/)
+    expect(slotHtml('Page **صفحه** x')).toMatch(/<strong class="bold"><span class="persian">صفحه<\/span><\/strong>/)
   })
 })

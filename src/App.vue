@@ -10,8 +10,12 @@ import SidePanel from './components/SidePanel.vue'
 import ScriptReference from './components/ScriptReference.vue'
 import StylesPanel from './components/StylesPanel.vue'
 import NoteField from './components/NoteField.vue'
+import CssPanel from './components/CssPanel.vue'
+import ToolbarMenu from './components/ToolbarMenu.vue'
+import { Ellipsis } from 'lucide-vue-next'
+import { pinSelection } from './editor/ids.js'
 import { noteEntries, noteHtml, noteDir, pageAt } from './editor/notes.js'
-import { normalizeStyles, stylesCss } from './utils/styles.js'
+import { normalizeStyles, stylesCss, scopeCss } from './utils/styles.js'
 import { fillTokens, slotNumber, ALIGNS } from './utils/layout.js'
 import { useDocument } from './composables/useDocument.js'
 import { onCloseRequest } from './utils/platform.js'
@@ -122,9 +126,10 @@ const { name, dirty, layout, scriptsOn } = doc
 const setup = ref(null)
 const fileActions = { new: doc.newDoc, open: doc.openDoc, save: doc.save, saveAs: doc.saveAs, pageSetup: () => setup.value.open() }
 
-// Paragraph styles (fonts, sizes) as a stylesheet over document.css; it prints too.
+// Paragraph styles (fonts, sizes), then the document's own CSS (CSS panel), as a stylesheet over
+// document.css; it prints too.
 const stylesSheet = document.head.appendChild(document.createElement('style'))
-const css = computed(() => stylesCss(normalizeStyles(layout.styles)))
+const css = computed(() => `${stylesCss(normalizeStyles(layout.styles))}\n${scopeCss(layout.css)}`)
 watch(css, (text) => { stylesSheet.textContent = text }, { immediate: true })
 onBeforeUnmount(() => stylesSheet.remove())
 
@@ -205,7 +210,7 @@ function zoneAt(e) {
 
 // Capture phase, so it runs before ProseMirror selects a word on the double-click.
 function onPageMouseDown(e) {
-  if (e.target.closest('.note-pop, .fn-area')) return
+  if (e.target.closest('.note-pop, .fn-area, .sel-actions')) return
   if (popup.value || editingNote.value) closeNotes()
   if (editing.value && e.target.closest('.sheet-edit')) return
   const hit = zoneAt(e)
@@ -235,7 +240,7 @@ function stopEditing() {
 }
 
 // Right-hand side panel: one at a time, by name; the toolbar button toggles it.
-const PANELS = { styles: 'Styles', scripts: 'Header & footer scripts' }
+const PANELS = { styles: 'Styles', scripts: 'Header & footer scripts', css: 'CSS' }
 const panel = ref(null) // closed until asked for
 const panelHelp = ref(false) // the panel's help text is showing
 const togglePanel = (key) => (panel.value = panel.value === key ? null : key)
@@ -247,6 +252,26 @@ function openScriptHelp() {
 function insertScript(code) {
   focusedSlot.value?.chain().focus().insertContent(code).run()
 }
+
+// A "…" button over the end of a selection in the body; its menu sends the selection's id to the
+// CSS panel. Out of the text flow, like everything screen-only in the page.
+const selMenu = ref(null) // { left, top } or null
+const cssPanel = ref(null)
+watch(editor, (e) => e?.on('selectionUpdate', () => {
+  const { empty, to } = e.state.selection
+  if (empty) return (selMenu.value = null)
+  const page = pageEl.value.getBoundingClientRect()
+  const at = e.view.coordsAtPos(to)
+  selMenu.value = { left: Math.min(at.right - page.left + 4, page.width - 32), top: at.top - page.top - 30 }
+}))
+async function styleSelection() {
+  const ids = pinSelection(editor.value)
+  if (!ids.length) return
+  panel.value = 'css'
+  await nextTick()
+  cssPanel.value?.addRule(ids.map((id) => `#${id}`).join(', '))
+}
+const selItems = [{ label: 'Style in CSS', run: styleSelection }]
 
 // The side panel sits under the sticky toolbar, whose height changes as the command bar wraps.
 let chromeResize
@@ -291,19 +316,22 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       }"
       @mousedown.capture="onPageMouseDown"
     >
-      <div v-for="n in pages" :key="n" class="sheet" :style="{ top: `calc(${n - 1} * (297mm + var(--page-gap)))` }">
+      <div v-for="n in pages" :id="`sheet-${n}`" :key="n" class="sheet" :style="{ top: `calc(${n - 1} * (297mm + var(--page-gap)))` }">
         <template v-for="z in ['header', 'footer']" :key="z">
-          <div v-if="sheetZones[n - 1]?.[z]" :class="['hf', `hf-${z}`]">
-            <div v-for="(html, i) in sheetZones[n - 1][z]" :key="i" class="hf-slot" dir="auto" :style="{ textAlign: ALIGNS[i] }" v-html="html" />
+          <div v-if="sheetZones[n - 1]?.[z]" :id="`${z}-${n}`" :class="['hf', `hf-${z}`]">
+            <div
+              v-for="(html, i) in sheetZones[n - 1][z]" :id="`${z}-${n}-${ALIGNS[i]}`" :key="i"
+              :class="['hf-slot', `slot-${ALIGNS[i]}`]" dir="auto" :style="{ textAlign: ALIGNS[i] }" v-html="html"
+            />
           </div>
         </template>
       </div>
       <template v-for="(list, k) in sheetNotes" :key="`fn${k}`">
         <ol
-          v-if="list.length" class="fn-area" :dir="noteDir(list[0].text)"
+          v-if="list.length" :id="`footnotes-${k + 1}`" class="fn-area" :dir="noteDir(list[0].text)"
           :style="{ top: `calc(${k + 1} * (297mm + var(--page-gap)) - var(--page-gap) - var(--margin-bottom))` }"
         >
-          <li v-for="n in list" :key="n.id" class="fn-item" :dir="noteDir(n.text)" @click="editFootnote(n.id)">
+          <li v-for="n in list" :id="`footnote-text-${n.number}`" :key="n.id" class="fn-item" :dir="noteDir(n.text)" @click="editFootnote(n.id)">
             <span class="fn-num">{{ n.number }}</span>
             <NoteField
               v-if="editingNote === n.id" :body="editor" :id="n.id" :text="n.text"
@@ -327,6 +355,11 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
           <button v-if="popup.pos != null" type="button" class="pop-btn" @click="deleteNote">Delete</button>
           <button type="button" class="pop-btn primary" @click="finishNote(popup.pos)">Done</button>
         </div>
+      </div>
+      <div v-if="selMenu && !editing" class="sel-actions" :style="{ left: `${selMenu.left}px`, top: `${selMenu.top}px` }">
+        <ToolbarMenu label="Selection actions" :items="selItems" :chevron="false">
+          <Ellipsis :size="16" aria-hidden="true" />
+        </ToolbarMenu>
       </div>
       <div
         v-if="editing"
@@ -358,6 +391,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         :vars="scriptVars(editing?.n ?? 1)" :can-insert="!!focusedSlot" :scripts-on="scriptsOn" :show-help="showHelp"
         @insert="insertScript"
       />
+      <CssPanel v-if="panel === 'css'" ref="cssPanel" v-model="layout.css" :show-help="showHelp" />
     </template>
   </SidePanel>
   </div>

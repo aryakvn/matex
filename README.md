@@ -19,6 +19,7 @@ MaTex is the editor she needed. It's small, it works offline on Linux, macOS and
   - headings, bold, italic, strikethrough, inline code
   - links, lists, quotes, code blocks, divider lines
   - images (insert, paste, or drop) and tables
+- **Style with CSS:** every element has a class (`.heading-1`, `.persian`, `.toc-item`) and an id. The CSS panel styles the document live and in print; select text and press … → *Style in CSS* to target exactly that.
 - **Print-first:** the page is plain HTML styled by one plain CSS file (`src/styles/document.css`). Nothing is drawn on a canvas, so what you see is what the browser's print engine produces.
 
 ## The `.matex` file
@@ -28,6 +29,7 @@ A `.matex` file is an ordinary zip:
 ```
 my-thesis.matex
 ├── DOCUMENT.md      # clean Markdown, HTML only where Markdown can't express something
+├── style.css        # the document's own CSS (optional)
 └── assets/
     └── figure-1.png # every image the document uses, referenced as assets/figure-1.png
 ```

@@ -2,11 +2,18 @@ import { Extension } from '@tiptap/core'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { Decoration, DecorationSet } from '@tiptap/pm/view'
 
-// Persian (Arabic-script) runs get the `.fa` class, which document.css gives the paragraph style's
+// Persian (Arabic-script) runs get the `.persian` class, which document.css gives the paragraph style's
 // Persian font (--fa-font) — Word's separate "complex script" font. Spaces, ZWNJ and punctuation
 // between two Persian words stay in the run, so the words are spaced by the Persian font.
+// Blocks that read right to left get `.persian` too, for the CSS panel (`.heading-1.persian`).
 // Display only: the class is a decoration (editor) or a span in rendered HTML, never saved.
 const RUN = /\p{scx=Arabic}(?:[\p{scx=Arabic}‌‍]|[\s\p{P}]+(?=\p{scx=Arabic}))*/gu
+
+// Whether text reads right to left: its first letter is Hebrew or Arabic-script, as dir="auto" decides.
+export const isRtl = (text) => /^[^\p{L}]*[֐-ࣿיִ-﷿ﹰ-﻿]/u.test(text)
+
+const rtlBlock = (dir, text) => dir === 'rtl' || (dir !== 'ltr' && isRtl(text))
+const BLOCKS = 'p, h1, h2, h3, h4, h5, h6, pre'
 
 // Text split into [{ text, fa }] pieces, in order.
 export function persianRuns(text) {
@@ -21,7 +28,8 @@ export function persianRuns(text) {
   return out
 }
 
-// Wraps the Persian runs of every text node under a DOM node (for HTML not drawn by the editor).
+// Wraps the Persian runs of every text node under a DOM node (for HTML not drawn by the editor),
+// and marks its right-to-left blocks.
 export function markPersian(root) {
   const walker = root.ownerDocument.createTreeWalker(root, 4 /* NodeFilter.SHOW_TEXT */)
   const texts = []
@@ -32,11 +40,12 @@ export function markPersian(root) {
     t.replaceWith(...runs.map((r) => {
       if (!r.fa) return r.text
       const span = root.ownerDocument.createElement('span')
-      span.className = 'fa'
+      span.className = 'persian'
       span.textContent = r.text
       return span
     }))
   }
+  for (const el of root.querySelectorAll(BLOCKS)) if (rtlBlock(el.getAttribute('dir'), el.textContent)) el.classList.add('persian')
   return root
 }
 
@@ -45,10 +54,11 @@ export function markPersian(root) {
 function decorate(doc) {
   const decos = []
   doc.descendants((node, pos) => {
+    if (node.isTextblock && rtlBlock(node.attrs.dir, node.textContent)) decos.push(Decoration.node(pos, pos + node.nodeSize, { class: 'persian' }))
     if (!node.isText) return
     let at = pos
     for (const r of persianRuns(node.text)) {
-      if (r.fa) decos.push(Decoration.inline(at, at + r.text.length, { class: 'fa' }))
+      if (r.fa) decos.push(Decoration.inline(at, at + r.text.length, { class: 'persian' }))
       at += r.text.length
     }
   })

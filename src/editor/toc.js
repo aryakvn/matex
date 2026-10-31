@@ -1,13 +1,12 @@
-import { Node } from '@tiptap/core'
+import { Node, mergeAttributes } from '@tiptap/core'
 import Heading from '@tiptap/extension-heading'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import TocView from '../components/TocView.vue'
 import { withDirMark } from './direction.js'
+import { attrBlock, escapeAttrs } from './ids.js'
 
-// Pandoc's marker for "leave this heading out of the table of contents".
-const UNLISTED = /\s*\{\.unlisted\}\s*$/
-
-// Heading with an `unlisted` flag, saved as `## Title {.unlisted}`.
+// Heading with an `unlisted` flag, saved as `## Title {.unlisted}` (Pandoc), and a saved `id` (ids.js),
+// together `## Title {#id .unlisted}`. ids.js parses both. Classes `heading heading-<level>`.
 export const UnlistedHeading = Heading.extend({
   addAttributes() {
     return {
@@ -19,20 +18,12 @@ export const UnlistedHeading = Heading.extend({
       },
     }
   },
-  parseMarkdown(token, helpers) {
-    const last = token.tokens?.at(-1)
-    const unlisted = last?.type === 'text' && UNLISTED.test(last.text)
-    if (unlisted) last.text = last.raw = last.text.replace(UNLISTED, '')
-    const node = this.parent(token, helpers)
-    if (unlisted && node.type === 'heading') node.attrs = { ...node.attrs, unlisted: true }
-    return node
+  renderHTML({ node, HTMLAttributes }) {
+    return this.parent({ node, HTMLAttributes: mergeAttributes(HTMLAttributes, { class: `heading heading-${node.attrs.level}` }) })
   },
   renderMarkdown(node, h, ctx) {
     const md = withDirMark(this.parent(node, h, ctx), node.attrs?.dir)
-    if (!md) return md
-    if (node.attrs.unlisted) return `${md} {.unlisted}`
-    // A heading that literally ends in "{.unlisted}" must not reopen as unlisted.
-    return md.replace(/\{\.unlisted\}\s*$/, '\\$&')
+    return md && escapeAttrs(md) + attrBlock(node.attrs)
   },
 })
 

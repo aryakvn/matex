@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { zipSync, strToU8 } from 'fflate'
+import { zipSync, unzipSync, strToU8 } from 'fflate'
+import { normalizeLayout } from '../src/utils/layout.js'
 import { pack, unpack } from '../src/utils/archive.js'
 
 describe('archive', () => {
@@ -10,6 +11,14 @@ describe('archive', () => {
     expect(out.markdown).toBe(markdown)
     expect(Object.keys(out.files)).toEqual(['assets/a.png'])
     expect([...out.files['assets/a.png']]).toEqual([1, 2, 3])
+  })
+
+  it('keeps the document CSS in style.css, not page.json', () => {
+    const css = '.heading-1 { color: red; }'
+    const bytes = pack({ markdown: 'x', files: {}, layout: { ...normalizeLayout(null), css } })
+    const entries = unzipSync(bytes)
+    expect(Object.keys(entries).sort()).toEqual(['DOCUMENT.md', 'style.css'])
+    expect(unpack(bytes).layout).toEqual({ ...normalizeLayout(null), css })
   })
 
   it('unpack rejects random bytes', () => {

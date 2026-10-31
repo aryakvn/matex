@@ -1,6 +1,6 @@
 // Paragraph styles, like Word's Styles gallery: each has a Latin font and a Persian font, because
 // mixed Persian/English writing usually sets each script in its own face. Persian text is wrapped in
-// `.fa` spans (src/editor/persian.js) that take the style's Persian font and size.
+// `span.persian` runs (src/editor/persian.js) that take the style's Persian font and size.
 // Saved in page.json as layout.styles; turned into CSS by stylesCss().
 
 export const STYLES = [
@@ -72,6 +72,32 @@ export function stylesCss(styles) {
     const extra = key === 'code' && latin ? `\n.page code { font-family: ${latin}; }` : ''
     return `${selector} { ${rules.filter(Boolean).join('; ')}; }${extra}`
   }).join('\n')
+}
+
+// The document's own CSS (CSS panel, layout.css), for inside the page only. Style rules and
+// @media/@supports go inside `.page { }` (CSS nesting), so each is one class more specific than
+// document.css and the styles above and wins over them; a selector starting with `.page` is the page
+// itself (`&`). Other at-rules (@page, @font-face, @keyframes) stay top level. The text goes through
+// the browser's CSS parser first, so a stray `}` can't escape the page and restyle the app.
+export function scopeCss(text) {
+  if (!text?.trim()) return ''
+  const sheet = new CSSStyleSheet()
+  try {
+    sheet.replaceSync(text)
+  } catch {
+    return ''
+  }
+  const inner = []
+  const outer = []
+  for (const rule of sheet.cssRules) {
+    if (rule instanceof CSSStyleRule) {
+      const selector = rule.selectorText.replace(/(^|,\s*)\.page(?![\w-])/g, '$1&')
+      inner.push(selector + rule.cssText.slice(rule.selectorText.length))
+    } else if (rule.conditionText !== undefined) inner.push(rule.cssText)
+    else outer.push(rule.cssText)
+  }
+  if (inner.length) outer.push(`.page {\n${inner.join('\n')}\n}`)
+  return outer.join('\n')
 }
 
 // Style of the block at the cursor, and applying one to the selected blocks.

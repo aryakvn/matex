@@ -1,7 +1,8 @@
 // Page layout: header/footer zones and page numbers. Stored as page.json inside the .matex archive.
 // A zone's height is the page margin on that side, so resizing it also moves the body text.
 // Each zone has three slots (left, centre, right); the page number is merged into one of them.
-// `styles` (paragraph styles and their fonts) lives here too, see styles.js.
+// `styles` (paragraph styles and their fonts) lives here too, see styles.js, and `css`, the
+// document's own CSS from the CSS panel (scopeCss in styles.js), which is saved as style.css instead.
 import { defaultStyles, normalizeStyles } from './styles.js'
 
 export const NUMBER_FORMATS = [
@@ -22,6 +23,7 @@ export const defaultLayout = () => ({
   footer: ['', '', ''],
   number: { where: 'footer', align: 'center', format: 'n', persian: false, start: 1, skipFirst: false },
   styles: defaultStyles(),
+  css: '',
 })
 
 const num = (v, min, max, fallback) => (Number.isFinite(+v) && v !== '' && v !== null ? Math.min(max, Math.max(min, +v)) : fallback)
@@ -49,6 +51,7 @@ export function normalizeLayout(raw) {
       skipFirst: n.skipFirst === true,
     },
     styles: normalizeStyles(r.styles),
+    css: typeof r.css === 'string' ? r.css : '',
   }
 }
 

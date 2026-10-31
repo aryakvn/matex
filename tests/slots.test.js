@@ -29,11 +29,11 @@ describe('header/footer scripts', () => {
 
 describe('slotHtml', () => {
   it('renders Markdown, fills text and appends the page number', () => {
-    expect(slotHtml('**Ch {page}**', (t) => t.replace('{page}', '4'))).toBe('<p><strong>Ch 4</strong></p>')
-    expect(slotHtml('A', undefined, '7')).toBe('<p>A 7</p>')
-    expect(slotHtml('', undefined, '7')).toBe('<p>7</p>')
+    expect(slotHtml('**Ch {page}**', (t) => t.replace('{page}', '4'))).toBe('<p class="paragraph"><strong class="bold">Ch 4</strong></p>')
+    expect(slotHtml('A', undefined, '7')).toBe('<p class="paragraph">A 7</p>')
+    expect(slotHtml('', undefined, '7')).toBe('<p class="paragraph">7</p>')
     expect(slotHtml('')).toBe('')
-    expect(slotHtml('![logo](blob:x)')).toContain('<img src="blob:x"')
+    expect(slotHtml('![logo](blob:x)')).toContain('<img class="image" src="blob:x"')
     expect(isDynamic('{{ date }}')).toBe(true)
     expect(isDynamic('plain')).toBe(false)
   })

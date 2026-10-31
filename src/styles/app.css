@@ -135,6 +135,51 @@ body {
 .ref-examples span { grid-column: 1; color: var(--muted); font-size: 12px; }
 .ref-examples .ref-insert { grid-column: 2; grid-row: 1 / span 2; }
 .ref-code { overflow-wrap: anywhere; }
+
+/* CSS editor (CssPanel.vue): a transparent textarea over its highlighted copy, both in one grid cell
+   with the same font and wrapping so the lines match; the copy sets the height. */
+.css-edit {
+  display: grid;
+  border: 1px solid var(--stroke-ctl);
+  border-bottom-color: var(--stroke-access);
+  border-radius: 4px;
+  background: var(--surface);
+}
+.css-edit:focus-within { border-bottom-color: var(--brand-ink); box-shadow: inset 0 -1px 0 var(--brand-ink); }
+.css-code, .css-input {
+  grid-area: 1 / 1;
+  min-height: 240px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 0;
+  font: 13px/20px Consolas, Menlo, "DejaVu Sans Mono", monospace;
+  tab-size: 2;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.css-code { color: var(--ink); pointer-events: none; }
+.css-input { resize: none; overflow: hidden; background: none; color: transparent; caret-color: var(--ink); outline: none; }
+.css-input::placeholder { color: var(--muted); }
+.css-input::selection { background: color-mix(in srgb, var(--brand-ink), transparent 70%); }
+.css-code .hljs-comment { color: var(--muted); font-style: italic; }
+.css-code :is(.hljs-selector-tag, .hljs-selector-pseudo) { color: #116329; }
+.css-code :is(.hljs-selector-id, .hljs-selector-class, .hljs-selector-attr) { color: #8250df; }
+.css-code :is(.hljs-attribute, .hljs-keyword, .hljs-meta) { color: #0550ae; }
+.css-code :is(.hljs-number, .hljs-string, .hljs-built_in) { color: #953800; }
+@media (prefers-color-scheme: dark) {
+  .css-code :is(.hljs-selector-tag, .hljs-selector-pseudo) { color: #7ee787; }
+  .css-code :is(.hljs-selector-id, .hljs-selector-class, .hljs-selector-attr) { color: #d2a8ff; }
+  .css-code :is(.hljs-attribute, .hljs-keyword, .hljs-meta) { color: #79c0ff; }
+  .css-code :is(.hljs-number, .hljs-string, .hljs-built_in) { color: #ffa657; }
+}
+.side .css-edit + .ref-h { margin-top: 20px; }
+
+/* The selection's "…" menu (App.vue), over the end of the selection and out of the text flow. */
+.sel-actions { position: absolute; z-index: 15; font: var(--font-ui); }
+.sel-actions .tb-btn { height: 26px; min-width: 26px; padding: 0 3px; background: var(--surface); color: var(--ink); box-shadow: var(--shadow-4); border-radius: 4px; }
+.sel-actions .tb-btn:hover, .sel-actions .tb-btn[aria-expanded="true"] { background: var(--hover); }
+.sel-actions .menu-list { min-width: 160px; white-space: nowrap; }
+@media print { .sel-actions { display: none; } }
 .side code { font-family: Consolas, "Cascadia Mono", Menlo, monospace; font-size: 12px; }
 /* The page is a transparent column; App.vue draws one white .sheet per A4 page behind the text. */
 .desk .page { position: relative; isolation: isolate; background: none; }

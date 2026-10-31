@@ -3,7 +3,7 @@ import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { Decoration, DecorationSet } from '@tiptap/pm/view'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import ReferencesView from '../components/ReferencesView.vue'
-import { markPersian } from './persian.js'
+import { markPersian, isRtl } from './persian.js'
 
 // Footnotes and references (Wikipedia style). Both are an inline `note` marker whose text is an attr;
 // markers sharing an id are one note (a source cited twice). In Markdown both are Pandoc footnotes:
@@ -31,7 +31,7 @@ export const pageAt = (breaks, pos) => 1 + breaks.filter((b) => b.pos <= pos).le
 
 // 'rtl' if the note's first letter is Hebrew/Arabic-script, else 'ltr'. For the footnote and
 // references rows: their text sits in a `dir="auto"` paragraph, which a row's own `dir="auto"` skips.
-export const noteDir = (md) => (/^[^\p{L}]*[֐-ࣿיִ-﷿ﹰ-﻿]/u.test(md) ? 'rtl' : 'ltr')
+export const noteDir = (md) => (isRtl(md) ? 'rtl' : 'ltr')
 
 // A note's Markdown text as HTML, through the body's schema; Persian runs get their font.
 const htmlCache = new Map()
@@ -74,7 +74,7 @@ export const Note = Node.create({
 
   addAttributes: () => ({ kind: dataAttr('kind', 'footnote'), id: dataAttr('note', ''), text: dataAttr('text', '') }),
   parseHTML: () => [{ tag: 'sup[data-note]' }],
-  renderHTML: ({ HTMLAttributes }) => ['sup', mergeAttributes(HTMLAttributes, { class: 'note' })],
+  renderHTML: ({ node, HTMLAttributes }) => ['sup', mergeAttributes(HTMLAttributes, { class: `note ${node.attrs.kind}` })],
 
   markdownTokenName: 'note',
   markdownTokenizer: {

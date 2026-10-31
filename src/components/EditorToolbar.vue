@@ -4,7 +4,7 @@
 import { computed, ref, nextTick } from 'vue'
 import {
   Undo2, Redo2, Bold, Italic, Strikethrough, Code, Link, List, ListOrdered,
-  Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, CaseSensitive, Superscript,
+  Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, FileCode, CaseSensitive, Superscript,
 } from 'lucide-vue-next'
 import ToolbarMenu from './ToolbarMenu.vue'
 import { directionAt } from '../editor/direction.js'
@@ -226,6 +226,12 @@ function onImagePicked(e) {
         :aria-pressed="panel === 'scripts'" @click="emit('panel', 'scripts')"
       >
         <Braces :size="20" />
+      </button>
+      <button
+        type="button" class="tb-btn" title="Document CSS" aria-label="Document CSS"
+        :aria-pressed="panel === 'css'" @click="emit('panel', 'css')"
+      >
+        <FileCode :size="20" />
       </button>
     </div>
   </header>

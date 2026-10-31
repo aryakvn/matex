@@ -23,7 +23,7 @@
 
 /* Persian runs (src/editor/persian.js) in the paragraph style's Persian font and size; the styles
    themselves are CSS made by src/utils/styles.js. No --fa-font = the Latin font's stack. */
-.page .fa { font-family: var(--fa-font); font-size: calc(var(--fa-scale, 1) * 1em); }
+.page span.persian { font-family: var(--fa-font); font-size: calc(var(--fa-scale, 1) * 1em); }
 
 .page .ProseMirror { position: relative; outline: none; min-height: calc(297mm - var(--margin-top) - var(--margin-bottom)); }
 .page .ProseMirror > :first-child { margin-top: 0; }

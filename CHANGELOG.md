@@ -43,11 +43,15 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Add a ? button to the Header/Footer tag shown while editing; it opens the side panel with the script help showing. The panel stays closed until asked for.
 - Add a Styles panel (Aa button), like Word's Styles gallery: Normal, Heading 1–3 and Code, each tile drawn in its own fonts; click to apply, pencil to change. Each style has a Latin font and a separate Persian font with its own size (e.g. Times New Roman 12 + B Nazanin 14), plus bold, italic and colour. Persian text in the page, headers/footers and table of contents gets the Persian font. Font boxes suggest common fonts and, where the webview allows, the installed ones. Saved in `page.json`.
 - Add footnotes and references, Wikipedia style (x² toolbar menu). A footnote shows as a superscript number and prints at the bottom of the sheet its marker is on, above the footer and under a short divider; the page breaks make room for it, and you type and edit it right there. A reference shows as a superscript `[1]`; citing the same source again reuses its number, and a References list (saved as `[REFERENCES]`) can go anywhere in the document. Clicking any marker or References entry opens a popup to edit or delete it. Both are numbered automatically, Persian notes read right-to-left, and they are saved as standard Markdown footnotes (`[^1]` / `[^ref-1]` with `[^1]: text` lines at the end).
+- Give every element of the document a class named after what it is (`.paragraph`, `.heading.heading-1`, `.list-item`, `.code-block`, `.table-cell`, `.bold`, `.link`, `.toc-item`, `.note.footnote`...) and a unique id (`#paragraph-3`, `#heading-2-1`, `#persian-5`, `#sheet-2`, `#footer-1-center`, `#toc-entry-3`...). Right-to-left blocks get `.persian` (`.heading-1.persian`), and Persian runs are `span.persian`.
+- Add a CSS panel (code-file button): the document's own CSS with syntax colours, applied live inside the page and in print, saved as `style.css` in the `.matex` archive. Rules win over the Styles panel; `&` is the page; `@page` and `@font-face` work.
+- Add a "…" button over any selection in the page; its "Style in CSS" pins the selection's id and opens the CSS panel with a `#id { }` rule ready to fill. Part of a line becomes a span saved as `[words]{#id}`; whole paragraphs and headings are saved as `text {#id}` / `## Title {#id}` (Pandoc attributes).
 
 ### Changed
 - Replace the app icon with the new MaTex logo (desktop icons regenerated from `app-icon.png`, browser favicon, title strip) and show it at the top of the README.
 - Excluded headings now leave the table of contents on screen too (it shows what will print); bring them back from the excluded-headings menu beside the title.
 - Restyle app chrome after Microsoft Fluent 2: grey canvas, title strip with app icon, file name and unsaved state, floating rounded command bar, Fluent dropdown, menus, inputs and buttons in light and dark.
+- Rename the Persian-run class from `.fa` to `.persian`.
 
 ### Fixed
 - Stop code block backgrounds and quote borders from running through the bottom margin and the gap between sheets when they split across pages.
