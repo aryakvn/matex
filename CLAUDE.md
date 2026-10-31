@@ -34,7 +34,7 @@ Releases come from `.github/workflows/release.yml`. Pushing a `v*` tag creates a
 - Markdown round-trip safety is enforced in that file and pinned by `tests/markdown.test.js`:
   - `escapeBlockStart` escapes paragraph text that would reparse as a heading, list, rule or code block.
   - Tables save in Tiptap's canonical padded form.
-  - HTML with no matching extension keeps its text but loses its tags. Add a node or mark per HTML feature.
+  - Block-level HTML becomes an `htmlBlock` atom (`src/editor/html.js`), saved verbatim (blank lines dropped, they'd end the block) and always drawn through `cleanHtml` (DOMPurify, no `<style>`). Inline HTML with no matching extension keeps its text but loses its tags.
 
 **`src/utils/platform.js` is the only file that touches Tauri.**
 - It lazy-imports `@tauri-apps/*` and falls back to browser equivalents: a file input, an `<a download>`, `confirm`/`alert`, `beforeunload`.
@@ -51,6 +51,7 @@ Releases come from `.github/workflows/release.yml`. Pushing a `v*` tag creates a
 - App shortcuts go through `fileAction(e)` in `src/utils/keys.js`, which matches `e.code` (`KeyS`), not `e.key`, so they work on the Persian keyboard layout. Mod-Shift-S is Save as, so Strike was moved to Mod-Shift-X.
 - Footnotes and references (`src/editor/notes.js`) are inline `note` nodes that carry their own text. `NoteMarkdown` reads `[^id]: text` definitions into them on parse and writes renumbered ones at the end on save. Footnotes are drawn per sheet by `App.vue`, and `pagination.js` ends each sheet's text above them, using the heights of the hidden `.fn-measure` list.
 - Every element has a class (from `renderHTML`: `HTMLAttributes` in `extensions.js`, heading/note/TOC in their files) and an id (`src/editor/ids.js`): auto `<class>-<n>` ids are body-only decorations, never saved; saved ids are a paragraph/heading `id` attr (`text {#id}`) and the `span` mark (`[text]{#id}`). The CSS panel's text is `layout.css` in memory and `style.css` in the archive; `scopeCss` nests it in `.page { }`.
+- Code fields are `CodeEdit.vue` (Monaco). `src/utils/monaco.js` is the slim Monaco entry (core + chosen contribs + CSS/HTML language services, workers via `?worker`); it is dynamically imported so tests and startup never load it. Add a language there (definition + feature + worker label), never import `editor.main` (bundles TypeScript, ~15 MB).
 - Image paste and drop are handled in `App.vue` `editorProps` and go through `doc.insertImage(file, pos)`. `tauri.conf.json` sets `dragDropEnabled: false` so the webview receives file drops.
 
 ## Conventions

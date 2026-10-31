@@ -82,3 +82,28 @@ describe('scopeCss', () => {
     expect(scopeCss('  ')).toBe('')
   })
 })
+
+describe('HTML blocks', () => {
+  it('keeps block HTML verbatim between Markdown', () => {
+    const md = 'Before\n\n<div align="center">\n<b>x</b> {#no}\n</div>\n\nAfter'
+    const editor = make(md)
+    expect(editor.getJSON().content.map((n) => n.type)).toEqual(['paragraph', 'htmlBlock', 'paragraph'])
+    expect(roundTrip(md)).toBe(md)
+  })
+
+  it('saves it without blank lines, which would end it', () => {
+    const editor = make('x')
+    editor.commands.setContent({ type: 'doc', content: [{ type: 'htmlBlock', attrs: { html: '<div>\n\n<b>a</b>\n</div>' } }] })
+    const md = editor.getMarkdown()
+    expect(md.trim()).toBe('<div>\n<b>a</b>\n</div>')
+    // (the empty paragraph after it is StarterKit's trailing node)
+    expect(make(md).getJSON().content[0]).toMatchObject({ type: 'htmlBlock', attrs: { html: '<div>\n<b>a</b>\n</div>' } })
+  })
+
+  it('draws it sanitized: no scripts, handlers or style', () => {
+    const editor = make('<div><img src="x" onerror="alert(1)"><script>alert(2)</script><style>p{}</style><i>ok</i></div>')
+    const html = editor.view.dom.querySelector('.html-block').innerHTML
+    expect(html).toContain('<i>ok</i>')
+    expect(html).not.toMatch(/onerror|script|style/)
+  })
+})

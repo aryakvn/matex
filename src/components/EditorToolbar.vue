@@ -4,7 +4,7 @@
 import { computed, ref, nextTick } from 'vue'
 import {
   Undo2, Redo2, Bold, Italic, Strikethrough, Code, Link, List, ListOrdered,
-  Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, FileCode, CaseSensitive, Superscript,
+  Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, FileCode, CodeXml, CaseSensitive, Superscript,
 } from 'lucide-vue-next'
 import ToolbarMenu from './ToolbarMenu.vue'
 import { directionAt } from '../editor/direction.js'
@@ -209,6 +209,11 @@ function onImagePicked(e) {
         v-if="editor.commands.insertTableOfContents"
         type="button" class="tb-btn" title="Table of contents" aria-label="Table of contents" @click="chain().insertTableOfContents().run()">
         <TableOfContents :size="20" />
+      </button>
+      <button
+        v-if="editor.commands.insertHtmlBlock"
+        type="button" class="tb-btn" title="HTML block" aria-label="HTML block" @click="chain().insertHtmlBlock().run()">
+        <CodeXml :size="20" />
       </button>
 
       <ToolbarMenu v-if="editor.commands.insertNote" label="Footnotes and references" :items="noteItems()">

@@ -47,12 +47,14 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Add a CSS panel (code-file button): the document's own CSS with syntax colours, applied live inside the page and in print, saved as `style.css` in the `.matex` archive. Rules win over the Styles panel; `&` is the page; `@page` and `@font-face` work.
 - Add a "…" button over any selection in the page; its "Style in CSS" pins the selection's id and opens the CSS panel with a `#id { }` rule ready to fill. Part of a line becomes a span saved as `[words]{#id}`; whole paragraphs and headings are saved as `text {#id}` / `## Title {#id}` (Pandoc attributes).
 
+- Add HTML blocks (</> button): raw HTML between paragraphs, drawn live in the page and saved in the Markdown exactly as written. Click one to edit its code in a popup under it. It is always sanitized when drawn (no scripts, event handlers or `<style>`), so opening someone else's document can't run code; style it from the CSS panel (`.html-block`).
 ### Changed
 - Replace the app icon with the new MaTex logo (desktop icons regenerated from `app-icon.png`, browser favicon, title strip) and show it at the top of the README.
 - Excluded headings now leave the table of contents on screen too (it shows what will print); bring them back from the excluded-headings menu beside the title.
 - Restyle app chrome after Microsoft Fluent 2: grey canvas, title strip with app icon, file name and unsaved state, floating rounded command bar, Fluent dropdown, menus, inputs and buttons in light and dark.
 - Rename the Persian-run class from `.fa` to `.persian`.
 
+- The CSS panel and HTML blocks edit code in Monaco (the VS Code editor) with CSS/HTML autocomplete, hover docs, colour swatches and checks; loaded the first time a code field opens, and works offline.
 ### Fixed
 - Stop code block backgrounds and quote borders from running through the bottom margin and the gap between sheets when they split across pages.
 - Let a code block or quote split across pages run through both sheets' margins, clearing only the gap between sheets.

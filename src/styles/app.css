@@ -136,43 +136,19 @@ body {
 .ref-examples .ref-insert { grid-column: 2; grid-row: 1 / span 2; }
 .ref-code { overflow-wrap: anywhere; }
 
-/* CSS editor (CssPanel.vue): a transparent textarea over its highlighted copy, both in one grid cell
-   with the same font and wrapping so the lines match; the copy sets the height. */
-.css-edit {
-  display: grid;
+/* Code field (CodeEdit.vue: CSS panel, HTML blocks): a Monaco editor in a Fluent input frame. */
+.code-edit {
+  padding-block: 6px;
   border: 1px solid var(--stroke-ctl);
   border-bottom-color: var(--stroke-access);
   border-radius: 4px;
   background: var(--surface);
+  overflow: hidden;
+  box-sizing: content-box;
 }
-.css-edit:focus-within { border-bottom-color: var(--brand-ink); box-shadow: inset 0 -1px 0 var(--brand-ink); }
-.css-code, .css-input {
-  grid-area: 1 / 1;
-  min-height: 240px;
-  margin: 0;
-  padding: 8px 10px;
-  border: 0;
-  font: 13px/20px Consolas, Menlo, "DejaVu Sans Mono", monospace;
-  tab-size: 2;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-.css-code { color: var(--ink); pointer-events: none; }
-.css-input { resize: none; overflow: hidden; background: none; color: transparent; caret-color: var(--ink); outline: none; }
-.css-input::placeholder { color: var(--muted); }
-.css-input::selection { background: color-mix(in srgb, var(--brand-ink), transparent 70%); }
-.css-code .hljs-comment { color: var(--muted); font-style: italic; }
-.css-code :is(.hljs-selector-tag, .hljs-selector-pseudo) { color: #116329; }
-.css-code :is(.hljs-selector-id, .hljs-selector-class, .hljs-selector-attr) { color: #8250df; }
-.css-code :is(.hljs-attribute, .hljs-keyword, .hljs-meta) { color: #0550ae; }
-.css-code :is(.hljs-number, .hljs-string, .hljs-built_in) { color: #953800; }
-@media (prefers-color-scheme: dark) {
-  .css-code :is(.hljs-selector-tag, .hljs-selector-pseudo) { color: #7ee787; }
-  .css-code :is(.hljs-selector-id, .hljs-selector-class, .hljs-selector-attr) { color: #d2a8ff; }
-  .css-code :is(.hljs-attribute, .hljs-keyword, .hljs-meta) { color: #79c0ff; }
-  .css-code :is(.hljs-number, .hljs-string, .hljs-built_in) { color: #ffa657; }
-}
-.side .css-edit + .ref-h { margin-top: 20px; }
+.code-edit:focus-within { border-bottom-color: var(--brand-ink); box-shadow: inset 0 -1px 0 var(--brand-ink); }
+.code-edit .monaco-editor { --vscode-editor-background: var(--surface); --vscode-editorGutter-background: var(--surface); }
+.side .code-edit + .ref-h { margin-top: 20px; }
 
 /* The selection's "…" menu (App.vue), over the end of the selection and out of the text flow. */
 .sel-actions { position: absolute; z-index: 15; font: var(--font-ui); }
@@ -180,6 +156,29 @@ body {
 .sel-actions .tb-btn:hover, .sel-actions .tb-btn[aria-expanded="true"] { background: var(--hover); }
 .sel-actions .menu-list { min-width: 160px; white-space: nowrap; }
 @media print { .sel-actions { display: none; } }
+
+/* HTML block (HtmlBlockView.vue): its code floats under it while selected, out of the text flow. */
+.html-block { position: relative; }
+.html-block.ProseMirror-selectednode { outline: 2px solid #1a55c4; outline-offset: 2px; }
+.html-empty { margin: 0; padding: 0.4em 0.6em; border: 1px dashed #bbb; border-radius: 4px; color: #888; font: var(--font-ui); }
+.html-pop {
+  position: absolute;
+  z-index: 16;
+  top: calc(100% + 6px);
+  inset-inline: 0;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--stroke);
+  border-radius: 8px;
+  box-shadow: var(--shadow-16);
+  font: var(--font-ui);
+}
+.html-pop .note-pop-actions { align-items: center; }
+.html-note { margin-inline-end: auto; color: var(--muted); font-size: 12px; }
+@media print { .html-pop, .html-empty { display: none; } }
 .side code { font-family: Consolas, "Cascadia Mono", Menlo, monospace; font-size: 12px; }
 /* The page is a transparent column; App.vue draws one white .sheet per A4 page behind the text. */
 .desk .page { position: relative; isolation: isolate; background: none; }

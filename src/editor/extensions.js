@@ -10,6 +10,7 @@ import { Pagination } from './pagination.js'
 import { Direction, DirectionMarkdown, withDirMark } from './direction.js'
 import { PersianFont } from './persian.js'
 import { noteExtensions, NoteMarkdown } from './notes.js'
+import { HtmlBlock } from './html.js'
 import { BlockIds, ElementIds, Span, escapeAttrs, attrBlock } from './ids.js'
 
 // A paragraph whose text starts like block syntax ("2) ", "- ", "# ", "---", 4 spaces)
@@ -60,8 +61,9 @@ export const extensions = [
   TableKit.configure({
     table: { resizable: false, ...cls('table') }, tableRow: cls('table-row'), tableCell: cls('table-cell'), tableHeader: cls('table-header'),
   }),
-  // ponytail: HTML with no matching extension (span, div align, mark) keeps its text but
-  // loses the tag on save. Add a node/mark per HTML feature once the toolbar can make it.
+  // Block-level HTML is kept verbatim (html.js). ponytail: inline HTML with no matching extension
+  // (<kbd>, <mark> in a sentence) keeps its text but loses the tag; add an inline HTML atom if needed.
+  HtmlBlock,
   DirectionMarkdown,
   NoteMarkdown, // after DirectionMarkdown: wraps the manager it creates
   BlockIds, // same

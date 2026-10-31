@@ -1,49 +1,36 @@
 <script setup>
-// Side panel content: the document's own CSS (layout.css, saved in page.json), applied live to the
-// page and in print (scopeCss in utils/styles.js). A textarea laid over a highlighted copy of its
-// text (highlight.js), so it reads like a code editor without bundling one.
+// Side panel content: the document's own CSS (layout.css, saved as style.css), applied live to the
+// page and in print (scopeCss in utils/styles.js).
 // addRule(selector) is how the page's "…" menu adds `#id { }` and puts the cursor in it.
-import { ref, computed } from 'vue'
-import hljs from 'highlight.js/lib/core'
-import cssLanguage from 'highlight.js/lib/languages/css'
-
-hljs.registerLanguage('css', cssLanguage)
+import { ref } from 'vue'
+import CodeEdit from './CodeEdit.vue'
 
 const css = defineModel({ type: String, default: '' })
 defineProps({ showHelp: { type: Boolean, default: false } })
 
-const area = ref(null)
-// The trailing newline keeps the copy as tall as the textarea when the text ends in one.
-const html = computed(() => `${hljs.highlight(css.value, { language: 'css' }).value}\n`)
+const code = ref(null)
 
-// Tab indents instead of leaving the field (Esc closes the panel). insertText keeps Undo working.
-function indent() {
-  if (!document.execCommand('insertText', false, '  ')) area.value.setRangeText('  ', area.value.selectionStart, area.value.selectionEnd, 'end')
-}
-
-// Typed into the textarea (not set through v-model, which lands a tick later and moves the cursor),
-// so Ctrl+Z takes it back out.
-function addRule(selector) {
-  const el = area.value
+// An edit in Monaco, so Ctrl+Z there takes it back out.
+async function addRule(selector) {
+  const editor = await code.value.ready()
+  const model = editor.getModel()
   const head = `${selector} {`
-  let caret = el.value.indexOf(head)
-  el.focus()
-  if (caret >= 0) caret += head.length
-  else {
-    const end = el.value.replace(/\s+$/, '').length
-    const text = `${end ? '\n\n' : ''}${head}\n  \n}\n`
-    el.setSelectionRange(end, el.value.length)
-    if (!document.execCommand('insertText', false, text)) {
-      el.setRangeText(text, end, el.value.length)
-      css.value = el.value
-    }
-    caret = el.value.length - 3
+  let found = model.findNextMatch(head, { lineNumber: 1, column: 1 }, false, true, null, false)
+  if (!found) {
+    const text = model.getValue().replace(/\s+$/, '')
+    const end = model.getPositionAt(text.length)
+    const range = { startLineNumber: end.lineNumber, startColumn: end.column, endLineNumber: model.getLineCount(), endColumn: model.getLineMaxColumn(model.getLineCount()) }
+    editor.executeEdits('add-rule', [{ range, text: `${text ? '\n\n' : ''}${head}\n  \n}\n` }])
+    found = model.findNextMatch(head, { lineNumber: 1, column: 1 }, false, true, null, false)
   }
-  el.setSelectionRange(caret, caret)
-  // A textarea that grows with its text never scrolls, so the panel does.
-  const lines = css.value.slice(0, caret).split('\n').length
-  const body = el.closest('.side-body')
-  if (body) body.scrollTop = el.offsetTop + lines * parseFloat(getComputedStyle(el).lineHeight) - body.clientHeight / 2
+  // Inside the rule: the indented line under its head.
+  const line = found.range.startLineNumber + 1
+  editor.setPosition({ lineNumber: line, column: model.getLineMaxColumn(line) })
+  editor.focus()
+  // The editor grows with its text and never scrolls, so the panel does.
+  const body = editor.getDomNode().closest('.side-body')
+  const host = editor.getDomNode().parentElement
+  if (body) body.scrollTop = host.offsetTop + editor.getTopForLineNumber(line) - body.clientHeight / 2
 }
 defineExpose({ addRule })
 
@@ -60,6 +47,7 @@ const CLASSES = [
   ['.fn-area .fn-item .references .refs-item', 'Footnotes at the sheet bottom, References list'],
   ['.sheet .hf-header .hf-footer .hf-slot', 'Sheets, headers and footers'],
   ['.span', 'Text you gave an id with …'],
+  ['.html-block', 'HTML blocks (</> button)'],
 ]
 const IDS = [
   ['#paragraph-3', 'The 3rd paragraph. Every element has one: #heading-2-1, #list-item-4, #persian-5, #footnote-2'],
@@ -83,14 +71,7 @@ const IDS = [
   </div>
   <p v-else class="ref-hint">Select text in the page and press … to add its id here.</p>
 
-  <div class="css-edit">
-    <pre class="css-code" aria-hidden="true" v-html="html" />
-    <textarea
-      ref="area" v-model="css" class="css-input" aria-label="Document CSS" spellcheck="false"
-      autocomplete="off" autocapitalize="off" placeholder=".heading-1 { color: #0f6cbd; }"
-      @keydown.tab.exact.prevent="indent"
-    />
-  </div>
+  <CodeEdit ref="code" v-model="css" language="css" label="Document CSS" placeholder=".heading-1 { color: #0f6cbd; }" />
 
   <template v-if="showHelp">
     <h3 class="ref-h">Classes</h3>
