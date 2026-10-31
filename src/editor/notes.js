@@ -40,8 +40,10 @@ export function noteHtml(editor, md) {
   if (!htmlCache.has(md)) {
     if (htmlCache.size > 200) htmlCache.clear() // ponytail: crude bound, like slots.js
     const doc = editor.schema.nodeFromJSON(editor.markdown.parse(md))
+    // The body's parse wraps everything in a section (sections.js); a note is just its content.
+    const body = doc.firstChild?.type.name === 'section' ? doc.firstChild.content : doc.content
     const tpl = document.createElement('template')
-    tpl.innerHTML = getHTMLFromFragment(doc.content, editor.schema)
+    tpl.innerHTML = getHTMLFromFragment(body, editor.schema)
     markPersian(tpl.content)
     htmlCache.set(md, tpl.innerHTML)
   }

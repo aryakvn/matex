@@ -4,11 +4,13 @@
 import { computed, ref, nextTick } from 'vue'
 import {
   Undo2, Redo2, Bold, Italic, Strikethrough, Code, Link, List, ListOrdered,
-  Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, FileCode, CodeXml, CaseSensitive, Superscript,
+  Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, FileCode, CodeXml, CaseSensitive, Superscript, Columns2,
 } from 'lucide-vue-next'
 import ToolbarMenu from './ToolbarMenu.vue'
 import { directionAt } from '../editor/direction.js'
 import { noteEntries } from '../editor/notes.js'
+import { sectionAt, MAX_COLUMNS } from '../editor/sections.js'
+import { canWrapColumns } from '../utils/layout.js'
 import { STYLES, styleAt, applyStyle } from '../utils/styles.js'
 import appIcon from '../../src-tauri/icons/64x64.png'
 
@@ -18,7 +20,7 @@ const props = defineProps({
   dirty: { type: Boolean, default: false },
   panel: { type: String, default: null }, // the side panel that is open, if any
 })
-const emit = defineEmits(['file', 'image', 'panel', 'note'])
+const emit = defineEmits(['file', 'image', 'panel', 'note', 'sectionCss'])
 
 const mod = /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘' : 'Ctrl+'
 const chain = () => props.editor.chain().focus()
@@ -77,6 +79,26 @@ function noteItems() {
     ...(refs.length ? [null, ...refs.map((r) => ({ label: `Cite [${r.number}] ${excerpt(r.text)}`, run: () => emit('note', { kind: 'reference', id: r.id }) }))] : []),
     null,
     { label: 'References list', run: () => chain().insertReferenceList().run() },
+  ]
+}
+
+// Sections (sections.js): columns of the cursor's section, section breaks, and its CSS (App.vue opens
+// the CSS panel on a rule for the section's id).
+function layoutItems() {
+  const at = sectionAt(props.editor.state)
+  const one = canWrapColumns ? '' : ' (shown as one here)'
+  return [
+    ...Array.from({ length: MAX_COLUMNS }, (_, i) => ({
+      label: i ? `${i + 1} columns${one}` : 'One column',
+      checked: at?.node.attrs.columns === i + 1,
+      disabled: !at,
+      run: () => chain().setSectionColumns(i + 1).run(),
+    })),
+    null,
+    { label: 'Section break (next page)', disabled: !at, run: () => chain().insertSection().run() },
+    { label: 'Remove section break', disabled: !at?.index, run: () => chain().removeSectionBreak().run() },
+    null,
+    { label: 'Style this section in CSS', disabled: !at, run: () => emit('sectionCss') },
   ]
 }
 
@@ -218,6 +240,10 @@ function onImagePicked(e) {
 
       <ToolbarMenu v-if="editor.commands.insertNote" label="Footnotes and references" :items="noteItems()">
         <Superscript :size="20" aria-hidden="true" />
+      </ToolbarMenu>
+
+      <ToolbarMenu v-if="editor.commands.insertSection" label="Layout: columns and sections" :items="layoutItems()">
+        <Columns2 :size="20" aria-hidden="true" />
       </ToolbarMenu>
 
       <ToolbarMenu label="Table" :items="tableItems">

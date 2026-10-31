@@ -1,4 +1,5 @@
 import StarterKit from '@tiptap/starter-kit'
+import Document from '@tiptap/extension-document'
 import Strike from '@tiptap/extension-strike'
 import Paragraph from '@tiptap/extension-paragraph'
 import Image from '@tiptap/extension-image'
@@ -12,13 +13,14 @@ import { PersianFont } from './persian.js'
 import { noteExtensions, NoteMarkdown } from './notes.js'
 import { HtmlBlock } from './html.js'
 import { BlockIds, ElementIds, Span, escapeAttrs, attrBlock } from './ids.js'
+import { Section, SectionDocument, SectionMarkdown } from './sections.js'
 
 // A paragraph whose text starts like block syntax ("2) ", "- ", "# ", "---", 4 spaces)
-// (or is "[TOC]" or "[REFERENCES]") would reopen as a list/heading/rule/code block/TOC/references list,
+// (or is "[TOC]", "[REFERENCES]" or a ":::" section fence) would reopen as a list/heading/rule/code block/TOC/references list,
 // so the leading character is escaped.
 export function escapeBlockStart(md) {
   if (/^ {4}/.test(md)) return '&#32;' + md.slice(1)
-  if (/^(#{1,6}|[>+*-])(\s|$)/.test(md) || /^([-*_])( *\1){2,} *$/.test(md) || /^\[(TOC|REFERENCES)\]\s*$/.test(md)) return '\\' + md
+  if (/^(#{1,6}|[>+*-])(\s|$)/.test(md) || /^([-*_])( *\1){2,} *$/.test(md) || /^\[(TOC|REFERENCES)\]\s*$/.test(md) || /^:{3}/.test(md)) return '\\' + md
   return md.replace(/^(\d{1,9})([.)])(?=\s|$)/, '$1\\$2')
 }
 
@@ -39,8 +41,10 @@ export const extensions = [
     bold: cls('bold'), italic: cls('italic'), underline: cls('underline'), code: cls('code'),
     blockquote: cls('blockquote'), bulletList: cls('bullet-list'), orderedList: cls('ordered-list'), listItem: cls('list-item'),
     horizontalRule: cls('horizontal-rule'), hardBreak: cls('hard-break'),
-    strike: false, paragraph: false, heading: false, codeBlock: false,
+    strike: false, paragraph: false, heading: false, codeBlock: false, document: false,
   }),
+  SectionDocument,
+  Section,
   SafeParagraph.configure(cls('paragraph')),
   UnlistedHeading,
   TableOfContents,
@@ -67,6 +71,7 @@ export const extensions = [
   DirectionMarkdown,
   NoteMarkdown, // after DirectionMarkdown: wraps the manager it creates
   BlockIds, // same
+  SectionMarkdown, // last: gathers what the others leave into sections
   ElementIds,
 ]
 
@@ -74,10 +79,10 @@ export const extensions = [
 // from the first strong letter, never saved. A manual override is saved (see direction.js).
 export const editorOptions = { extensions, textDirection: 'auto', contentType: 'markdown' }
 
-// Header/footer slots and note text: the body's editor without sheets, a table of contents, notes or
-// ids (a slot repeats on every sheet, so its ids would too).
-const bodyOnly = [Pagination, TableOfContents, ...noteExtensions, NoteMarkdown, ElementIds]
+// Header/footer slots and note text: the body's editor without sheets, sections, a table of contents,
+// notes or ids (a slot repeats on every sheet, so its ids would too).
+const bodyOnly = [Pagination, SectionDocument, Section, SectionMarkdown, TableOfContents, ...noteExtensions, NoteMarkdown, ElementIds]
 export const slotEditorOptions = {
   ...editorOptions,
-  extensions: extensions.filter((e) => !bodyOnly.includes(e)),
+  extensions: [Document, ...extensions.filter((e) => !bodyOnly.includes(e))],
 }

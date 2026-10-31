@@ -23,7 +23,7 @@ describe('table of contents', () => {
 
   it('lists every heading with its level and unlisted flag', () => {
     const editor = make(md)
-    expect(editor.getJSON().content[0].type).toBe('tableOfContents')
+    expect(editor.getJSON().content[0].content[0].type).toBe('tableOfContents')
     expect(tocEntries(editor.state.doc).map(({ level, text, unlisted }) => [level, text, unlisted])).toEqual([
       [1, 'One', false],
       [2, 'Hidden', true],
@@ -33,7 +33,7 @@ describe('table of contents', () => {
 
   it('excluding a heading saves the marker', () => {
     const editor = make('# A')
-    editor.view.dispatch(editor.state.tr.setNodeAttribute(0, 'unlisted', true))
+    editor.view.dispatch(editor.state.tr.setNodeAttribute(1, 'unlisted', true))
     expect(editor.getMarkdown().trim()).toBe('# A {.unlisted}')
   })
 
@@ -46,7 +46,7 @@ describe('table of contents', () => {
       ],
     }
     const out = new Editor({ ...editorOptions, contentType: 'json', element: document.createElement('div'), content: json }).getMarkdown()
-    const back = make(out).getJSON().content
+    const back = make(out).getJSON().content[0].content
     expect(back[0]).toMatchObject({ type: 'paragraph', content: [{ text: '[TOC]' }] })
     expect(back[1]).toMatchObject({ type: 'heading', attrs: { unlisted: false }, content: [{ text: 'Use {.unlisted}' }] })
   })

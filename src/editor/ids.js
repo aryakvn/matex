@@ -11,6 +11,8 @@ import { persianRuns } from './persian.js'
 //   style) and the `span` mark (`[text]{#id}`). pinSelection() makes them.
 
 export const PINNED = ['paragraph', 'heading']
+// Nodes whose `id` attr is saved: pinned blocks and sections (sections.js).
+const SAVED = [...PINNED, 'section']
 const IDENT = '[A-Za-z][\\w-]*'
 const ITEM = `(?:#${IDENT}|\\.unlisted)`
 // A trailing `{#id .unlisted}` attribute block (either item, any order); `]{` is a span's.
@@ -68,7 +70,7 @@ function dropCopies(trs, old, state) {
   const { tr } = state
   state.doc.descendants((node, pos) => {
     const { id } = node.attrs
-    if (!PINNED.includes(node.type.name) || !id) return
+    if (!SAVED.includes(node.type.name) || !id) return
     if (seen.has(id)) tr.setNodeAttribute(pos, 'id', null)
     seen.add(id)
   })
@@ -138,7 +140,7 @@ function idDecorations(doc) {
       return
     }
     const auto = next(baseOf(node))
-    const id = (PINNED.includes(node.type.name) && node.attrs.id) || auto
+    const id = (SAVED.includes(node.type.name) && node.attrs.id) || auto
     decos.push(Decoration.node(pos, pos + node.nodeSize, { id }))
   })
   return DecorationSet.create(doc, decos)
@@ -161,7 +163,7 @@ export const ElementIds = Extension.create({
 
 const LETTERS = 'abcdefghijkmnopqrstuvwxyz'
 // Letters only, so a saved id never equals an auto one (those end in digits).
-const newId = (base) => `${base}-${Array.from({ length: 5 }, () => LETTERS[Math.floor(Math.random() * LETTERS.length)]).join('')}`
+export const newId = (base) => `${base}-${Array.from({ length: 5 }, () => LETTERS[Math.floor(Math.random() * LETTERS.length)]).join('')}`
 
 // Ids of what is selected, made permanent where they can be: part of one paragraph's or heading's
 // text becomes a span; whole paragraphs and headings get a saved id; anything else (code block,

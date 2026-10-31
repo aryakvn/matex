@@ -33,7 +33,7 @@ describe('footnotes and references', () => {
 
   it('reads definitions into the markers and numbers each kind in order of first use', () => {
     const editor = make(md)
-    expect(editor.getJSON().content.map((n) => n.type)).toEqual(['paragraph', 'referenceList', 'paragraph'])
+    expect(editor.getJSON().content[0].content.map((n) => n.type)).toEqual(['paragraph', 'referenceList', 'paragraph'])
     const list = noteEntries(editor.state.doc).map(({ kind, number, text }) => [kind, number, text])
     expect(list).toEqual([
       ['footnote', 1, 'First *note*.'],
@@ -76,7 +76,7 @@ describe('footnotes and references', () => {
 
   it('literal note and list syntax in a paragraph stays text', () => {
     const editor = fromJSON([para(text('[^1]: not a note')), para(text('[REFERENCES]'))])
-    const back = make(editor.getMarkdown()).getJSON().content
+    const back = make(editor.getMarkdown()).getJSON().content[0].content
     expect(back.map((n) => n.type)).toEqual(['paragraph', 'paragraph'])
     expect(back.map((n) => n.content[0].text)).toEqual(['[^1]: not a note', '[REFERENCES]'])
   })

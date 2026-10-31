@@ -42,11 +42,12 @@ Releases come from `.github/workflows/release.yml`. Pushing a `v*` tag creates a
 - Each new native call also needs a permission in `src-tauri/capabilities/default.json`. The capabilities are deliberately minimal: no broad fs scope, since dialog-picked paths are allowed automatically.
 
 **Styling is split between document and app chrome.**
-- `src/styles/document.css` is the document's only stylesheet. It is scoped to `.page`, sized for A4 with `@page`, and uses logical properties for RTL.
+- `src/styles/document.css` is the document's only stylesheet. It is scoped to `.page`, sized by CSS variables (`--sheet-w/-h`, `--margin-*`) that `App.vue` sets from the page setup along with the `@page` size, and uses logical properties for RTL.
 - App chrome (toolbar, menus, light/dark tokens) lives in `src/styles/app.css` and is hidden in print. It follows Microsoft Fluent 2 (Office 2023 look); reuse its tokens (`--surface`, `--stroke`, `--brand`, `--shadow-4`/`--shadow-16`, ...) instead of new colours.
 - Keep the document HTML + CSS only, with no canvas rendering, so it prints and converts to PDF through the webview.
 
 **Behaviors that span files:**
+- The body document is `section+` (`src/editor/sections.js`). Each section starts on a new sheet and carries `id` and `columns`; saved as `::: {#id .section columns=2}` … `:::`, the first one unfenced when it has no settings. `SectionMarkdown` gathers loose top-level blocks into sections after every parse. `pagination.js` breaks before each section; a section with columns is fragmented by the browser (CSS `column-wrap`) and only gets zero-height page-start breaks. Header/footer and note editors use the plain `Document`.
 - `show()` in `useDocument` replaces the editor state, which also clears the undo history. This keeps Undo from bringing back the previous document after New/Open.
 - App shortcuts go through `fileAction(e)` in `src/utils/keys.js`, which matches `e.code` (`KeyS`), not `e.key`, so they work on the Persian keyboard layout. Mod-Shift-S is Save as, so Strike was moved to Mod-Shift-X.
 - Footnotes and references (`src/editor/notes.js`) are inline `note` nodes that carry their own text. `NoteMarkdown` reads `[^id]: text` definitions into them on parse and writes renumbered ones at the end on save. Footnotes are drawn per sheet by `App.vue`, and `pagination.js` ends each sheet's text above them, using the heights of the hidden `.fn-measure` list.

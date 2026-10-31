@@ -48,11 +48,14 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Add a "…" button over any selection in the page; its "Style in CSS" pins the selection's id and opens the CSS panel with a `#id { }` rule ready to fill. Part of a line becomes a span saved as `[words]{#id}`; whole paragraphs and headings are saved as `text {#id}` / `## Title {#id}` (Pandoc attributes).
 
 - Add HTML blocks (</> button): raw HTML between paragraphs, drawn live in the page and saved in the Markdown exactly as written. Click one to edit its code in a popup under it. It is always sanitized when drawn (no scripts, event handlers or `<style>`), so opening someone else's document can't run code; style it from the CSS panel (`.html-block`).
+- Add paper size (A3, A4, A5, B5, Letter, Legal), landscape orientation, left/right margins and 1–4 columns to Page setup; top/bottom margins are now set there too. Columns fill each sheet in order and need Chromium 145+ (the Windows app); the macOS and Linux apps show one column for now.
+- Add sections, like Word's "next page" section breaks (columns button in the toolbar): each section starts on a new sheet and has its own number of columns, and "Style this section in CSS" gives it an id and opens a `#id { }` rule, so a few pages can be one column and the next two columns with their own styling. Saved as Pandoc fenced divs (`::: {#appendix .section columns=2}` … `:::`); a document with one plain section stays plain Markdown. With more than one section, a small "Section N" tag shows above each on screen (not printed). Backspace at a section's start or "Remove section break" joins it to the one before.
 ### Changed
 - Replace the app icon with the new MaTex logo (desktop icons regenerated from `app-icon.png`, browser favicon, title strip) and show it at the top of the README.
 - Excluded headings now leave the table of contents on screen too (it shows what will print); bring them back from the excluded-headings menu beside the title.
 - Restyle app chrome after Microsoft Fluent 2: grey canvas, title strip with app icon, file name and unsaved state, floating rounded command bar, Fluent dropdown, menus, inputs and buttons in light and dark.
 - Rename the Persian-run class from `.fa` to `.persian`.
+- The number of columns is set per section (toolbar's columns menu) instead of in Page setup; Page setup keeps the gap between columns.
 
 - The CSS panel and HTML blocks edit code in Monaco (the VS Code editor) with CSS/HTML autocomplete, hover docs, colour swatches and checks; loaded the first time a code field opens, and works offline.
 ### Fixed

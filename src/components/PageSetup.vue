@@ -1,8 +1,9 @@
 <script setup>
-// Page setup dialog: header/footer text and size, and page numbering. Edits the document's layout
+// Page setup dialog: paper, margins, column gap, header/footer text size, and page numbering.
+// The number of columns belongs to each section (toolbar's Layout menu). Edits the document's layout
 // object live, so the sheets behind the dialog update as you type.
 import { ref } from 'vue'
-import { NUMBER_FORMATS, ALIGNS, defaultLayout } from '../utils/layout.js'
+import { NUMBER_FORMATS, ALIGNS, PAPERS, defaultLayout } from '../utils/layout.js'
 
 const props = defineProps({ layout: { type: Object, required: true } })
 
@@ -13,6 +14,14 @@ const zones = [
   { key: 'header', title: 'Header' },
   { key: 'footer', title: 'Footer' },
 ]
+// Top and bottom margins are the header and footer heights.
+const margins = [
+  { key: 'headerHeight', label: 'Top', min: 5 },
+  { key: 'footerHeight', label: 'Bottom', min: 5 },
+  { key: 'marginLeft', label: 'Left', min: 0 },
+  { key: 'marginRight', label: 'Right', min: 0 },
+]
+const paperLabel = (name) => `${name} (${PAPERS[name].join(' × ')} mm)`
 // Styles have their own panel, so Reset here leaves them alone.
 const reset = () => Object.assign(props.layout, { ...defaultLayout(), styles: props.layout.styles })
 </script>
@@ -22,13 +31,46 @@ const reset = () => Object.assign(props.layout, { ...defaultLayout(), styles: pr
     <form method="dialog">
       <h2>Page setup</h2>
 
-      <fieldset v-for="z in zones" :key="z.key">
-        <legend>{{ z.title }}</legend>
+      <fieldset>
+        <legend>Paper</legend>
         <div class="setup-row">
-          <label>Height (mm)
-            <input v-model.number="layout[`${z.key}Height`]" type="number" min="5" max="100" step="1" />
+          <label class="grow">Size
+            <select v-model="layout.paper">
+              <option v-for="(_, p) in PAPERS" :key="p" :value="p">{{ paperLabel(p) }}</option>
+            </select>
           </label>
-          <label>Text size (pt)
+          <label>Orientation
+            <select v-model="layout.landscape">
+              <option :value="false">Portrait</option>
+              <option :value="true">Landscape</option>
+            </select>
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Margins (mm)</legend>
+        <div class="setup-row margins">
+          <label v-for="m in margins" :key="m.key">{{ m.label }}
+            <input v-model.number="layout[m.key]" type="number" :min="m.min" max="100" step="1" />
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Columns</legend>
+        <div class="setup-row">
+          <label>Gap (mm)
+            <input v-model.number="layout.columnGap" type="number" min="0" max="50" step="1" />
+          </label>
+        </div>
+        <p class="setup-hint setup-warn">Set the number of columns for each section in the toolbar's Layout menu.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Header and footer</legend>
+        <div class="setup-row">
+          <label v-for="z in zones" :key="z.key">{{ z.title }} text size (pt)
             <input v-model.number="layout[`${z.key}Size`]" type="number" min="6" max="36" step="1" />
           </label>
         </div>
@@ -36,7 +78,7 @@ const reset = () => Object.assign(props.layout, { ...defaultLayout(), styles: pr
       <p class="setup-hint">
         Double-click a page's top or bottom margin to write its header or footer. There, <code>{page}</code> and
         <code>{pages}</code> fill in, and <code v-pre>{{ code }}</code> runs JavaScript with <code>page</code>,
-        <code>pages</code>, <code>number</code>, <code>title</code> and <code>date</code>. The height is the page margin on that side.
+        <code>pages</code>, <code>number</code>, <code>title</code> and <code>date</code>. The header and footer fill the top and bottom margins.
       </p>
 
       <fieldset>

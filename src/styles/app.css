@@ -180,16 +180,17 @@ body {
 .html-note { margin-inline-end: auto; color: var(--muted); font-size: 12px; }
 @media print { .html-pop, .html-empty { display: none; } }
 .side code { font-family: Consolas, "Cascadia Mono", Menlo, monospace; font-size: 12px; }
-/* The page is a transparent column; App.vue draws one white .sheet per A4 page behind the text. */
+/* The page is a transparent column; App.vue draws one white .sheet per page behind the text. */
 .desk .page { position: relative; isolation: isolate; background: none; }
-.sheet { position: absolute; inset-inline: 0; z-index: -1; height: 297mm; background: #fff; box-shadow: var(--shadow-4); }
+.sheet { position: absolute; inset-inline: 0; z-index: -1; height: var(--sheet-h); background: #fff; box-shadow: var(--shadow-4); }
 /* A page break inside a block with a background or side border (code, quote) would drag it across
    the gap. The block keeps running through both sheets' margins; only the gap is painted back to
    canvas, with the sheet's bottom shadow redrawn at its top edge. */
 .page-gap::before {
   content: "";
   position: absolute;
-  inset-inline: calc(-1 * var(--margin-x));
+  left: calc(-1 * var(--margin-left));
+  right: calc(-1 * var(--margin-right));
   height: inherit;
   background: linear-gradient(
     transparent calc(100% - var(--page-gap) - var(--margin-top)),
@@ -201,13 +202,13 @@ body {
 }
 
 /* Header/footer being edited in place (App.vue): above the text, with Word's dashed line and tag. */
-.sheet-edit { position: absolute; inset-inline: 0; z-index: 1; height: 297mm; pointer-events: none; }
+.sheet-edit { position: absolute; inset-inline: 0; z-index: 1; height: var(--sheet-h); pointer-events: none; }
 .page .sheet-edit .hf { pointer-events: auto; overflow: visible; background: #fff; }
 .hf-edit.hf-header { border-bottom: 1px dashed var(--brand); }
 .hf-edit.hf-footer { border-top: 1px dashed var(--brand); }
 .hf-tag {
   position: absolute;
-  inset-inline-start: var(--margin-x);
+  left: var(--margin-left);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -246,10 +247,35 @@ body {
 .hf-number { flex: none; padding: 0 4px; border-radius: 2px; background: #eee; }
 .page.hf-mode .ProseMirror:not(.hf .ProseMirror) { opacity: 0.45; }
 
+/* Sections (src/editor/sections.js): with more than one, each gets a small tag just above its text,
+   in the top margin. A zero-height block (spanning the columns, which clip anything placed above
+   them) nudged up, so it doesn't move the page breaks. */
+.desk .page .ProseMirror { counter-reset: section; }
+.desk .page .section { counter-increment: section; }
+.desk .page .ProseMirror:has(> .section ~ .section) > .section::before {
+  content: "Section " counter(section);
+  display: block;
+  width: fit-content;
+  height: 0;
+  column-span: all;
+  position: relative;
+  top: -20px;
+  color: var(--muted);
+  font: var(--font-ui);
+  font-size: 11px;
+  line-height: 16px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.desk .page .ProseMirror:has(> .section ~ .section) > .section.cols::before {
+  content: "Section " counter(section) " · " attr(data-columns) " columns";
+}
+
 @media print {
   :root { --page-gap: 0px; }
   .sheet-edit { display: none; }
   .page.hf-mode .ProseMirror:not(.hf .ProseMirror) { opacity: 1; }
+  .desk .page .section::before { display: none !important; }
   body, .desk { background: none; padding: 0; }
   .sheet { background: none; box-shadow: none; } /* stays, for the header and footer */
   .toolbar, .side, .toc-more, .page-gap::before { display: none !important; }
@@ -474,7 +500,8 @@ body {
 .setup fieldset { margin: 0 0 12px; padding: 8px 12px 12px; border: 1px solid var(--stroke); border-radius: 4px; }
 .setup legend { padding: 0 4px; font-weight: 600; }
 .setup-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
-.setup label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); text-transform: capitalize; }
+.setup-row.margins { display: grid; grid-template-columns: repeat(4, 1fr); }
+.setup label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
 .setup label.grow { flex: 1 1 120px; }
 .setup label.check { flex-direction: row; align-items: center; gap: 8px; font-size: 14px; color: var(--ink); text-transform: none; }
 .setup input[type="number"], .setup input[type="text"], .setup select {
@@ -494,5 +521,6 @@ body {
 .setup input:focus, .setup select:focus { outline: none; border-bottom-color: var(--brand-ink); box-shadow: inset 0 -1px 0 var(--brand-ink); }
 .setup input:disabled, .setup select:disabled { opacity: 0.5; }
 .setup-hint { margin: 0 0 12px; font-size: 12px; color: var(--muted); }
+.setup .setup-warn { margin: 8px 0 0; }
 .setup-actions { display: flex; justify-content: flex-end; gap: 8px; }
 @media print { .setup { display: none; } }

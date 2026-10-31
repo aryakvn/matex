@@ -14,9 +14,10 @@ import CssPanel from './components/CssPanel.vue'
 import ToolbarMenu from './components/ToolbarMenu.vue'
 import { Ellipsis } from 'lucide-vue-next'
 import { pinSelection } from './editor/ids.js'
+import { pinSection } from './editor/sections.js'
 import { noteEntries, noteHtml, noteDir, pageAt } from './editor/notes.js'
 import { normalizeStyles, stylesCss, scopeCss } from './utils/styles.js'
-import { fillTokens, slotNumber, ALIGNS } from './utils/layout.js'
+import { fillTokens, slotNumber, ALIGNS, sheetSize } from './utils/layout.js'
 import { useDocument } from './composables/useDocument.js'
 import { onCloseRequest } from './utils/platform.js'
 import { fileAction } from './utils/keys.js'
@@ -47,7 +48,7 @@ const editor = useEditor({
   editorProps: imageProps(() => editor.value),
 })
 
-// A4 sheets drawn behind the text; the Pagination extension says how many.
+// Sheets drawn behind the text; the Pagination extension says how many.
 const pages = ref(1)
 const breaks = shallowRef([])
 watch(editor, (e) => e?.on('paginate', (found) => {
@@ -126,16 +127,21 @@ const { name, dirty, layout, scriptsOn } = doc
 const setup = ref(null)
 const fileActions = { new: doc.newDoc, open: doc.openDoc, save: doc.save, saveAs: doc.saveAs, pageSetup: () => setup.value.open() }
 
-// Paragraph styles (fonts, sizes), then the document's own CSS (CSS panel), as a stylesheet over
-// document.css; it prints too.
+// Paper size for print, paragraph styles (fonts, sizes), then the document's own CSS (CSS panel), as
+// a stylesheet over document.css; it prints too.
 const stylesSheet = document.head.appendChild(document.createElement('style'))
-const css = computed(() => `${stylesCss(normalizeStyles(layout.styles))}\n${scopeCss(layout.css)}`)
+const sheet = computed(() => sheetSize(layout))
+const css = computed(() =>
+  `@page { size: ${sheet.value.width}mm ${sheet.value.height}mm; }\n${stylesCss(normalizeStyles(layout.styles))}\n${scopeCss(layout.css)}`)
 watch(css, (text) => { stylesSheet.textContent = text }, { immediate: true })
 onBeforeUnmount(() => stylesSheet.remove())
 
-// Header and footer heights are the page's top and bottom margins, and styles change line heights,
-// so both re-flow the pages.
-watch(() => [layout.headerHeight, layout.footerHeight, css.value], () => nextTick(() => editor.value?.storage.pagination.refresh?.()))
+// Paper, margins (header and footer heights are the top and bottom ones), the column gap and styles
+// all change where lines fall, so they re-flow the pages.
+watch(
+  () => [layout.headerHeight, layout.footerHeight, layout.marginLeft, layout.marginRight, layout.columnGap, css.value],
+  () => nextTick(() => editor.value?.storage.pagination.refresh?.()),
+)
 // Each slot is Markdown. Per sheet: {{ }} scripts run (if allowed), {page}/{pages} fill in, the page
 // number joins its slot. Slots with none of that render once and are shared by every sheet.
 const scriptVars = (n) => ({
@@ -272,6 +278,14 @@ async function styleSelection() {
   cssPanel.value?.addRule(ids.map((id) => `#${id}`).join(', '))
 }
 const selItems = [{ label: 'Style in CSS', run: styleSelection }]
+// Toolbar's Layout menu: a rule for the cursor's section (given a saved id first).
+async function styleSection() {
+  const id = pinSection(editor.value)
+  if (!id) return
+  panel.value = 'css'
+  await nextTick()
+  cssPanel.value?.addRule(`#${id}`)
+}
 
 // The side panel sits under the sticky toolbar, whose height changes as the command bar wraps.
 let chromeResize
@@ -300,7 +314,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 <template>
   <EditorToolbar
     :editor="activeEditor" :name="name" :dirty="dirty" :panel="panel"
-    @file="fileActions[$event]()" @image="doc.insertImage($event, undefined, activeEditor)" @panel="togglePanel" @note="insertNote"
+    @file="fileActions[$event]()" @image="doc.insertImage($event, undefined, activeEditor)" @panel="togglePanel" @note="insertNote" @section-css="styleSection"
   />
   <div :class="['workspace', { 'with-side': panel }]">
   <main class="desk">
@@ -308,15 +322,20 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       ref="pageEl"
       :class="['page', { 'hf-mode': editing }]"
       :style="{
+        '--sheet-w': `${sheet.width}mm`,
+        '--sheet-h': `${sheet.height}mm`,
         '--margin-top': `${layout.headerHeight}mm`,
         '--margin-bottom': `${layout.footerHeight}mm`,
+        '--margin-left': `${layout.marginLeft}mm`,
+        '--margin-right': `${layout.marginRight}mm`,
+        '--column-gap': `${layout.columnGap}mm`,
         '--header-size': `${layout.headerSize}pt`,
         '--footer-size': `${layout.footerSize}pt`,
-        minHeight: `calc(${pages} * (297mm + var(--page-gap)) - var(--page-gap))`,
+        minHeight: `calc(${pages} * (var(--sheet-h) + var(--page-gap)) - var(--page-gap))`,
       }"
       @mousedown.capture="onPageMouseDown"
     >
-      <div v-for="n in pages" :id="`sheet-${n}`" :key="n" class="sheet" :style="{ top: `calc(${n - 1} * (297mm + var(--page-gap)))` }">
+      <div v-for="n in pages" :id="`sheet-${n}`" :key="n" class="sheet" :style="{ top: `calc(${n - 1} * (var(--sheet-h) + var(--page-gap)))` }">
         <template v-for="z in ['header', 'footer']" :key="z">
           <div v-if="sheetZones[n - 1]?.[z]" :id="`${z}-${n}`" :class="['hf', `hf-${z}`]">
             <div
@@ -329,7 +348,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       <template v-for="(list, k) in sheetNotes" :key="`fn${k}`">
         <ol
           v-if="list.length" :id="`footnotes-${k + 1}`" class="fn-area" :dir="noteDir(list[0].text)"
-          :style="{ top: `calc(${k + 1} * (297mm + var(--page-gap)) - var(--page-gap) - var(--margin-bottom))` }"
+          :style="{ top: `calc(${k + 1} * (var(--sheet-h) + var(--page-gap)) - var(--page-gap) - var(--margin-bottom))` }"
         >
           <li v-for="n in list" :id="`footnote-text-${n.number}`" :key="n.id" class="fn-item" :dir="noteDir(n.text)" @click="editFootnote(n.id)">
             <span class="fn-num">{{ n.number }}</span>
@@ -364,7 +383,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       <div
         v-if="editing"
         class="sheet-edit"
-        :style="{ top: `calc(${Math.min(editing.n, pages) - 1} * (297mm + var(--page-gap)))` }"
+        :style="{ top: `calc(${Math.min(editing.n, pages) - 1} * (var(--sheet-h) + var(--page-gap)))` }"
         @keydown.esc="stopEditing"
       >
         <div :class="['hf', `hf-${editing.zone}`, 'hf-edit']">

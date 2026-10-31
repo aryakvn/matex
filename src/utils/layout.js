@@ -1,5 +1,6 @@
-// Page layout: header/footer zones and page numbers. Stored as page.json inside the .matex archive.
-// A zone's height is the page margin on that side, so resizing it also moves the body text.
+// Page layout: paper, side margins, column gap, header/footer zones and page numbers. Stored as
+// page.json inside the .matex archive.
+// A zone's height is the page margin on that side (top/bottom), so resizing it also moves the body text.
 // Each zone has three slots (left, centre, right); the page number is merged into one of them.
 // `styles` (paragraph styles and their fonts) lives here too, see styles.js, and `css`, the
 // document's own CSS from the CSS panel (scopeCss in styles.js), which is saved as style.css instead.
@@ -14,9 +15,34 @@ export const NUMBER_FORMATS = [
 ]
 export const ALIGNS = ['left', 'center', 'right']
 
+// Paper sizes in mm, portrait (width, height).
+export const PAPERS = {
+  A3: [297, 420],
+  A4: [210, 297],
+  A5: [148, 210],
+  B5: [176, 250],
+  Letter: [215.9, 279.4],
+  Legal: [215.9, 355.6],
+}
+
+// { width, height } in mm of one sheet, after orientation.
+export function sheetSize(layout) {
+  const [w, h] = PAPERS[layout.paper] ?? PAPERS.A4
+  return layout.landscape ? { width: h, height: w } : { width: w, height: h }
+}
+
+// Columns (set per section, sections.js) flow sheet by sheet through CSS wrapped columns (column-wrap,
+// Chromium 145+). Elsewhere (the macOS and Linux webviews, for now) a section shows as one column.
+export const canWrapColumns = typeof CSS !== 'undefined' && !!CSS.supports?.('column-wrap', 'wrap')
+
 export const defaultLayout = () => ({
-  headerHeight: 25, // mm
-  footerHeight: 25,
+  paper: 'A4',
+  landscape: false,
+  marginLeft: 20, // mm
+  marginRight: 20,
+  columnGap: 10, // mm, between the columns of every section that has them
+  headerHeight: 25, // mm, = top margin
+  footerHeight: 25, // = bottom margin
   headerSize: 10, // pt
   footerSize: 10,
   header: ['', '', ''], // left, centre, right; may use {page} and {pages}
@@ -36,6 +62,11 @@ export function normalizeLayout(raw) {
   const r = raw && typeof raw === 'object' ? raw : {}
   const n = r.number && typeof r.number === 'object' ? r.number : {}
   return {
+    paper: pick(r.paper, Object.keys(PAPERS), d.paper),
+    landscape: r.landscape === true,
+    marginLeft: num(r.marginLeft, 0, 100, d.marginLeft),
+    marginRight: num(r.marginRight, 0, 100, d.marginRight),
+    columnGap: num(r.columnGap, 0, 50, d.columnGap),
     headerHeight: num(r.headerHeight, 5, 100, d.headerHeight),
     footerHeight: num(r.footerHeight, 5, 100, d.footerHeight),
     headerSize: num(r.headerSize, 6, 36, d.headerSize),

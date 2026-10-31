@@ -2,11 +2,11 @@
 // Dropdown for the toolbar: a button that opens a list of actions.
 // Closes on choice, outside click, or Escape.
 import { ref, onBeforeUnmount } from 'vue'
-import { ChevronDown } from 'lucide-vue-next'
+import { ChevronDown, Check } from 'lucide-vue-next'
 
 defineProps({
   label: { type: String, required: true },
-  // [{ label, hint?, disabled?, run }] ; null = divider
+  // [{ label, hint?, disabled?, checked?, run }] ; null = divider. `checked` (true/false) makes a radio item.
   items: { type: Array, required: true },
   chevron: { type: Boolean, default: true },
 })
@@ -51,9 +51,13 @@ onBeforeUnmount(close)
         <template v-for="(item, i) in items" :key="i">
           <li v-if="!item" class="menu-sep" role="separator" />
           <li v-else role="none">
-            <button type="button" role="menuitem" :disabled="item.disabled" @click="choose(item)">
+            <button
+              type="button" :role="item.checked === undefined ? 'menuitem' : 'menuitemradio'" :aria-checked="item.checked"
+              :disabled="item.disabled" @click="choose(item)"
+            >
               <span>{{ item.label }}</span>
               <kbd v-if="item.hint">{{ item.hint }}</kbd>
+              <Check v-if="item.checked" :size="16" aria-hidden="true" />
             </button>
           </li>
         </template>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { defaultLayout, normalizeLayout, zoneSlots, isDefaultLayout } from '../src/utils/layout.js'
+import { defaultLayout, normalizeLayout, zoneSlots, isDefaultLayout, sheetSize } from '../src/utils/layout.js'
 import { pack, unpack } from '../src/utils/archive.js'
 
 describe('layout', () => {
@@ -10,6 +10,13 @@ describe('layout', () => {
     expect(l.footerSize).toBe(10)
     expect(l.number.where).toBe('footer')
     expect(l.number.start).toBe(3)
+  })
+
+  it('reads paper, side margins and column gap, and turns the sheet for landscape', () => {
+    const l = normalizeLayout({ paper: 'A5', landscape: true, marginLeft: -3, columnGap: 999 })
+    expect(sheetSize(l)).toEqual({ width: 210, height: 148 })
+    expect([l.marginLeft, l.marginRight, l.columnGap]).toEqual([0, 20, 50])
+    expect(sheetSize(normalizeLayout({ paper: 'Moon' }))).toEqual({ width: 210, height: 297 })
   })
 
   it('puts the page number in the chosen slot, with start, format, digits and skip-first', () => {

@@ -45,6 +45,10 @@ Nobody has run these yet. They work in the browser, but are untested in the Taur
 - [ ] A `]` in an image's file name breaks its Markdown alt text. Escape it.
 - [ ] Several images dropped at once land in reverse order.
 - [ ] A footnote longer than the room left on its sheet runs into the bottom margin; it isn't split across sheets.
+- [ ] In a section with columns, footnotes are drawn over the bottom of the columns; the text doesn't make room for them.
+- [ ] Sections only break to a new sheet (Word's "next page"); no continuous sections, and paper, orientation and margins are still the same for the whole document.
+- [ ] A fenced div inside a section (`:::` not written by MaTex) is unwrapped on open.
+- [ ] Columns need CSS `column-wrap` (Chromium 145+); the macOS and Linux webviews show one column until WebKit has it.
 - [ ] Saving overwrites the file in place, so a crash mid-save can corrupt it. Write to a temp file, then rename.
 - [ ] Pressing Ctrl+S twice quickly on an untitled document opens two Save dialogs. Add an in-flight guard.
 - [ ] The link box rejects `example.com` and `#anchor` (`type="url"`).

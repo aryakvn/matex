@@ -2,18 +2,23 @@
   The document's only stylesheet. Kept free of app chrome so a future
   print/PDF step can render DOCUMENT.md to HTML and apply this file alone.
 */
-@page { size: A4; margin: 0; }
+@page { size: A4; margin: 0; } /* App.vue adds the page setup's paper size after this */
 
 .page {
   box-sizing: border-box;
-  width: 210mm;
-  max-width: 100%;
-  min-height: 297mm;
-  margin: 0 auto;
-  --margin-top: 25mm; /* = the header's height; App.vue sets both margins from the page setup */
+  /* App.vue sets all of these from the page setup. */
+  --sheet-w: 210mm;
+  --sheet-h: 297mm;
+  --margin-top: 25mm; /* = the header's height */
   --margin-bottom: 25mm; /* = the footer's height */
-  --margin-x: 20mm;
-  padding: var(--margin-top) var(--margin-x) var(--margin-bottom);
+  --margin-left: 20mm;
+  --margin-right: 20mm;
+  --text-h: calc(var(--sheet-h) - var(--margin-top) - var(--margin-bottom)); /* one sheet's text area */
+  width: var(--sheet-w);
+  max-width: 100%;
+  min-height: var(--sheet-h);
+  margin: 0 auto;
+  padding: var(--margin-top) var(--margin-right) var(--margin-bottom) var(--margin-left);
   background: #fff;
   color: #1a1a1a;
   font-family: Georgia, "Times New Roman", Tahoma, serif;
@@ -25,8 +30,25 @@
    themselves are CSS made by src/utils/styles.js. No --fa-font = the Latin font's stack. */
 .page span.persian { font-family: var(--fa-font); font-size: calc(var(--fa-scale, 1) * 1em); }
 
-.page .ProseMirror { position: relative; outline: none; min-height: calc(297mm - var(--margin-top) - var(--margin-bottom)); }
-.page .ProseMirror > :first-child { margin-top: 0; }
+.page .ProseMirror { position: relative; outline: none; min-height: var(--text-h); }
+.page .section > :first-child { margin-top: 0; }
+
+/* Sections (src/editor/sections.js) each start on a new sheet (pagination.js). One with columns
+   (.cols, --columns from its node) has one row of columns per sheet, filled in order; the gap between
+   rows is the bottom margin, the gap between sheets and the next top margin. The browser breaks the
+   text there, so headings keep with the next block. Without column-wrap (WebKit, for now) such a
+   section stays one column. */
+@supports (column-wrap: wrap) {
+  .page .section.cols {
+    column-count: var(--columns);
+    column-gap: var(--column-gap);
+    column-fill: auto;
+    column-height: var(--text-h);
+    column-wrap: wrap;
+    row-gap: calc(var(--margin-bottom) + var(--page-gap, 0px) + var(--margin-top));
+  }
+  .page .section.cols :is(h1, h2, h3, h4, h5, h6) { break-after: avoid; }
+}
 
 /* Page breaks (src/editor/pagination.js): spacers that carry the next line to the next sheet.
    Hidden while the layout is measured. */
@@ -42,7 +64,7 @@
   align-items: center;
   gap: 1em;
   box-sizing: border-box;
-  padding-inline: var(--margin-x);
+  padding: 0 var(--margin-right) 0 var(--margin-left);
   color: #555;
   line-height: 1.3;
   overflow: hidden;
@@ -101,7 +123,7 @@
 .page pre .hljs-deletion { color: #82071e; background: #ffebe9; }
 .page hr { border: 0; border-top: 1px solid #ccc; margin: 1.5em 0; }
 /* No image taller than a sheet's text area, so every image fits on one page. */
-.page img { display: block; max-width: 100%; max-height: calc(297mm - var(--margin-top) - var(--margin-bottom)); height: auto; margin: 0 0 0.8em; }
+.page img { display: block; max-width: 100%; max-height: var(--text-h); height: auto; margin: 0 0 0.8em; }
 .page img.ProseMirror-selectednode { outline: 2px solid #1a55c4; }
 .page table { border-collapse: collapse; width: 100%; margin: 0 0 0.8em; }
 .page th, .page td { border: 1px solid #bbb; padding: 0.3em 0.6em; vertical-align: top; text-align: start; }
@@ -137,7 +159,8 @@
 .page .fn-area {
   position: absolute;
   z-index: 1;
-  inset-inline: var(--margin-x);
+  left: var(--margin-left);
+  right: var(--margin-right);
   transform: translateY(-100%);
   margin: 0;
   padding: 0.9em 0 0;
@@ -164,7 +187,7 @@
 .page .refs-text { flex: 1; min-width: 0; }
 .page :is(.refs-empty, .refs-blank) { color: #888; }
 
-/* Print the same 210mm column with the same margins, so screen sheets and paper pages match. */
+/* Print the same column with the same margins, so screen sheets and paper pages match. */
 @media print {
-  .page { width: 210mm; max-width: none; min-height: 0 !important; padding-bottom: 0; }
+  .page { width: var(--sheet-w); max-width: none; min-height: 0 !important; padding-bottom: 0; }
 }

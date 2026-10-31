@@ -19,7 +19,7 @@ A [few words]{#w} here.
 
 - item {#li}`
     expect(roundTrip(md)).toBe(md)
-    const json = make(md).getJSON().content
+    const json = make(md).getJSON().content[0].content
     expect(json[0].attrs).toMatchObject({ id: 'top', unlisted: true })
     expect(json[1].attrs.id).toBe('intro')
     expect(json[2].content[1]).toMatchObject({ text: 'few words', marks: [{ type: 'span', attrs: { id: 'w' } }] })
@@ -29,14 +29,14 @@ A [few words]{#w} here.
   it('literal attribute text stays text', () => {
     const json = { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'see {#x}' }] }] }
     const out = new Editor({ ...editorOptions, contentType: 'json', element: document.createElement('div'), content: json }).getMarkdown()
-    expect(make(out).getJSON().content[0]).toMatchObject({ attrs: { id: null }, content: [{ text: 'see {#x}' }] })
+    expect(make(out).getJSON().content[0].content[0]).toMatchObject({ attrs: { id: null }, content: [{ text: 'see {#x}' }] })
   })
 
   it('pressing Enter does not copy the id', () => {
     const editor = make('Intro {#intro}')
-    editor.commands.setTextSelection(3)
+    editor.commands.setTextSelection(4)
     editor.commands.splitBlock()
-    expect(editor.getJSON().content.map((n) => n.attrs.id)).toEqual(['intro', null])
+    expect(editor.getJSON().content[0].content.map((n) => n.attrs.id)).toEqual(['intro', null])
   })
 })
 
@@ -55,7 +55,7 @@ describe('element ids and classes', () => {
 describe('pinSelection', () => {
   it('wraps part of a paragraph in a span and saves it', () => {
     const editor = make('Hello world')
-    editor.view.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, 7, 12)))
+    editor.view.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, 8, 13)))
     const [id] = pinSelection(editor)
     expect(id).toMatch(/^span-[a-z]+$/)
     expect(editor.getMarkdown().trim()).toBe(`Hello [world]{#${id}}`)
@@ -87,7 +87,7 @@ describe('HTML blocks', () => {
   it('keeps block HTML verbatim between Markdown', () => {
     const md = 'Before\n\n<div align="center">\n<b>x</b> {#no}\n</div>\n\nAfter'
     const editor = make(md)
-    expect(editor.getJSON().content.map((n) => n.type)).toEqual(['paragraph', 'htmlBlock', 'paragraph'])
+    expect(editor.getJSON().content[0].content.map((n) => n.type)).toEqual(['paragraph', 'htmlBlock', 'paragraph'])
     expect(roundTrip(md)).toBe(md)
   })
 
@@ -97,7 +97,7 @@ describe('HTML blocks', () => {
     const md = editor.getMarkdown()
     expect(md.trim()).toBe('<div>\n<b>a</b>\n</div>')
     // (the empty paragraph after it is StarterKit's trailing node)
-    expect(make(md).getJSON().content[0]).toMatchObject({ type: 'htmlBlock', attrs: { html: '<div>\n<b>a</b>\n</div>' } })
+    expect(make(md).getJSON().content[0].content[0]).toMatchObject({ type: 'htmlBlock', attrs: { html: '<div>\n<b>a</b>\n</div>' } })
   })
 
   it('draws it sanitized: no scripts, handlers or style', () => {

@@ -59,7 +59,7 @@ describe('markdown', () => {
     const texts = ['2) paren', '1. x', '- x', '+ x', '* x', '# x', '> q', '---', '    indented']
     const json = { type: 'doc', content: texts.map((text) => ({ type: 'paragraph', content: [{ type: 'text', text }] })) }
     const md = new Editor({ ...editorOptions, contentType: 'json', element: document.createElement('div'), content: json }).getMarkdown()
-    const back = make(md).getJSON().content.filter((n) => n.content)
+    const back = make(md).getJSON().content[0].content.filter((n) => n.content)
     expect(back.map((n) => n.type)).toEqual(texts.map(() => 'paragraph'))
     expect(back.map((n) => n.content.map((c) => c.text).join(''))).toEqual(texts)
   })
@@ -149,7 +149,7 @@ describe('manual direction', () => {
       { type: 'paragraph', content: [{ type: 'text', text: 'end' }] },
     ] }
     const editor = new Editor({ ...editorOptions, element: document.createElement('div'), content: json, contentType: 'json' })
-    const reopened = make(editor.getMarkdown()).getJSON().content
+    const reopened = make(editor.getMarkdown()).getJSON().content[0].content
     expect(reopened.map((n) => [n.type, n.attrs.dir, n.content?.[0]?.text])).toEqual([
       ['paragraph', 'rtl', '# x'], ['paragraph', 'rtl', undefined], ['paragraph', 'rtl', undefined], ['paragraph', 'auto', 'end'],
     ])
