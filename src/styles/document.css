@@ -129,6 +129,13 @@
 .page img.align-left { margin-left: 0; margin-right: auto; }
 .page img.align-center { margin-left: auto; margin-right: auto; }
 .page img.align-right { margin-left: auto; margin-right: 0; }
+/* Wrapped: the image (and its caption, image.js) floats to its side and text flows beside it. A float
+   never leaves its section, which starts a new sheet. */
+.page img.wrap.align-left { float: left; clear: left; margin: 0.2em 1em 0.6em 0; }
+.page img.wrap.align-right { float: right; clear: right; margin: 0.2em 0 0.6em 1em; }
+.page .wrap-caption.align-left { float: left; clear: left; margin: -0.4em 1em 0.6em 0; }
+.page .wrap-caption.align-right { float: right; clear: right; margin: -0.4em 0 0.6em 1em; }
+.page .section::after { content: ""; display: block; clear: both; }
 .page table { border-collapse: collapse; width: 100%; margin: 0 0 0.8em; }
 .page th, .page td { border: 1px solid #bbb; padding: 0.3em 0.6em; vertical-align: top; text-align: start; }
 .page th { background: #f2f2f2; }

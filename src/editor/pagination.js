@@ -130,8 +130,16 @@ function findBreaks(view, page) {
     let prev = el.previousElementSibling
     while (prev?.classList.contains('page-gap')) prev = prev.previousElementSibling
     const extra = prev ? Math.min(parseFloat(getComputedStyle(prev).marginBottom), parseFloat(getComputedStyle(el).marginTop)) : 0
+    // A caption right under an image or table moves to the next sheet with it.
+    let end = pos + node.nodeSize
+    let bottom = rect.bottom
+    const next = view.state.doc.nodeAt(end)
+    if (next?.type.name === 'caption') {
+      bottom = Math.max(bottom, view.nodeDOM(end)?.getBoundingClientRect?.().bottom ?? 0)
+      end += next.nodeSize
+    }
     // ponytail: tables and the table of contents move whole; one taller than a sheet runs over its margin.
-    while (at(rect.bottom) > limit(pos + node.nodeSize) && at(rect.top) > sheetTop(k) + 1) breakBefore(pos, at(rect.top), false, extra)
+    while (at(bottom) > limit(end) && at(rect.top) > sheetTop(k) + 1) breakBefore(pos, at(rect.top), false, extra)
     heading = null
   }
 

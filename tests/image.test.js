@@ -38,6 +38,18 @@ describe('image settings', () => {
     expect(editor.getMarkdown()).toBe('![a](x.png){width=30% .center brightness=90%}')
   })
 
+  it('wrap round-trips and floats its caption at the image width', () => {
+    const md = '![a](x.png){width=40% .right .wrap}\n\n: fig-1: cap {#IMG-1}\n\nText beside.'
+    const editor = make(md)
+    expect(editor.getMarkdown()).toBe(md)
+    expect(imageOf(editor).attrs.wrap).toBe(true)
+    const caption = editor.view.dom.querySelector('.caption')
+    expect(caption.classList.contains('wrap-caption')).toBe(true)
+    expect(caption.classList.contains('align-right')).toBe(true)
+    expect(caption.style.width).toBe('40%')
+    expect(make('![a](x.png){.center}\n\n: fig-1: cap {#IMG-1}').view.dom.querySelector('.wrap-caption')).toBe(null)
+  })
+
   it('helpers', () => {
     expect(parseImageAttrs(' .left  width=5% ')).toEqual({ align: 'left', width: 5 })
     expect(imageAttrBlock({ brightness: 100, contrast: 100 })).toBe('')

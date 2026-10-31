@@ -54,6 +54,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Make the table of contents title editable: click it and type (e.g. «فهرست مطالب»). Saved as `[TOC: Title]`; the default "Contents" still saves as `[TOC]`.
 - Add a Word-style status bar at the bottom of the window: the page the cursor is on ("Page 2 of 5") and the document's word count.
 - Add picture tools: select an image for a Picture group in the ribbon (width as % of the text column, align left/center/right, grayscale/sepia/invert filters, brightness and contrast sliders, flip, reset) and corner handles to drag-resize it. Saved as a Pandoc attribute block after the image (`![a](assets/a.png){width=50% .center .sepia brightness=120%}`); unknown items in it are kept.
+- Add text wrapping around images (Wrap text button in the Picture group): the image floats to its left or right side and text flows beside it; its caption floats with it at the same width. Turning it on picks the paragraph's start side and a 40% width if none was set; centring ends it. Saved as `.wrap` (`{width=40% .right .wrap}`).
 ### Changed
 - Replace the app icon with the new MaTex logo (desktop icons regenerated from `app-icon.png`, browser favicon, title strip) and show it at the top of the README.
 - Excluded headings now leave the table of contents on screen too (it shows what will print); bring them back from the excluded-headings menu beside the title.
@@ -73,3 +74,4 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Align page breaks to line boxes instead of glyph boxes, so the sheet gap over a split code block or quote sits exactly on the gap between sheets and each sheet's text starts exactly at its top margin.
 - Make the left-to-right / right-to-left buttons work in bulleted and numbered lists: the list item now takes the direction, so its bullet or number and indent move to that side (also when reopened).
 - Lists and the table of contents now read in the direction of their first item: a list starting with Persian puts every bullet or number on the right (and one starting with English on the left), unless an item's direction is set by hand. Before, both were always left to right, because `dir="auto"` skips child elements that have their own direction.
+- Keep a caption on the same sheet as its image or table; a figure near a sheet's bottom no longer leaves its caption on the next one.

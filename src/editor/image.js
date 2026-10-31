@@ -1,8 +1,11 @@
 import Image from '@tiptap/extension-image'
+import { Plugin, PluginKey } from '@tiptap/pm/state'
+import { Decoration, DecorationSet } from '@tiptap/pm/view'
 
 // Picture settings (Picture group of the toolbar, resize handles in App.vue), saved as a Pandoc
 // attribute block right after the image:
 //   ![alt](assets/a.png){width=50% .center .grayscale brightness=120% contrast=90% .flip-h}
+// `.wrap` with `.left`/`.right` floats the image to that side and lets the text flow beside it.
 // Width is a percentage of the text column, so it prints the same on any paper. Items MaTex doesn't
 // know (`#id`, `height=3cm`) are kept as written.
 export const IMAGE_ALIGNS = ['left', 'center', 'right']
@@ -20,6 +23,7 @@ export function parseImageAttrs(text) {
     const cls = item[0] === '.' ? item.slice(1) : null
     const [, key, value] = /^(width|brightness|contrast)=(\d+(?:\.\d+)?)%$/.exec(item) ?? []
     if (IMAGE_ALIGNS.includes(cls)) attrs.align = cls
+    else if (cls === 'wrap') attrs.wrap = true
     else if (IMAGE_FILTERS.includes(cls)) attrs.filter = cls
     else if (FLIPS[cls]) attrs[FLIPS[cls]] = true
     else if (key === 'width') attrs.width = clampWidth(+value)
@@ -35,6 +39,7 @@ export function imageAttrBlock(a = {}) {
   const items = [
     a.width && `width=${a.width}%`,
     a.align && `.${a.align}`,
+    a.wrap && '.wrap',
     a.filter && `.${a.filter}`,
     a.brightness != null && a.brightness !== 100 && `brightness=${a.brightness}%`,
     a.contrast != null && a.contrast !== 100 && `contrast=${a.contrast}%`,
@@ -76,6 +81,11 @@ export const Picture = Image.extend({
         parseHTML: (el) => IMAGE_ALIGNS.find((a) => el.classList.contains(`align-${a}`)) ?? null,
         renderHTML: ({ align }) => (align ? { class: `align-${align}` } : {}),
       },
+      wrap: {
+        default: false,
+        parseHTML: (el) => el.classList.contains('wrap'),
+        renderHTML: ({ wrap }) => (wrap ? { class: 'wrap' } : {}),
+      },
       filter: {
         default: null,
         parseHTML: (el) => IMAGE_FILTERS.find((f) => el.classList.contains(`filter-${f}`)) ?? null,
@@ -98,6 +108,10 @@ export const Picture = Image.extend({
     }
   },
 
+  addProseMirrorPlugins() {
+    return [...(this.parent?.() ?? []), wrapCaptions]
+  },
+
   markdownTokenizer: {
     name: 'image',
     level: 'inline',
@@ -113,4 +127,36 @@ export const Picture = Image.extend({
   renderMarkdown(node, h, ctx) {
     return this.parent(node, h, ctx) + imageAttrBlock(node.attrs)
   },
+})
+
+// A caption under a wrapped image floats with it, at the image's width, so the text wraps around both.
+// A decoration, because CSS can't give a sibling the image's width.
+function captionDecorations(doc) {
+  const decos = []
+  doc.descendants((node, pos) => {
+    if (node.isTextblock || node.isAtom) return false
+    let prev = null
+    node.forEach((child, offset) => {
+      const { wrap, align, width } = prev?.attrs ?? {}
+      if (child.type.name === 'caption' && prev?.type.name === 'image' && wrap && (align === 'left' || align === 'right')) {
+        const at = pos + 1 + offset
+        decos.push(Decoration.node(at, at + child.nodeSize, {
+          class: `wrap-caption align-${align}`,
+          ...(width && { style: `width: ${width}%` }),
+        }))
+      }
+      prev = child
+    })
+  })
+  return DecorationSet.create(doc, decos)
+}
+
+const captionKey = new PluginKey('wrapCaptions')
+const wrapCaptions = new Plugin({
+  key: captionKey,
+  state: {
+    init: (_, { doc }) => captionDecorations(doc),
+    apply: (tr, set) => (tr.docChanged ? captionDecorations(tr.doc) : set),
+  },
+  props: { decorations: (state) => captionKey.getState(state) },
 })

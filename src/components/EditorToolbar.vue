@@ -5,7 +5,7 @@ import { computed, ref, nextTick, watch } from 'vue'
 import {
   Undo2, Redo2, Bold, Italic, Strikethrough, Code, Link, List, ListOrdered,
   Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, FileCode, CodeXml, CaseSensitive, Superscript, Columns2, Captions,
-  AlignStartVertical, AlignCenterVertical, AlignEndVertical, Contrast, SunDim, FlipHorizontal2, FlipVertical2,
+  AlignStartVertical, AlignCenterVertical, AlignEndVertical, Contrast, SunDim, FlipHorizontal2, FlipVertical2, TextWrap,
 } from 'lucide-vue-next'
 import ToolbarMenu from './ToolbarMenu.vue'
 import { directionAt } from '../editor/direction.js'
@@ -124,7 +124,7 @@ const picAligns = [
   { align: 'center', label: 'Center', icon: AlignCenterVertical },
   { align: 'right', label: 'Align right', icon: AlignEndVertical },
 ]
-const picDefaults = { width: null, align: null, filter: null, brightness: 100, contrast: 100, flipH: false, flipV: false }
+const picDefaults = { width: null, align: null, wrap: false, filter: null, brightness: 100, contrast: 100, flipH: false, flipV: false }
 const capitalize = (s) => s[0].toUpperCase() + s.slice(1)
 const filterItems = computed(() => [
   ...[null, ...IMAGE_FILTERS].map((f) => ({ label: f ? capitalize(f) : 'No filter', checked: (pic.value?.filter ?? null) === f, run: () => setPic({ filter: f }) })),
@@ -135,6 +135,19 @@ function setWidth(e) {
   const n = parseFloat(e.target.value)
   setPic({ width: Number.isFinite(n) ? clampWidth(n) : null })
   e.target.value = pic.value?.width ?? ''
+}
+// Wrapping floats the image to its side, so it needs left or right: centring or un-aligning ends it,
+// and turning it on picks the paragraph's start side (and a width, if there was none).
+const sides = ['left', 'right']
+function alignPic(a) {
+  const align = pic.value.align === a ? null : a
+  setPic({ align, ...(!sides.includes(align) && { wrap: false }) })
+}
+function toggleWrap() {
+  if (pic.value.wrap) return setPic({ wrap: false })
+  const el = props.editor.view.nodeDOM(props.editor.state.selection.from)?.parentElement
+  const start = el && getComputedStyle(el).direction === 'rtl' ? 'right' : 'left'
+  setPic({ wrap: true, align: sides.includes(pic.value.align) ? pic.value.align : start, width: pic.value.width ?? 40 })
 }
 const adjustOpen = ref(false)
 watch(pic, (p) => { if (!p) adjustOpen.value = false })
@@ -317,9 +330,12 @@ function onImagePicked(e) {
           </label>
           <button
             v-for="a in picAligns" :key="a.align" type="button" class="tb-btn" :title="a.label" :aria-label="a.label"
-            :aria-pressed="pic.align === a.align" @click="setPic({ align: pic.align === a.align ? null : a.align })"
+            :aria-pressed="pic.align === a.align" @click="alignPic(a.align)"
           >
             <component :is="a.icon" :size="18" />
+          </button>
+          <button type="button" class="tb-btn" title="Wrap text around the picture" aria-label="Wrap text" :aria-pressed="pic.wrap" @click="toggleWrap">
+            <TextWrap :size="18" />
           </button>
         </div>
         <div class="tb-row">
