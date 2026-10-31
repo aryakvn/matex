@@ -37,18 +37,30 @@ describe('table of contents', () => {
     expect(editor.getMarkdown().trim()).toBe('# A {.unlisted}')
   })
 
+  it('round-trips an edited title', () => {
+    for (const title of ['فهرست مطالب', 'A [b] c', '']) {
+      const editor = make('# A')
+      editor.commands.setContent({ type: 'doc', content: [{ type: 'tableOfContents', attrs: { title } }] }, { contentType: 'json' })
+      const out = editor.getMarkdown()
+      expect(make(out).getJSON().content[0].content[0]).toMatchObject({ type: 'tableOfContents', attrs: { title } })
+    }
+    expect(make('[TOC]').getJSON().content[0].content[0].attrs.title).toBe('Contents')
+  })
+
   it('literal "[TOC]" and "{.unlisted}" text stays text', () => {
     const json = {
       type: 'doc',
       content: [
         { type: 'paragraph', content: [{ type: 'text', text: '[TOC]' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: '[TOC: x]' }] },
         { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Use {.unlisted}' }] },
       ],
     }
     const out = new Editor({ ...editorOptions, contentType: 'json', element: document.createElement('div'), content: json }).getMarkdown()
     const back = make(out).getJSON().content[0].content
     expect(back[0]).toMatchObject({ type: 'paragraph', content: [{ text: '[TOC]' }] })
-    expect(back[1]).toMatchObject({ type: 'heading', attrs: { unlisted: false }, content: [{ text: 'Use {.unlisted}' }] })
+    expect(back[1]).toMatchObject({ type: 'paragraph', content: [{ text: '[TOC: x]' }] })
+    expect(back[2]).toMatchObject({ type: 'heading', attrs: { unlisted: false }, content: [{ text: 'Use {.unlisted}' }] })
   })
 })
 

@@ -1,5 +1,5 @@
 <script setup>
-// Node view for the [TOC] block: lists the document's headings live with the page each starts on.
+// Node view for the [TOC] block: an editable title (input), then lists the document's headings live with the page each starts on.
 // Each entry's "…" menu excludes that heading. Excluded headings leave the list (so the sheet looks
 // as it prints) and are brought back from the eye-off menu in the margin. Both menus sit outside
 // the text flow so they never move the page breaks.
@@ -44,7 +44,12 @@ const includeItems = computed(() => excluded.value.map((e) => ({ label: `Include
 
 <template>
   <NodeViewWrapper as="nav" class="toc" data-toc contenteditable="false">
-    <p class="toc-title">Contents</p>
+    <!-- Saved on change (blur or Enter), so a retyped title is one undo step. -->
+    <input
+      class="toc-title" :class="{ persian: isRtl(node.attrs.title) }" dir="auto" aria-label="Table of contents title"
+      placeholder="Title" :value="node.attrs.title" :readonly="!editor.isEditable"
+      @change="updateAttributes({ title: $event.target.value.trim() })" @keydown.enter="$event.target.blur()"
+    >
     <ToolbarMenu
       v-if="excluded.length" :label="`Excluded headings (${excluded.length})`" :items="includeItems"
       :chevron="false" class="toc-more toc-excluded"

@@ -39,7 +39,9 @@ export function tocEntries(doc) {
   return list
 }
 
-// Auto table of contents, saved as a `[TOC]` line.
+export const TOC_TITLE = 'Contents'
+
+// Auto table of contents, saved as a `[TOC]` line, or `[TOC: Title]` when its title was edited.
 export const TableOfContents = Node.create({
   name: 'tableOfContents',
   group: 'block',
@@ -47,8 +49,15 @@ export const TableOfContents = Node.create({
   selectable: true,
   draggable: true,
 
+  addAttributes: () => ({
+    title: {
+      default: TOC_TITLE,
+      parseHTML: (el) => el.getAttribute('data-title') ?? TOC_TITLE,
+      renderHTML: (attrs) => ({ 'data-title': attrs.title }),
+    },
+  }),
   parseHTML: () => [{ tag: 'nav[data-toc]' }],
-  renderHTML: () => ['nav', { 'data-toc': '', class: 'toc' }],
+  renderHTML: ({ HTMLAttributes }) => ['nav', mergeAttributes(HTMLAttributes, { 'data-toc': '', class: 'toc' })],
   // Falls back to renderHTML when the editor isn't a Vue one (tests).
   addNodeView: () => VueNodeViewRenderer(TocView),
 
@@ -58,12 +67,12 @@ export const TableOfContents = Node.create({
     level: 'block',
     start: (src) => src.indexOf('[TOC]'),
     tokenize(src) {
-      const match = /^\[TOC\][ \t]*(?:\n+|$)/.exec(src)
-      if (match) return { type: 'tableOfContents', raw: match[0] }
+      const match = /^\[TOC(?::[ \t]*([^\n]*?))?\][ \t]*(?:\n+|$)/.exec(src)
+      if (match) return { type: 'tableOfContents', raw: match[0], title: match[1]?.trim() ?? TOC_TITLE }
     },
   },
-  parseMarkdown: (token, helpers) => helpers.createNode('tableOfContents'),
-  renderMarkdown: () => '[TOC]',
+  parseMarkdown: (token, helpers) => helpers.createNode('tableOfContents', { title: token.title }),
+  renderMarkdown: (node) => (node.attrs.title === TOC_TITLE ? '[TOC]' : `[TOC: ${node.attrs.title}]`),
 
   addCommands() {
     return {

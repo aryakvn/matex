@@ -17,11 +17,11 @@ import { BlockIds, ElementIds, Span, escapeAttrs, attrBlock } from './ids.js'
 import { Section, SectionDocument, SectionMarkdown } from './sections.js'
 
 // A paragraph whose text starts like block syntax ("2) ", "- ", "# ", "---", 4 spaces)
-// (or is "[TOC]", "[REFERENCES]" or a ":::" section fence) would reopen as a list/heading/rule/code block/TOC/references list,
+// (or is "[TOC]", "[TOC: Title]", "[REFERENCES]" or a ":::" section fence) would reopen as a list/heading/rule/code block/TOC/references list,
 // so the leading character is escaped.
 export function escapeBlockStart(md) {
   if (/^ {4}/.test(md)) return '&#32;' + md.slice(1)
-  if (/^(#{1,6}|[>+*-])(\s|$)/.test(md) || /^([-*_])( *\1){2,} *$/.test(md) || /^\[(TOC|REFERENCES)\]\s*$/.test(md) || /^:{3}/.test(md)) return '\\' + md
+  if (/^(#{1,6}|[>+*-])(\s|$)/.test(md) || /^([-*_])( *\1){2,} *$/.test(md) || /^\[(TOC(:.*)?|REFERENCES)\]\s*$/.test(md) || /^:{3}/.test(md)) return '\\' + md
   return md.replace(/^(\d{1,9})([.)])(?=\s|$)/, '$1\\$2')
 }
 

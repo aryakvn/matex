@@ -132,7 +132,12 @@
 .page .selectedCell { background: #dbe7fb; }
 .page .toc { margin: 0 0 1.5em; }
 .page .toc.ProseMirror-selectednode { outline: 2px solid #1a55c4; outline-offset: 4px; }
-.page .toc-title { font-size: 1.25em; font-weight: bold; margin-bottom: 0.4em; }
+.page .toc-title {
+  display: block; width: 100%; box-sizing: border-box; margin: 0 0 0.4em; padding: 0; border: 0; outline: 0;
+  background: none; color: inherit; font: inherit; font-size: 1.25em; font-weight: bold;
+}
+@media screen { .page .toc-title:is(:hover, :focus) { box-shadow: inset 0 -1px #1a55c4; } }
+.page .toc-title.persian { font-family: var(--fa-font); font-size: calc(var(--fa-scale, 1) * 1.25em); }
 .page .toc-list { list-style: none; margin: 0; padding: 0; }
 .page .toc-item { display: flex; align-items: baseline; gap: 0.4em; min-height: 1.8em; }
 .page .toc-item a { color: inherit; text-decoration: none; }
@@ -196,5 +201,6 @@
 
 /* Print the same column with the same margins, so screen sheets and paper pages match. */
 @media print {
+  .page .toc-title::placeholder { color: transparent; }
   .page { width: var(--sheet-w); max-width: none; min-height: 0 !important; padding-bottom: 0; }
 }
