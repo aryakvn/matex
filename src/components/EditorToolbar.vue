@@ -321,7 +321,7 @@ function onImagePicked(e) {
         <span class="tb-label" aria-hidden="true">Insert</span>
       </div>
 
-      <div v-if="pic" class="tb-group" role="group" aria-label="Picture">
+      <div v-if="pic" class="tb-group tb-context" role="group" aria-label="Picture">
         <div class="tb-row">
           <label class="tb-num" title="Width, as a share of the text column (empty = natural size)">
             <span>Width</span>

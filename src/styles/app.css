@@ -20,6 +20,12 @@
   --brand-ink: #0f6cbd;
   --on-brand: #ffffff;
   --focus: #000000;
+  /* Contextual ribbon groups (Picture), like Word's coloured contextual tabs, washed out */
+  --context: #f5f1fc;
+  --context-stroke: #e4daf6;
+  --context-ink: #6b4fa8;
+  --context-hover: #ebe3f9;
+  --context-selected: #e0d4f5;
   --shadow-4: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.14);
   --shadow-16: 0 0 2px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.14);
   --ease-out: cubic-bezier(0.1, 0.9, 0.2, 1);
@@ -46,6 +52,11 @@
     --brand-pressed: #0c3b5e;
     --brand-ink: #479ef5;
     --focus: #ffffff;
+    --context: #2f2a39;
+    --context-stroke: #423a52;
+    --context-ink: #c3b1ec;
+    --context-hover: #3b3448;
+    --context-selected: #463d57;
     --shadow-4: 0 0 2px rgba(0, 0, 0, 0.24), 0 2px 4px rgba(0, 0, 0, 0.28);
     --shadow-16: 0 0 2px rgba(0, 0, 0, 0.24), 0 8px 16px rgba(0, 0, 0, 0.28);
     color-scheme: dark;
@@ -411,6 +422,18 @@ html, .side-body, .desk { scrollbar-width: thin; }
   background: var(--stroke);
 }
 .tb-row { display: flex; align-items: center; gap: 2px; }
+/* A group that shows only for the selection (Picture): tinted so it stands out, its buttons tinted to match. */
+.tb-group.tb-context {
+  margin-inline: 4px;
+  border: 1px solid var(--context-stroke);
+  border-radius: 6px;
+  background: var(--context);
+  --hover: var(--context-hover);
+  --pressed: var(--context-selected);
+  --selected: var(--context-selected);
+}
+.tb-group.tb-context::after { display: none; }
+.tb-context .tb-label { color: var(--context-ink); font-weight: 600; }
 .tb-label {
   margin-top: auto;
   padding-top: 2px;

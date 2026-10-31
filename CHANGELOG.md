@@ -55,6 +55,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Add a Word-style status bar at the bottom of the window: the page the cursor is on ("Page 2 of 5") and the document's word count.
 - Add picture tools: select an image for a Picture group in the ribbon (width as % of the text column, align left/center/right, grayscale/sepia/invert filters, brightness and contrast sliders, flip, reset) and corner handles to drag-resize it. Saved as a Pandoc attribute block after the image (`![a](assets/a.png){width=50% .center .sepia brightness=120%}`); unknown items in it are kept.
 - Add text wrapping around images (Wrap text button in the Picture group): the image floats to its left or right side and text flows beside it; its caption floats with it at the same width. Turning it on picks the paragraph's start side and a 40% width if none was set; centring ends it. Saved as `.wrap` (`{width=40% .right .wrap}`).
+- Tint the Picture group of the ribbon a washed-out violet (its own `--context*` tokens, light and dark), like Word's coloured contextual tabs, so it stands out while an image is selected.
 ### Changed
 - Replace the app icon with the new MaTex logo (desktop icons regenerated from `app-icon.png`, browser favicon, title strip) and show it at the top of the README.
 - Excluded headings now leave the table of contents on screen too (it shows what will print); bring them back from the excluded-headings menu beside the title.
