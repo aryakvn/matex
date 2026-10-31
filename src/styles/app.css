@@ -309,17 +309,38 @@ body {
 }
 .doc-state { flex: none; color: var(--muted); font-size: 12px; }
 
+.menubar { display: flex; gap: 2px; padding: 0 0 4px; }
+
+/* Word-style ribbon: groups of two rows, a caption under each, a thin rule between groups */
 .cmdbar {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 2px;
-  padding: 4px 8px;
+  align-items: stretch;
+  row-gap: 4px;
+  padding: 4px 4px 2px;
   background: var(--surface);
   border-radius: 8px;
   box-shadow: var(--shadow-4);
 }
-.tb-sep { width: 1px; height: 20px; margin: 0 6px; background: var(--stroke); }
+.tb-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 8px;
+  border-inline-end: 1px solid var(--stroke);
+}
+.tb-group:last-child { border-inline-end: 0; }
+.tb-row { display: flex; align-items: center; gap: 2px; }
+.tb-label {
+  margin-top: auto;
+  padding-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 14px;
+  text-align: center;
+}
+.cmdbar .tb-btn { height: 28px; min-width: 28px; padding: 0 4px; }
+.cmdbar .tb-select { height: 28px; }
 
 .tb-btn {
   display: inline-flex;

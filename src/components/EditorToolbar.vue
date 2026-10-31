@@ -156,129 +156,151 @@ function onImagePicked(e) {
       <span v-if="dirty" class="doc-state">Unsaved changes</span>
     </div>
 
-    <div class="cmdbar" role="toolbar" aria-label="Formatting">
+    <!-- Menu row above the ribbon, where Word keeps its tabs. -->
+    <nav class="menubar" aria-label="Menu">
       <ToolbarMenu label="File" :items="fileItems" />
+    </nav>
 
-      <span class="tb-sep" />
-
-      <button type="button" class="tb-btn" title="Undo" aria-label="Undo" :disabled="!editor.can().undo()" @click="chain().undo().run()">
-        <Undo2 :size="20" />
-      </button>
-      <button type="button" class="tb-btn" title="Redo" aria-label="Redo" :disabled="!editor.can().redo()" @click="chain().redo().run()">
-        <Redo2 :size="20" />
-      </button>
-
-      <span class="tb-sep" />
-
-      <span class="tb-select-wrap">
-        <select class="tb-select" aria-label="Text style" :value="blockType" @change="applyStyle(editor, $event.target.value)">
-          <option v-for="s in STYLES" :key="s.key" :value="s.key">{{ s.label }}</option>
-        </select>
-        <ChevronDown :size="16" aria-hidden="true" />
-      </span>
-      <button
-        type="button" class="tb-btn" title="Styles and fonts" aria-label="Styles and fonts"
-        :aria-pressed="panel === 'styles'" @click="emit('panel', 'styles')"
-      >
-        <CaseSensitive :size="20" />
-      </button>
-
-      <span class="tb-sep" />
-
-      <button
-        v-for="m in marks" :key="m.name" type="button" class="tb-btn"
-        :title="`${m.label} (${m.hint})`" :aria-label="m.label"
-        :aria-pressed="editor.isActive(m.name)" @click="m.run"
-      >
-        <component :is="m.icon" :size="20" />
-      </button>
-
-      <div class="link-wrap">
-        <button
-          type="button" class="tb-btn" title="Link" aria-label="Link"
-          :aria-pressed="editor.isActive('link')" :aria-expanded="linkOpen" @click="linkOpen ? (linkOpen = false) : openLink()"
-        >
-          <Link :size="20" />
-        </button>
-        <Transition name="menu">
-          <form v-if="linkOpen" class="link-pop" @submit.prevent="applyLink" @keydown.esc="linkOpen = false">
-            <input ref="linkInput" v-model="linkUrl" type="url" placeholder="https://" aria-label="Link address" dir="ltr" />
-            <button type="submit" class="pop-btn primary">Apply</button>
-            <button v-if="editor.isActive('link')" type="button" class="pop-btn" @click="removeLink">Remove</button>
-          </form>
-        </Transition>
+    <div class="cmdbar" role="toolbar" aria-label="Formatting">
+      <!-- Word's Home ribbon: groups of two button rows with a caption under each. -->
+      <div class="tb-group" role="group" aria-label="Undo">
+        <div class="tb-row">
+          <button type="button" class="tb-btn" title="Undo" aria-label="Undo" :disabled="!editor.can().undo()" @click="chain().undo().run()">
+            <Undo2 :size="18" />
+          </button>
+        </div>
+        <div class="tb-row">
+          <button type="button" class="tb-btn" title="Redo" aria-label="Redo" :disabled="!editor.can().redo()" @click="chain().redo().run()">
+            <Redo2 :size="18" />
+          </button>
+        </div>
+        <span class="tb-label" aria-hidden="true">Undo</span>
       </div>
 
-      <span class="tb-sep" />
+      <div class="tb-group" role="group" aria-label="Font">
+        <div class="tb-row">
+          <span class="tb-select-wrap">
+            <select class="tb-select" aria-label="Text style" :value="blockType" @change="applyStyle(editor, $event.target.value)">
+              <option v-for="s in STYLES" :key="s.key" :value="s.key">{{ s.label }}</option>
+            </select>
+            <ChevronDown :size="16" aria-hidden="true" />
+          </span>
+          <button
+            type="button" class="tb-btn" title="Styles and fonts" aria-label="Styles and fonts"
+            :aria-pressed="panel === 'styles'" @click="emit('panel', 'styles')"
+          >
+            <CaseSensitive :size="18" />
+          </button>
+        </div>
+        <div class="tb-row">
+          <button
+            v-for="m in marks" :key="m.name" type="button" class="tb-btn"
+            :title="`${m.label} (${m.hint})`" :aria-label="m.label"
+            :aria-pressed="editor.isActive(m.name)" @click="m.run"
+          >
+            <component :is="m.icon" :size="18" />
+          </button>
 
-      <button
-        v-for="b in blocks" :key="b.name" type="button" class="tb-btn"
-        :title="b.label" :aria-label="b.label" :aria-pressed="editor.isActive(b.name)" @click="b.run"
-      >
-        <component :is="b.icon" :size="20" />
-      </button>
-      <button type="button" class="tb-btn" title="Divider line" aria-label="Divider line" @click="chain().setHorizontalRule().run()">
-        <Minus :size="20" />
-      </button>
+          <div class="link-wrap">
+            <button
+              type="button" class="tb-btn" title="Link" aria-label="Link"
+              :aria-pressed="editor.isActive('link')" :aria-expanded="linkOpen" @click="linkOpen ? (linkOpen = false) : openLink()"
+            >
+              <Link :size="18" />
+            </button>
+            <Transition name="menu">
+              <form v-if="linkOpen" class="link-pop" @submit.prevent="applyLink" @keydown.esc="linkOpen = false">
+                <input ref="linkInput" v-model="linkUrl" type="url" placeholder="https://" aria-label="Link address" dir="ltr" />
+                <button type="submit" class="pop-btn primary">Apply</button>
+                <button v-if="editor.isActive('link')" type="button" class="pop-btn" @click="removeLink">Remove</button>
+              </form>
+            </Transition>
+          </div>
+        </div>
+        <span class="tb-label" aria-hidden="true">Font</span>
+      </div>
 
-      <span class="tb-sep" />
+      <div class="tb-group" role="group" aria-label="Paragraph">
+        <div class="tb-row">
+          <button
+            v-for="b in blocks" :key="b.name" type="button" class="tb-btn"
+            :title="b.label" :aria-label="b.label" :aria-pressed="editor.isActive(b.name)" @click="b.run"
+          >
+            <component :is="b.icon" :size="18" />
+          </button>
+        </div>
+        <div class="tb-row">
+          <button
+            v-for="d in directions" :key="d.dir" type="button" class="tb-btn"
+            :title="d.label" :aria-label="d.label" :aria-pressed="directionAt(editor.state) === d.dir"
+            @click="chain().toggleDirection(d.dir).run()"
+          >
+            <component :is="d.icon" :size="18" />
+          </button>
+          <button type="button" class="tb-btn" title="Divider line" aria-label="Divider line" @click="chain().setHorizontalRule().run()">
+            <Minus :size="18" />
+          </button>
+        </div>
+        <span class="tb-label" aria-hidden="true">Paragraph</span>
+      </div>
 
-      <button
-        v-for="d in directions" :key="d.dir" type="button" class="tb-btn"
-        :title="d.label" :aria-label="d.label" :aria-pressed="directionAt(editor.state) === d.dir"
-        @click="chain().toggleDirection(d.dir).run()"
-      >
-        <component :is="d.icon" :size="20" />
-      </button>
+      <div class="tb-group" role="group" aria-label="Insert">
+        <div class="tb-row">
+          <button type="button" class="tb-btn" title="Insert image" aria-label="Insert image" @click="imageInput.click()">
+            <Image :size="18" />
+          </button>
+          <input ref="imageInput" type="file" accept="image/*" hidden @change="onImagePicked" />
 
-      <span class="tb-sep" />
+          <ToolbarMenu label="Table" :items="tableItems">
+            <Table :size="18" aria-hidden="true" />
+          </ToolbarMenu>
 
-      <button type="button" class="tb-btn" title="Insert image" aria-label="Insert image" @click="imageInput.click()">
-        <Image :size="20" />
-      </button>
-      <input ref="imageInput" type="file" accept="image/*" hidden @change="onImagePicked" />
+          <button
+            v-if="editor.commands.insertHtmlBlock"
+            type="button" class="tb-btn" title="HTML block" aria-label="HTML block" @click="chain().insertHtmlBlock().run()">
+            <CodeXml :size="18" />
+          </button>
+        </div>
+        <div class="tb-row">
+          <button
+            v-if="editor.commands.insertTableOfContents"
+            type="button" class="tb-btn" title="Table of contents" aria-label="Table of contents" @click="chain().insertTableOfContents().run()">
+            <TableOfContents :size="18" />
+          </button>
 
-      <button
-        v-if="editor.commands.insertTableOfContents"
-        type="button" class="tb-btn" title="Table of contents" aria-label="Table of contents" @click="chain().insertTableOfContents().run()">
-        <TableOfContents :size="20" />
-      </button>
-      <button
-        v-if="editor.commands.insertHtmlBlock"
-        type="button" class="tb-btn" title="HTML block" aria-label="HTML block" @click="chain().insertHtmlBlock().run()">
-        <CodeXml :size="20" />
-      </button>
+          <ToolbarMenu v-if="editor.commands.insertNote" label="Footnotes and references" :items="noteItems()">
+            <Superscript :size="18" aria-hidden="true" />
+          </ToolbarMenu>
 
-      <ToolbarMenu v-if="editor.commands.insertNote" label="Footnotes and references" :items="noteItems()">
-        <Superscript :size="20" aria-hidden="true" />
-      </ToolbarMenu>
+          <ToolbarMenu v-if="editor.commands.insertCaption" label="Captions and cross-references" :items="captionItems()">
+            <Captions :size="18" aria-hidden="true" />
+          </ToolbarMenu>
+        </div>
+        <span class="tb-label" aria-hidden="true">Insert</span>
+      </div>
 
-      <ToolbarMenu v-if="editor.commands.insertCaption" label="Captions and cross-references" :items="captionItems()">
-        <Captions :size="20" aria-hidden="true" />
-      </ToolbarMenu>
-
-      <ToolbarMenu v-if="editor.commands.insertSection" label="Layout: columns and sections" :items="layoutItems()">
-        <Columns2 :size="20" aria-hidden="true" />
-      </ToolbarMenu>
-
-      <ToolbarMenu label="Table" :items="tableItems">
-        <Table :size="20" aria-hidden="true" />
-      </ToolbarMenu>
-
-      <span class="tb-sep" />
-
-      <button
-        type="button" class="tb-btn" title="Header and footer scripts" aria-label="Header and footer scripts"
-        :aria-pressed="panel === 'scripts'" @click="emit('panel', 'scripts')"
-      >
-        <Braces :size="20" />
-      </button>
-      <button
-        type="button" class="tb-btn" title="Document CSS" aria-label="Document CSS"
-        :aria-pressed="panel === 'css'" @click="emit('panel', 'css')"
-      >
-        <FileCode :size="20" />
-      </button>
+      <div class="tb-group" role="group" aria-label="Layout">
+        <div class="tb-row">
+          <ToolbarMenu v-if="editor.commands.insertSection" label="Layout: columns and sections" :items="layoutItems()">
+            <Columns2 :size="18" aria-hidden="true" />
+          </ToolbarMenu>
+        </div>
+        <div class="tb-row">
+          <button
+            type="button" class="tb-btn" title="Header and footer scripts" aria-label="Header and footer scripts"
+            :aria-pressed="panel === 'scripts'" @click="emit('panel', 'scripts')"
+          >
+            <Braces :size="18" />
+          </button>
+          <button
+            type="button" class="tb-btn" title="Document CSS" aria-label="Document CSS"
+            :aria-pressed="panel === 'css'" @click="emit('panel', 'css')"
+          >
+            <FileCode :size="18" />
+          </button>
+        </div>
+        <span class="tb-label" aria-hidden="true">Layout</span>
+      </div>
     </div>
   </header>
 </template>
