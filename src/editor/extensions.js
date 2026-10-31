@@ -9,13 +9,14 @@ import { UnlistedHeading, TableOfContents } from './toc.js'
 import { Pagination } from './pagination.js'
 import { Direction, DirectionMarkdown, withDirMark } from './direction.js'
 import { PersianFont } from './persian.js'
+import { noteExtensions, NoteMarkdown } from './notes.js'
 
 // A paragraph whose text starts like block syntax ("2) ", "- ", "# ", "---", 4 spaces)
-// (or is "[TOC]") would reopen as a list/heading/rule/code block/table of contents,
+// (or is "[TOC]" or "[REFERENCES]") would reopen as a list/heading/rule/code block/TOC/references list,
 // so the leading character is escaped.
 export function escapeBlockStart(md) {
   if (/^ {4}/.test(md)) return '&#32;' + md.slice(1)
-  if (/^(#{1,6}|[>+*-])(\s|$)/.test(md) || /^([-*_])( *\1){2,} *$/.test(md) || /^\[TOC\]\s*$/.test(md)) return '\\' + md
+  if (/^(#{1,6}|[>+*-])(\s|$)/.test(md) || /^([-*_])( *\1){2,} *$/.test(md) || /^\[(TOC|REFERENCES)\]\s*$/.test(md)) return '\\' + md
   return md.replace(/^(\d{1,9})([.)])(?=\s|$)/, '$1\\$2')
 }
 
@@ -30,6 +31,7 @@ export const extensions = [
   SafeParagraph,
   UnlistedHeading,
   TableOfContents,
+  ...noteExtensions,
   Pagination,
   Direction,
   PersianFont,
@@ -46,14 +48,16 @@ export const extensions = [
   // ponytail: HTML with no matching extension (span, div align, mark) keeps its text but
   // loses the tag on save. Add a node/mark per HTML feature once the toolbar can make it.
   DirectionMarkdown,
+  NoteMarkdown, // after DirectionMarkdown: wraps the manager it creates
 ]
 
 // Spread into every `new Editor` / `useEditor`. `dir="auto"` per block = direction
 // from the first strong letter, never saved. A manual override is saved (see direction.js).
 export const editorOptions = { extensions, textDirection: 'auto', contentType: 'markdown' }
 
-// Header/footer slots: the body's editor without sheets or a table of contents.
+// Header/footer slots and note text: the body's editor without sheets, a table of contents or notes.
+const bodyOnly = [Pagination, TableOfContents, ...noteExtensions, NoteMarkdown]
 export const slotEditorOptions = {
   ...editorOptions,
-  extensions: extensions.filter((e) => e !== Pagination && e !== TableOfContents),
+  extensions: extensions.filter((e) => !bodyOnly.includes(e)),
 }

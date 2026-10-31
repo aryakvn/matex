@@ -4,10 +4,11 @@
 import { computed, ref, nextTick } from 'vue'
 import {
   Undo2, Redo2, Bold, Italic, Strikethrough, Code, Link, List, ListOrdered,
-  Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, CaseSensitive,
+  Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, CaseSensitive, Superscript,
 } from 'lucide-vue-next'
 import ToolbarMenu from './ToolbarMenu.vue'
 import { directionAt } from '../editor/direction.js'
+import { noteEntries } from '../editor/notes.js'
 import { STYLES, styleAt, applyStyle } from '../utils/styles.js'
 import appIcon from '../../src-tauri/icons/64x64.png'
 
@@ -17,7 +18,7 @@ const props = defineProps({
   dirty: { type: Boolean, default: false },
   panel: { type: String, default: null }, // the side panel that is open, if any
 })
-const emit = defineEmits(['file', 'image', 'panel'])
+const emit = defineEmits(['file', 'image', 'panel', 'note'])
 
 const mod = /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘' : 'Ctrl+'
 const chain = () => props.editor.chain().focus()
@@ -64,6 +65,20 @@ const tableItems = computed(() => [
   null,
   { label: 'Delete table', disabled: !inTable.value, run: () => chain().deleteTable().run() },
 ])
+
+// Footnotes and references. App.vue inserts them (and opens where the text is written);
+// a reference already in the document can be cited again under the same number.
+const excerpt = (md) => md.replace(/[*_`~\\[\]()#>]/g, '').trim().slice(0, 48) || 'Untitled reference'
+function noteItems() {
+  const refs = noteEntries(props.editor.state.doc).filter((e) => e.kind === 'reference')
+  return [
+    { label: 'Footnote', run: () => emit('note', { kind: 'footnote' }) },
+    { label: 'New reference', run: () => emit('note', { kind: 'reference' }) },
+    ...(refs.length ? [null, ...refs.map((r) => ({ label: `Cite [${r.number}] ${excerpt(r.text)}`, run: () => emit('note', { kind: 'reference', id: r.id }) }))] : []),
+    null,
+    { label: 'References list', run: () => chain().insertReferenceList().run() },
+  ]
+}
 
 // Link: small popover, because window.prompt doesn't exist in Tauri webviews.
 const linkOpen = ref(false)
@@ -195,6 +210,10 @@ function onImagePicked(e) {
         type="button" class="tb-btn" title="Table of contents" aria-label="Table of contents" @click="chain().insertTableOfContents().run()">
         <TableOfContents :size="20" />
       </button>
+
+      <ToolbarMenu v-if="editor.commands.insertNote" label="Footnotes and references" :items="noteItems()">
+        <Superscript :size="20" aria-hidden="true" />
+      </ToolbarMenu>
 
       <ToolbarMenu label="Table" :items="tableItems">
         <Table :size="20" aria-hidden="true" />

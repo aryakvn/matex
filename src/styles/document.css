@@ -124,6 +124,46 @@
 .page .toc-l3 { padding-inline-start: 3em; }
 .page .toc-l4, .page .toc-l5, .page .toc-l6 { padding-inline-start: 4.5em; }
 
+/* Footnote and reference markers (src/editor/notes.js). The number is a decoration's data-n.
+   line-height 0 so a marker never makes its line taller. */
+.page sup.note { font-size: 0.75em; line-height: 0; vertical-align: super; cursor: pointer; }
+.page sup.note::after { content: attr(data-n); }
+.page sup.note[data-kind="reference"] { color: #1a55c4; }
+.page sup.note[data-kind="reference"]::after { content: "[" attr(data-n) "]"; }
+.page sup.note.ProseMirror-selectednode { outline: 1px solid #1a55c4; outline-offset: 1px; }
+
+/* Footnotes: at the bottom of each sheet's text area, above the footer, under a short divider
+   (drawn by App.vue; pagination.js keeps the text above them). */
+.page .fn-area {
+  position: absolute;
+  z-index: 1;
+  inset-inline: var(--margin-x);
+  transform: translateY(-100%);
+  margin: 0;
+  padding: 0.9em 0 0;
+  list-style: none;
+  font-size: 0.8em;
+  line-height: 1.4;
+}
+.page .fn-area::before { content: ""; position: absolute; top: 0.45em; inset-inline-start: 0; width: 33%; border-top: 1px solid #888; }
+.page .fn-area > .fn-item { display: flex; gap: 0.35em; margin: 0; cursor: text; }
+.page .fn-num { flex: none; position: relative; top: -0.35em; font-size: 0.8em; }
+.page .fn-text, .page .fn-item .note-field { flex: 1; min-width: 0; }
+.page .fn-item :is(p, h1, h2, h3, ul, ol, pre, blockquote) { margin: 0; font-size: inherit; }
+.page .note-field .ProseMirror { min-height: 1.3em; }
+.page .fn-measure { top: 0; transform: none; visibility: hidden; pointer-events: none; }
+
+/* The [REFERENCES] block, like the table of contents. */
+.page .references { margin: 0 0 1.5em; }
+.page .references.ProseMirror-selectednode { outline: 2px solid #1a55c4; outline-offset: 4px; }
+.page .refs-title { font-size: 1.25em; font-weight: bold; margin-bottom: 0.4em; }
+.page .refs-list { list-style: none; margin: 0; padding: 0; }
+.page .refs-list > .refs-item { display: flex; gap: 0.5em; margin: 0; cursor: pointer; }
+.page .refs-item p { margin: 0; }
+.page .refs-num { flex: none; min-width: 2em; }
+.page .refs-text { flex: 1; min-width: 0; }
+.page :is(.refs-empty, .refs-blank) { color: #888; }
+
 /* Print the same 210mm column with the same margins, so screen sheets and paper pages match. */
 @media print {
   .page { width: 210mm; max-width: none; min-height: 0 !important; padding-bottom: 0; }

@@ -19,7 +19,8 @@ MaTex exists because writing a Persian thesis offline on Linux, with your own fo
 
 - [ ] Math (KaTeX or MathJax, saved as `$…$` / `$$…$$` in Markdown).
 - [ ] Page layouts and templates (thesis, article, book).
-- [ ] Footnotes, citations and bibliography.
+- [x] Footnotes and references (Wikipedia style), with a references list.
+- [ ] Citation styles and a bibliography database (BibTeX).
 - [ ] Multi-file books (chapters as separate files in one project).
 - [ ] Export to PDF / HTML / DOCX.
 - [ ] Raw Markdown/HTML source view for the times you want it.
@@ -43,6 +44,7 @@ Nobody has run these yet. They work in the browser, but are untested in the Taur
 - [ ] A reopened SVG image doesn't render (the blob has no MIME type). Infer the type from the extension.
 - [ ] A `]` in an image's file name breaks its Markdown alt text. Escape it.
 - [ ] Several images dropped at once land in reverse order.
+- [ ] A footnote longer than the room left on its sheet runs into the bottom margin; it isn't split across sheets.
 - [ ] Saving overwrites the file in place, so a crash mid-save can corrupt it. Write to a temp file, then rename.
 - [ ] Pressing Ctrl+S twice quickly on an untitled document opens two Save dialogs. Add an in-flight guard.
 - [ ] The link box rejects `example.com` and `#anchor` (`type="url"`).
@@ -54,6 +56,5 @@ Nobody has run these yet. They work in the browser, but are untested in the Taur
   - `<span>`, `<div align>`, `<mark>`
   - comments and `<details>`
   - task-list checkboxes
-  - footnotes
 
   Add a node or mark for each one as the toolbar learns to make it.

@@ -49,6 +49,7 @@ Releases come from `.github/workflows/release.yml`. Pushing a `v*` tag creates a
 **Behaviors that span files:**
 - `show()` in `useDocument` replaces the editor state, which also clears the undo history. This keeps Undo from bringing back the previous document after New/Open.
 - App shortcuts go through `fileAction(e)` in `src/utils/keys.js`, which matches `e.code` (`KeyS`), not `e.key`, so they work on the Persian keyboard layout. Mod-Shift-S is Save as, so Strike was moved to Mod-Shift-X.
+- Footnotes and references (`src/editor/notes.js`) are inline `note` nodes that carry their own text. `NoteMarkdown` reads `[^id]: text` definitions into them on parse and writes renumbered ones at the end on save. Footnotes are drawn per sheet by `App.vue`, and `pagination.js` ends each sheet's text above them, using the heights of the hidden `.fn-measure` list.
 - Image paste and drop are handled in `App.vue` `editorProps` and go through `doc.insertImage(file, pos)`. `tauri.conf.json` sets `dragDropEnabled: false` so the webview receives file drops.
 
 ## Conventions

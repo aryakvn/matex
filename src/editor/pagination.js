@@ -1,12 +1,15 @@
 import { Extension } from '@tiptap/core'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { Decoration, DecorationSet } from '@tiptap/pm/view'
+import { noteEntries } from './notes.js'
 
 // Word-style A4 sheets. The text stays one flow. After each layout change it is measured with the
 // old breaks hidden, then a spacer goes before every line (or unsplittable block) that would cross
 // a sheet's bottom margin, tall enough to land it on the next sheet's top margin.
 // Sheet margins are the `.page` padding; `--page-gap` is the grey gap between sheets on screen
 // (0 in print, so each sheet prints as exactly one page). The sheets themselves are drawn by App.vue.
+// Footnotes print at the bottom of the sheet their marker is on, so each sheet's text area ends
+// above them; their heights come from App.vue's hidden `.fn-measure` list (one item per footnote).
 // ponytail: re-measures the whole document after every edit; measure from the first changed block if it gets slow.
 
 const SHEET_HEIGHT = (297 * 96) / 25.4 // A4 in CSS px
@@ -14,6 +17,20 @@ const key = new PluginKey('pagination')
 
 // Page (1-based) that the node at `pos` starts on, given the current breaks.
 export const pageOf = (breaks, pos) => 1 + breaks.filter((b) => b.pos <= pos + 1).length
+
+// { gap, height: Map id → px }: the footnote area's own padding/divider, and each footnote's height.
+function footnoteHeights(page) {
+  const box = page.querySelector('.fn-measure')
+  const height = new Map()
+  if (!box) return { gap: 0, height }
+  let sum = 0
+  for (const li of box.children) {
+    const h = li.getBoundingClientRect().height
+    height.set(li.dataset.note, h)
+    sum += h
+  }
+  return { gap: box.getBoundingClientRect().height - sum, height }
+}
 
 function findBreaks(view, page) {
   const style = getComputedStyle(page)
@@ -23,6 +40,18 @@ function findBreaks(view, page) {
   const origin = page.getBoundingClientRect().top
   const sheetTop = (k) => k * (SHEET_HEIGHT + gap) + marginTop
   const sheetBottom = (k) => k * (SHEET_HEIGHT + gap) + SHEET_HEIGHT - marginBottom
+
+  const notes = noteEntries(view.state.doc).filter((e) => e.kind === 'footnote')
+  const fn = notes.length ? footnoteHeights(page) : null
+  let sheetStart = 0 // doc position where the current sheet's text starts
+  // Room taken on the current sheet by the footnotes whose markers sit before `to`.
+  // ponytail: scans every footnote per call; index by position if documents get hundreds.
+  function reserve(to) {
+    let h = 0
+    for (const n of notes) if (n.pos >= sheetStart && n.pos < to) h += fn.height.get(n.id) ?? 0
+    return h && h + fn.gap
+  }
+  const limit = (to) => sheetBottom(k) - (fn ? reserve(to) : 0)
 
   const breaks = []
   let k = 0 // current sheet
@@ -35,6 +64,7 @@ function findBreaks(view, page) {
   function breakAt(pos, top, inline, extra = 0) {
     const height = sheetTop(k + 1) - top - extra
     k++
+    sheetStart = pos
     if (height <= 0) return // already past this sheet (after a block taller than a sheet)
     breaks.push({ pos, height: height - gap, inline })
     shift += height
@@ -57,14 +87,24 @@ function findBreaks(view, page) {
     const lead = Math.max(0, at(view.coordsAtPos(start).top) - contentTop)
     const bottom = (p) => at(view.coordsAtPos(p).bottom) + lead
     let from = start
-    while (bottom(end) > sheetBottom(k)) {
-      // First position whose line crosses the bottom margin.
+    while (bottom(end) > limit(end + 1)) {
+      // First position whose line crosses the bottom margin (or the footnotes above it).
       let lo = from
       let hi = end
       while (lo < hi) {
         const mid = (lo + hi) >> 1
-        if (bottom(mid) > sheetBottom(k)) hi = mid
+        if (bottom(mid) > limit(mid + 1)) hi = mid
         else lo = mid + 1
+      }
+      // A footnote marker can make the limit move mid-line: back up to the start of that line.
+      if (fn) {
+        const lineTop = view.coordsAtPos(lo).top - 1
+        let a = from
+        while (a < lo) {
+          const mid = (a + lo) >> 1
+          if (view.coordsAtPos(mid).top >= lineTop) lo = mid
+          else a = mid + 1
+        }
       }
       const top = at(view.coordsAtPos(lo).top) - lead
       if (top <= sheetTop(k) + 1) break // a single line taller than a sheet
@@ -84,7 +124,7 @@ function findBreaks(view, page) {
     while (prev?.classList.contains('page-gap')) prev = prev.previousElementSibling
     const extra = prev ? Math.min(parseFloat(getComputedStyle(prev).marginBottom), parseFloat(getComputedStyle(el).marginTop)) : 0
     // ponytail: tables and the table of contents move whole; one taller than a sheet runs over its margin.
-    while (at(rect.bottom) > sheetBottom(k) && at(rect.top) > sheetTop(k) + 1) breakBefore(pos, at(rect.top), false, extra)
+    while (at(rect.bottom) > limit(pos + node.nodeSize) && at(rect.top) > sheetTop(k) + 1) breakBefore(pos, at(rect.top), false, extra)
     heading = null
   }
 

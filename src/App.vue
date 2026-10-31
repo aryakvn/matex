@@ -9,6 +9,8 @@ import PageSetup from './components/PageSetup.vue'
 import SidePanel from './components/SidePanel.vue'
 import ScriptReference from './components/ScriptReference.vue'
 import StylesPanel from './components/StylesPanel.vue'
+import NoteField from './components/NoteField.vue'
+import { noteEntries, noteHtml, noteDir, pageAt } from './editor/notes.js'
 import { normalizeStyles, stylesCss } from './utils/styles.js'
 import { fillTokens, slotNumber, ALIGNS } from './utils/layout.js'
 import { useDocument } from './composables/useDocument.js'
@@ -43,7 +45,76 @@ const editor = useEditor({
 
 // A4 sheets drawn behind the text; the Pagination extension says how many.
 const pages = ref(1)
-watch(editor, (e) => e?.on('paginate', (found) => { pages.value = found.pages }))
+const breaks = shallowRef([])
+watch(editor, (e) => e?.on('paginate', (found) => {
+  pages.value = found.pages
+  breaks.value = found.breaks
+}))
+
+// Footnotes and references (editor/notes.js), in order of first use. Footnotes are drawn at the
+// bottom of the sheet their marker is on and edited there; any marker (or references entry) clicked
+// opens a popup under it with the note's text.
+const notes = shallowRef([])
+const editingNote = ref(null) // id of the footnote being edited at its sheet's bottom
+const popup = ref(null) // { id, pos (null from the references list), left, top }
+const focusedNote = shallowRef(null) // a note's editor, while it has the toolbar
+watch(editor, (e) => {
+  if (!e) return
+  const list = () => { notes.value = noteEntries(e.state.doc) }
+  list()
+  e.on('notes', list)
+  e.on('noteClick', openPopup)
+})
+const footnotes = computed(() => notes.value.filter((n) => n.kind === 'footnote'))
+const sheetNotes = computed(() => {
+  const per = Array.from({ length: pages.value }, () => [])
+  for (const n of footnotes.value) per[Math.min(pageAt(breaks.value, n.pos), pages.value) - 1].push(n)
+  return per
+})
+const popupNote = computed(() => popup.value && notes.value.find((n) => n.id === popup.value.id))
+
+function openPopup({ id, pos = null, el }) {
+  if (!el?.getBoundingClientRect) return
+  closeNotes()
+  const page = pageEl.value.getBoundingClientRect()
+  const r = el.getBoundingClientRect()
+  popup.value = { id, pos, left: Math.max(0, Math.min(r.left - page.left, page.width - 340)), top: r.bottom - page.top + 6 }
+}
+function editFootnote(id) {
+  if (editingNote.value === id) return
+  closeNotes()
+  editingNote.value = id
+}
+function closeNotes() {
+  popup.value = null
+  editingNote.value = null
+  focusedNote.value = null
+}
+// Enter, Esc or Done: back to the text, just after the marker.
+function finishNote(pos) {
+  closeNotes()
+  const e = editor.value
+  if (pos != null && e.state.doc.nodeAt(pos)?.type.name === 'note') e.chain().focus().setTextSelection(pos + 1).run()
+  else e.commands.focus()
+}
+function deleteNote() {
+  const { id, pos } = popup.value
+  closeNotes()
+  const e = editor.value
+  if (e.state.doc.nodeAt(pos)?.attrs.id === id) e.chain().focus().deleteRange({ from: pos, to: pos + 1 }).run()
+}
+// From the toolbar: a new footnote is written at its sheet's bottom, a new reference in its popup;
+// citing a known reference again just adds the marker.
+function insertNote({ kind, id }) {
+  const e = editor.value
+  const known = id && notes.value.find((n) => n.id === id)
+  const attrs = { kind, id: id ?? `${kind[0]}${Math.random().toString(36).slice(2, 10)}`, text: known?.text ?? '' }
+  const pos = e.state.selection.from
+  e.chain().focus().insertNote(attrs).run()
+  if (known) return
+  if (kind === 'footnote') editFootnote(attrs.id)
+  else nextTick(() => openPopup({ id: attrs.id, pos, el: e.view.nodeDOM(pos) }))
+}
 
 const doc = useDocument(editor)
 const { name, dirty, layout, scriptsOn } = doc
@@ -97,7 +168,7 @@ const pageEl = ref(null)
 const editing = ref(null) // { zone: 'header'|'footer', n } or null
 const slotEditors = shallowRef([])
 const focusedSlot = shallowRef(null)
-const activeEditor = computed(() => focusedSlot.value ?? editor.value)
+const activeEditor = computed(() => focusedSlot.value ?? focusedNote.value ?? editor.value)
 
 function slotEditor(zone, i) {
   const ed = new Editor({
@@ -134,6 +205,8 @@ function zoneAt(e) {
 
 // Capture phase, so it runs before ProseMirror selects a word on the double-click.
 function onPageMouseDown(e) {
+  if (e.target.closest('.note-pop, .fn-area')) return
+  if (popup.value || editingNote.value) closeNotes()
   if (editing.value && e.target.closest('.sheet-edit')) return
   const hit = zoneAt(e)
   if (!editing.value && !(hit && e.detail >= 2)) return
@@ -202,7 +275,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 <template>
   <EditorToolbar
     :editor="activeEditor" :name="name" :dirty="dirty" :panel="panel"
-    @file="fileActions[$event]()" @image="doc.insertImage($event, undefined, activeEditor)" @panel="togglePanel"
+    @file="fileActions[$event]()" @image="doc.insertImage($event, undefined, activeEditor)" @panel="togglePanel" @note="insertNote"
   />
   <div :class="['workspace', { 'with-side': panel }]">
   <main class="desk">
@@ -224,6 +297,36 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
             <div v-for="(html, i) in sheetZones[n - 1][z]" :key="i" class="hf-slot" dir="auto" :style="{ textAlign: ALIGNS[i] }" v-html="html" />
           </div>
         </template>
+      </div>
+      <template v-for="(list, k) in sheetNotes" :key="`fn${k}`">
+        <ol
+          v-if="list.length" class="fn-area" :dir="noteDir(list[0].text)"
+          :style="{ top: `calc(${k + 1} * (297mm + var(--page-gap)) - var(--page-gap) - var(--margin-bottom))` }"
+        >
+          <li v-for="n in list" :key="n.id" class="fn-item" :dir="noteDir(n.text)" @click="editFootnote(n.id)">
+            <span class="fn-num">{{ n.number }}</span>
+            <NoteField
+              v-if="editingNote === n.id" :body="editor" :id="n.id" :text="n.text"
+              @focus="focusedNote = $event" @done="finishNote(n.pos)"
+            />
+            <span v-else class="fn-text" v-html="noteHtml(editor, n.text) || '&nbsp;'" />
+          </li>
+        </ol>
+      </template>
+      <!-- Every footnote at full width, unseen: pagination.js reads their heights from here. -->
+      <ol v-if="footnotes.length" class="fn-area fn-measure" dir="auto" aria-hidden="true">
+        <li v-for="n in footnotes" :key="n.id" :data-note="n.id" class="fn-item" :dir="noteDir(n.text)">
+          <span class="fn-num">{{ n.number }}</span>
+          <span class="fn-text" v-html="noteHtml(editor, n.text) || '&nbsp;'" />
+        </li>
+      </ol>
+      <div v-if="popupNote" class="note-pop" :style="{ left: `${popup.left}px`, top: `${popup.top}px` }">
+        <span class="note-pop-title">{{ popupNote.kind === 'reference' ? `Reference [${popupNote.number}]` : `Footnote ${popupNote.number}` }}</span>
+        <NoteField :key="popup.id" :body="editor" :id="popup.id" :text="popupNote.text" @focus="focusedNote = $event" @done="finishNote(popup.pos)" />
+        <div class="note-pop-actions">
+          <button v-if="popup.pos != null" type="button" class="pop-btn" @click="deleteNote">Delete</button>
+          <button type="button" class="pop-btn primary" @click="finishNote(popup.pos)">Done</button>
+        </div>
       </div>
       <div
         v-if="editing"

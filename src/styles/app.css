@@ -366,6 +366,35 @@ body {
 .pop-btn.primary:active { background: var(--brand-pressed); }
 .pop-btn.primary:focus-visible { outline-color: var(--focus); box-shadow: inset 0 0 0 3px var(--surface); }
 
+/* A note's popup, under its marker (App.vue). The text field keeps the document's font. */
+.note-pop {
+  position: absolute;
+  z-index: 5;
+  display: grid;
+  gap: 8px;
+  width: 320px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  border-radius: 8px;
+  box-shadow: var(--shadow-16);
+  color: var(--ink);
+}
+.note-pop-title { font: var(--font-ui); font-weight: 600; color: var(--muted); }
+.note-pop .note-field .ProseMirror {
+  padding: 4px 8px;
+  border: 1px solid var(--stroke-ctl);
+  border-bottom-color: var(--stroke-access);
+  border-radius: 4px;
+  background: #fff;
+  color: #1a1a1a;
+  line-height: 1.4;
+}
+.note-pop .note-field .ProseMirror:focus-within { border-bottom-color: var(--brand-ink); box-shadow: inset 0 -1px 0 var(--brand-ink); }
+.note-pop .note-field p { margin: 0; }
+.note-pop-actions { display: flex; justify-content: flex-end; gap: 8px; font: var(--font-ui); }
+@media print { .note-pop, .fn-measure { display: none; } }
+
 /* Fluent flyout entrance: short slide down with a decelerating curve. */
 .menu-enter-active { transition: opacity 150ms linear, transform 250ms var(--ease-out); }
 .menu-leave-active { transition: opacity 100ms linear; }
