@@ -15,6 +15,7 @@ import ToolbarMenu from './components/ToolbarMenu.vue'
 import { Ellipsis } from 'lucide-vue-next'
 import { pinSelection } from './editor/ids.js'
 import { pinSection } from './editor/sections.js'
+import { clampWidth } from './editor/image.js'
 import { noteEntries, noteHtml, noteDir, pageAt } from './editor/notes.js'
 import { normalizeStyles, stylesCss, scopeCss } from './utils/styles.js'
 import { fillTokens, slotNumber, ALIGNS, sheetSize } from './utils/layout.js'
@@ -324,6 +325,61 @@ async function styleSection() {
   cssPanel.value?.addRule(`#${id}`)
 }
 
+// Handles on the selected image's bottom corners (body only). Dragging one draws Word's dashed
+// outline and sets the width on release, as a share of the text column (editor/image.js). The image
+// itself isn't resized live: ProseMirror would redraw it from the document on every change.
+const imgBox = ref(null) // { left, top, width, height } of the selected image, in page coordinates
+const ghost = ref(null) // the outline while dragging, same shape
+function selectedImage() {
+  const sel = editor.value?.state.selection
+  return sel?.node?.type.name === 'image' ? editor.value.view.nodeDOM(sel.from) : null
+}
+function placeImageBox() {
+  const img = selectedImage()
+  if (!img?.getBoundingClientRect || editing.value) return (imgBox.value = null)
+  const page = pageEl.value.getBoundingClientRect()
+  const r = img.getBoundingClientRect()
+  imgBox.value = { left: r.left - page.left, top: r.top - page.top, width: r.width, height: r.height }
+}
+watch(editor, (e) => {
+  e?.on('transaction', () => nextTick(placeImageBox))
+  e?.on('paginate', placeImageBox)
+})
+watch(editing, () => nextTick(placeImageBox))
+// What an image's width percentage is of: its parent's content box, or one column of it.
+function columnWidth(el) {
+  const s = getComputedStyle(el)
+  const inner = el.clientWidth - parseFloat(s.paddingLeft) - parseFloat(s.paddingRight)
+  const n = parseInt(s.columnCount) || 1
+  return (inner - (n - 1) * (parseFloat(s.columnGap) || 0)) / n
+}
+// side: -1 = bottom-left handle, 1 = bottom-right. A centred image grows on both sides at once.
+function startResize(down, side) {
+  const img = selectedImage()
+  const box = imgBox.value
+  if (!img || !box?.width) return
+  down.preventDefault()
+  const e = editor.value
+  const pos = e.state.selection.from
+  const full = columnWidth(img.parentElement)
+  const centred = e.state.doc.nodeAt(pos).attrs.align === 'center'
+  let pct = null
+  const move = (m) => {
+    pct = clampWidth(((box.width + (m.clientX - down.clientX) * side * (centred ? 2 : 1)) / full) * 100)
+    const width = (pct / 100) * full
+    const left = centred ? box.left + (box.width - width) / 2 : side > 0 ? box.left : box.left + box.width - width
+    ghost.value = { left, top: box.top, width, height: (width * box.height) / box.width }
+  }
+  const up = () => {
+    window.removeEventListener('pointermove', move)
+    window.removeEventListener('pointerup', up)
+    ghost.value = null
+    if (pct != null) e.chain().focus().setNodeSelection(pos).updateAttributes('image', { width: pct }).run()
+  }
+  window.addEventListener('pointermove', move)
+  window.addEventListener('pointerup', up)
+}
+
 // The side panel sits under the sticky toolbar, whose height changes as the command bar wraps.
 let chromeResize
 onMounted(() => {
@@ -417,6 +473,14 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
           <Ellipsis :size="16" aria-hidden="true" />
         </ToolbarMenu>
       </div>
+      <template v-if="imgBox">
+        <span
+          v-for="side in [-1, 1]" :key="side" :class="['img-handle', side > 0 ? 'img-handle-r' : 'img-handle-l']"
+          :style="{ left: `${imgBox.left + (side > 0 ? imgBox.width : 0)}px`, top: `${imgBox.top + imgBox.height}px` }"
+          title="Drag to resize" aria-hidden="true" @pointerdown="startResize($event, side)"
+        />
+      </template>
+      <div v-if="ghost" class="img-ghost" :style="{ left: `${ghost.left}px`, top: `${ghost.top}px`, width: `${ghost.width}px`, height: `${ghost.height}px` }" />
       <div
         v-if="editing"
         class="sheet-edit"

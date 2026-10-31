@@ -1,16 +1,18 @@
 <script setup>
 // Title strip + Fluent-style command bar for a Tiptap editor. Formatting runs straight on the editor;
 // file actions and picked images go up as events so the owner decides what they mean.
-import { computed, ref, nextTick } from 'vue'
+import { computed, ref, nextTick, watch } from 'vue'
 import {
   Undo2, Redo2, Bold, Italic, Strikethrough, Code, Link, List, ListOrdered,
   Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, FileCode, CodeXml, CaseSensitive, Superscript, Columns2, Captions,
+  AlignStartVertical, AlignCenterVertical, AlignEndVertical, Contrast, SunDim, FlipHorizontal2, FlipVertical2,
 } from 'lucide-vue-next'
 import ToolbarMenu from './ToolbarMenu.vue'
 import { directionAt } from '../editor/direction.js'
 import { noteEntries } from '../editor/notes.js'
 import { captionEntries } from '../editor/captions.js'
 import { sectionAt, MAX_COLUMNS } from '../editor/sections.js'
+import { IMAGE_FILTERS, clampWidth } from '../editor/image.js'
 import { canWrapColumns } from '../utils/layout.js'
 import { STYLES, styleAt, applyStyle } from '../utils/styles.js'
 import appIcon from '../../src-tauri/icons/64x64.png'
@@ -112,6 +114,30 @@ function layoutItems() {
     { label: 'Style this section in CSS', disabled: !at, run: () => emit('sectionCss') },
   ]
 }
+
+// Picture (image.js): shown while an image is selected, like Word's Picture Format tab. Sliders and
+// the width field don't take focus back to the text, so they keep working while dragged or typed in.
+const pic = computed(() => (props.editor?.isActive('image') ? props.editor.getAttributes('image') : null))
+const setPic = (attrs) => props.editor.chain().updateAttributes('image', attrs).run()
+const picAligns = [
+  { align: 'left', label: 'Align left', icon: AlignStartVertical },
+  { align: 'center', label: 'Center', icon: AlignCenterVertical },
+  { align: 'right', label: 'Align right', icon: AlignEndVertical },
+]
+const picDefaults = { width: null, align: null, filter: null, brightness: 100, contrast: 100, flipH: false, flipV: false }
+const capitalize = (s) => s[0].toUpperCase() + s.slice(1)
+const filterItems = computed(() => [
+  ...[null, ...IMAGE_FILTERS].map((f) => ({ label: f ? capitalize(f) : 'No filter', checked: (pic.value?.filter ?? null) === f, run: () => setPic({ filter: f }) })),
+  null,
+  { label: 'Reset picture', run: () => setPic(picDefaults) },
+])
+function setWidth(e) {
+  const n = parseFloat(e.target.value)
+  setPic({ width: Number.isFinite(n) ? clampWidth(n) : null })
+  e.target.value = pic.value?.width ?? ''
+}
+const adjustOpen = ref(false)
+watch(pic, (p) => { if (!p) adjustOpen.value = false })
 
 // Link: small popover, because window.prompt doesn't exist in Tauri webviews.
 const linkOpen = ref(false)
@@ -280,6 +306,55 @@ function onImagePicked(e) {
           </ToolbarMenu>
         </div>
         <span class="tb-label" aria-hidden="true">Insert</span>
+      </div>
+
+      <div v-if="pic" class="tb-group" role="group" aria-label="Picture">
+        <div class="tb-row">
+          <label class="tb-num" title="Width, as a share of the text column (empty = natural size)">
+            <span>Width</span>
+            <input type="number" min="5" max="100" step="5" placeholder="auto" :value="pic.width ?? ''" aria-label="Picture width in percent" @change="setWidth" />
+            <span>%</span>
+          </label>
+          <button
+            v-for="a in picAligns" :key="a.align" type="button" class="tb-btn" :title="a.label" :aria-label="a.label"
+            :aria-pressed="pic.align === a.align" @click="setPic({ align: pic.align === a.align ? null : a.align })"
+          >
+            <component :is="a.icon" :size="18" />
+          </button>
+        </div>
+        <div class="tb-row">
+          <ToolbarMenu label="Filter" :items="filterItems">
+            <Contrast :size="18" aria-hidden="true" />
+          </ToolbarMenu>
+          <div class="link-wrap">
+            <button
+              type="button" class="tb-btn" title="Brightness and contrast" aria-label="Brightness and contrast"
+              :aria-expanded="adjustOpen" @click="adjustOpen = !adjustOpen"
+            >
+              <SunDim :size="18" />
+            </button>
+            <Transition name="menu">
+              <div v-if="adjustOpen" class="link-pop adjust-pop" @keydown.esc="adjustOpen = false">
+                <label v-for="k in ['brightness', 'contrast']" :key="k">
+                  <span>{{ capitalize(k) }}</span>
+                  <input type="range" min="0" max="200" step="5" :value="pic[k]" @input="setPic({ [k]: +$event.target.value })" />
+                  <output>{{ pic[k] }}%</output>
+                </label>
+                <div class="adjust-actions">
+                  <button type="button" class="pop-btn" @click="setPic({ brightness: 100, contrast: 100 })">Reset</button>
+                  <button type="button" class="pop-btn primary" @click="adjustOpen = false">Done</button>
+                </div>
+              </div>
+            </Transition>
+          </div>
+          <button type="button" class="tb-btn" title="Flip horizontally" aria-label="Flip horizontally" :aria-pressed="pic.flipH" @click="setPic({ flipH: !pic.flipH })">
+            <FlipHorizontal2 :size="18" />
+          </button>
+          <button type="button" class="tb-btn" title="Flip vertically" aria-label="Flip vertically" :aria-pressed="pic.flipV" @click="setPic({ flipV: !pic.flipV })">
+            <FlipVertical2 :size="18" />
+          </button>
+        </div>
+        <span class="tb-label" aria-hidden="true">Picture</span>
       </div>
 
       <div class="tb-group" role="group" aria-label="Layout">

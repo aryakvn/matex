@@ -2,7 +2,6 @@ import StarterKit from '@tiptap/starter-kit'
 import Document from '@tiptap/extension-document'
 import Strike from '@tiptap/extension-strike'
 import Paragraph from '@tiptap/extension-paragraph'
-import Image from '@tiptap/extension-image'
 import { TableKit } from '@tiptap/extension-table'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { createLowlight, common } from 'lowlight'
@@ -12,6 +11,7 @@ import { Direction, DirectionMarkdown, withDirMark } from './direction.js'
 import { PersianFont } from './persian.js'
 import { noteExtensions, NoteMarkdown } from './notes.js'
 import { HtmlBlock } from './html.js'
+import { Picture } from './image.js'
 import { captionExtensions } from './captions.js'
 import { BlockIds, ElementIds, Span, escapeAttrs, attrBlock } from './ids.js'
 import { Section, SectionDocument, SectionMarkdown } from './sections.js'
@@ -57,7 +57,7 @@ export const extensions = [
   Strike.extend({
     addKeyboardShortcuts() { return { 'Mod-Shift-x': () => this.editor.commands.toggleStrike() } },
   }).configure(cls('strike')),
-  Image.configure(cls('image')),
+  Picture.configure(cls('image')),
   Span,
   // Syntax colours from highlight.js's common languages (bundled, offline). Language comes from
   // the fence (```js); a block without one is guessed. Colours live in document.css.

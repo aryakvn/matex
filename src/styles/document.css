@@ -125,6 +125,10 @@
 /* No image taller than a sheet's text area, so every image fits on one page. */
 .page img { display: block; max-width: 100%; max-height: var(--text-h); height: auto; margin: 0 0 0.8em; }
 .page img.ProseMirror-selectednode { outline: 2px solid #1a55c4; }
+/* Picture settings (editor/image.js); width, filter and flip are inline styles. Physical sides, as named. */
+.page img.align-left { margin-left: 0; margin-right: auto; }
+.page img.align-center { margin-left: auto; margin-right: auto; }
+.page img.align-right { margin-left: auto; margin-right: 0; }
 .page table { border-collapse: collapse; width: 100%; margin: 0 0 0.8em; }
 .page th, .page td { border: 1px solid #bbb; padding: 0.3em 0.6em; vertical-align: top; text-align: start; }
 .page th { background: #f2f2f2; }

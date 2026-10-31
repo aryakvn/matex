@@ -193,6 +193,23 @@ html, .side-body, .desk { scrollbar-width: thin; }
 .sel-actions .tb-btn:hover, .sel-actions .tb-btn[aria-expanded="true"] { background: var(--hover); }
 .sel-actions .menu-list { min-width: 160px; white-space: nowrap; }
 @media print { .sel-actions { display: none; } }
+/* Resize handles and drag outline for the selected image (App.vue), drawn over the page. */
+.img-handle {
+  position: absolute;
+  z-index: 15;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  box-sizing: border-box;
+  border: 1.5px solid #1a55c4;
+  border-radius: 2px;
+  background: #fff;
+  touch-action: none;
+}
+.img-handle-r { cursor: nwse-resize; }
+.img-handle-l { cursor: nesw-resize; }
+.img-ghost { position: absolute; z-index: 14; border: 1px dashed #1a55c4; pointer-events: none; }
+@media print { .img-handle, .img-ghost { display: none; } }
 
 /* HTML block (HtmlBlockView.vue): its code floats under it while selected, out of the text flow. */
 .html-block { position: relative; }
@@ -503,6 +520,25 @@ html, .side-body, .desk { scrollbar-width: thin; }
 }
 /* Fluent marks a focused input with a brand underline instead of an outline. */
 .link-pop input:focus { outline: none; border-bottom-color: var(--brand-ink); box-shadow: inset 0 -1px 0 var(--brand-ink); }
+/* Picture group: width field and the brightness/contrast flyout */
+.tb-num { display: inline-flex; align-items: center; gap: 4px; margin-inline-end: 4px; color: var(--muted); font-size: 12px; }
+.tb-num input {
+  width: 56px;
+  height: 26px;
+  padding: 0 4px;
+  border: 1px solid var(--stroke-ctl);
+  border-bottom-color: var(--stroke-access);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+.tb-num input:focus { outline: none; border-bottom-color: var(--brand-ink); box-shadow: inset 0 -1px 0 var(--brand-ink); }
+.adjust-pop { flex-direction: column; min-width: 260px; }
+.adjust-pop label { display: grid; grid-template-columns: 72px 1fr 40px; align-items: center; gap: 8px; }
+.adjust-pop input { width: auto; height: auto; padding: 0; border: 0; box-shadow: none; accent-color: var(--brand); }
+.adjust-pop output { color: var(--muted); font-size: 12px; text-align: end; }
+.adjust-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .pop-btn {
   height: 32px;
   padding: 0 12px;
