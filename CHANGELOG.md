@@ -60,6 +60,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - The CSS panel and HTML blocks edit code in Monaco (the VS Code editor) with CSS/HTML autocomplete, hover docs, colour swatches and checks; loaded the first time a code field opens, and works offline.
 - A section's CSS background now fills its whole sheets, margins included (and prints), instead of only the text area.
 ### Fixed
+- Pasting text copied from a MaTex document no longer starts a new section; it joins the section it is pasted into.
 - Stop code block backgrounds and quote borders from running through the bottom margin and the gap between sheets when they split across pages.
 - Let a code block or quote split across pages run through both sheets' margins, clearing only the gap between sheets.
 - Align page breaks to line boxes instead of glyph boxes, so the sheet gap over a split code block or quote sits exactly on the gap between sheets and each sheet's text starts exactly at its top margin.

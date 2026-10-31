@@ -1,6 +1,7 @@
 import { Node, Extension, mergeAttributes } from '@tiptap/core'
 import Document from '@tiptap/extension-document'
-import { TextSelection } from '@tiptap/pm/state'
+import { Plugin, TextSelection } from '@tiptap/pm/state'
+import { Fragment, Slice } from '@tiptap/pm/model'
 import { canSplit } from '@tiptap/pm/transform'
 import { newId } from './ids.js'
 
@@ -94,6 +95,10 @@ export const Section = Node.create({
     return `::: ${fence(attrs)}\n\n${body}\n\n:::`
   },
 
+  // Copying a whole section puts its <section> on the clipboard; pasted (or dropped) content joins the
+  // section it lands in instead. Only insertSection makes a section break.
+  addProseMirrorPlugins: () => [new Plugin({ props: { transformPasted: unwrapSections } })],
+
   addCommands() {
     return {
       // Section break at the cursor: what follows starts a new section (same columns, no id) on a new sheet.
@@ -139,6 +144,20 @@ export const Section = Node.create({
     }
   },
 })
+
+// A slice with its top-level sections replaced by their blocks.
+export function unwrapSections(slice) {
+  const { content, openStart, openEnd } = slice
+  const isSection = (node) => node?.type.name === 'section'
+  if (!isSection(content.firstChild) && !isSection(content.lastChild)) return slice
+  const blocks = []
+  content.forEach((node) => (isSection(node) ? node.content.forEach((b) => blocks.push(b)) : blocks.push(node)))
+  return new Slice(
+    Fragment.from(blocks),
+    isSection(content.firstChild) ? Math.max(0, openStart - 1) : openStart,
+    isSection(content.lastChild) ? Math.max(0, openEnd - 1) : openEnd,
+  )
+}
 
 const sectionDepth = ($pos) => {
   for (let d = $pos.depth; d > 0; d--) if ($pos.node(d).type.name === 'section') return d

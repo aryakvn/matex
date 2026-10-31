@@ -49,6 +49,15 @@ describe('sections', () => {
     expect(sections(make(out))).toEqual([[null, 1, ['::: {.section}']]])
   })
 
+  it('pastes a copied section into the current one, not as a new section', () => {
+    const editor = make('One\n\nTwo')
+    editor.commands.selectAll()
+    const { dom } = editor.view.serializeForClipboard(editor.state.selection.content())
+    editor.commands.focus('end')
+    editor.view.pasteHTML(dom.innerHTML, new Event('paste')) // jsdom has no ClipboardEvent
+    expect(editor.state.doc.childCount).toBe(1)
+  })
+
   it('splits at the cursor and joins back', () => {
     const editor = make('Hello world')
     editor.view.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, 8)))
