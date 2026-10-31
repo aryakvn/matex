@@ -122,12 +122,12 @@ describe('manual direction', () => {
   it('gives a list item its first paragraph\'s direction, so the bullet moves side too', () => {
     const items = (editor) => [...editor.view.dom.querySelectorAll('li')].map((li) => li.getAttribute('dir'))
     const editor = make(`- ${RLM}one\n- two`)
-    expect(items(editor)).toEqual(['rtl', 'auto'])
+    expect(items(editor)).toEqual(['rtl', 'rtl']) // the rest of the list follows the first item
     editor.commands.setTextSelection(editor.state.doc.content.size - 2) // in "two"
-    editor.commands.toggleDirection('rtl')
+    editor.commands.toggleDirection('ltr')
+    expect(items(editor)).toEqual(['rtl', 'ltr'])
+    editor.commands.toggleDirection('ltr')
     expect(items(editor)).toEqual(['rtl', 'rtl'])
-    editor.commands.toggleDirection('rtl')
-    expect(items(editor)).toEqual(['rtl', 'auto'])
     expect(editor.getMarkdown().trim()).toBe(`- ${RLM}one\n- two`)
   })
 
@@ -169,5 +169,24 @@ describe('manual direction in tables', () => {
     reopened.state.doc.descendants((n) => { if (n.type.name === 'paragraph' && n.textContent) dirs.push([n.textContent, n.attrs.dir]) })
     expect(dirs).toEqual([['A', 'auto'], ['B', 'auto'], ['x', 'auto'], ['y', 'rtl']])
     expect(reopened.getMarkdown()).toBe(md)
+  })
+})
+
+describe('list direction', () => {
+  const dirs = (editor) => [...editor.view.dom.querySelectorAll('ul, li, li > p')].map((el) => el.getAttribute('dir'))
+
+  it('follows the first item, not dir="auto" (which skips the items and stays LTR)', () => {
+    expect(dirs(make('- سلام\n- hello'))).toEqual(['rtl', 'rtl', 'rtl', 'rtl', 'rtl'])
+    expect(dirs(make('- hello\n- سلام'))).toEqual(['ltr', 'ltr', 'ltr', 'ltr', 'ltr'])
+  })
+
+  it('takes a forced direction on the first item; a forced later item keeps its own', () => {
+    const editor = make('- hello\n- world')
+    editor.commands.setTextSelection(3)
+    editor.commands.toggleDirection('rtl')
+    expect(dirs(editor)).toEqual(['rtl', 'rtl', 'rtl', 'rtl', 'rtl'])
+    editor.commands.setTextSelection(editor.state.doc.content.size - 3)
+    editor.commands.toggleDirection('ltr')
+    expect(dirs(editor)).toEqual(['rtl', 'rtl', 'rtl', 'ltr', 'ltr'])
   })
 })

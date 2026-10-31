@@ -1,5 +1,8 @@
 import { Extension } from '@tiptap/core'
 import { Markdown } from '@tiptap/markdown'
+import { Plugin, PluginKey } from '@tiptap/pm/state'
+import { Decoration, DecorationSet } from '@tiptap/pm/view'
+import { isRtl } from './persian.js'
 
 // Manual direction (the toolbar's ¶ buttons) overrides `dir="auto"` on a paragraph or heading.
 // In the editor it is the node's `dir` attr; in Markdown it is a leading Unicode mark,
@@ -9,6 +12,7 @@ const TYPES = ['paragraph', 'heading']
 // A list item's bullet and indent follow the item's own `dir`, not its paragraph's, so an item
 // takes the forced direction of its first paragraph (never saved: the paragraph's mark is).
 const ITEMS = ['listItem', 'taskItem']
+const LISTS = ['bulletList', 'orderedList', 'taskList']
 
 // Markdown of a block + its direction mark (after `## ` for headings).
 export function withDirMark(md, dir) {
@@ -65,8 +69,38 @@ export function directionAt(state) {
   return state.selection.$from.parent.attrs.dir ?? 'auto'
 }
 
+// A list reads in the direction of its first item: its own forced dir, else its first letter. The
+// list, its items and their paragraphs get that dir unless forced. `dir="auto"` can't do this: it
+// skips descendants that have a dir of their own, and every block has one, so lists came out LTR.
+function listDecorations(doc) {
+  const decos = []
+  const set = (node, pos, dir) => { if (!MARKS[node.attrs.dir]) decos.push(Decoration.node(pos, pos + node.nodeSize, { dir })) }
+  doc.descendants((node, pos) => {
+    if (!LISTS.includes(node.type.name) || !node.firstChild) return
+    const first = node.firstChild
+    const dir = MARKS[first.attrs.dir] ? first.attrs.dir : isRtl(first.textContent) ? 'rtl' : 'ltr'
+    set(node, pos, dir)
+    node.forEach((item, at) => {
+      const itemPos = pos + 1 + at
+      set(item, itemPos, dir)
+      item.forEach((child, i) => { if (TYPES.includes(child.type.name)) set(child, itemPos + 1 + i, dir) })
+    })
+  })
+  return DecorationSet.create(doc, decos)
+}
+
+const listsKey = new PluginKey('listDirection')
+
 export const Direction = Extension.create({
   name: 'direction',
+  addProseMirrorPlugins: () => [new Plugin({
+    key: listsKey,
+    state: {
+      init: (_, { doc }) => listDecorations(doc),
+      apply: (tr, set) => (tr.docChanged ? listDecorations(tr.doc) : set),
+    },
+    props: { decorations: (state) => listsKey.getState(state) },
+  })],
   addCommands() {
     return {
       // Force `dir` on the selected blocks; if they all have it already, go back to auto.

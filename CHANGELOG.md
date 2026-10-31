@@ -66,3 +66,4 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Let a code block or quote split across pages run through both sheets' margins, clearing only the gap between sheets.
 - Align page breaks to line boxes instead of glyph boxes, so the sheet gap over a split code block or quote sits exactly on the gap between sheets and each sheet's text starts exactly at its top margin.
 - Make the left-to-right / right-to-left buttons work in bulleted and numbered lists: the list item now takes the direction, so its bullet or number and indent move to that side (also when reopened).
+- Lists and the table of contents now read in the direction of their first item: a list starting with Persian puts every bullet or number on the right (and one starting with English on the left), unless an item's direction is set by hand. Before, both were always left to right, because `dir="auto"` skips child elements that have their own direction.

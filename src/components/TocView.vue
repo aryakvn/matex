@@ -52,8 +52,9 @@ const includeItems = computed(() => excluded.value.map((e) => ({ label: `Include
       <EyeOff :size="16" aria-hidden="true" />
     </ToolbarMenu>
     <p v-if="!listed.length" class="toc-empty">Add headings to fill the table of contents.</p>
-    <!-- dir="auto" on the list: the first heading sets which side the page numbers sit on. -->
-    <ol v-else class="toc-list" dir="auto">
+    <!-- The first heading sets which side the page numbers sit on. Not dir="auto": that skips the
+         links, which have their own dir, and would always be left to right. -->
+    <ol v-else class="toc-list" :dir="isRtl(listed[0].text) ? 'rtl' : 'ltr'">
       <li
         v-for="(entry, i) in listed" :id="`toc-entry-${i + 1}`" :key="entry.pos"
         :class="['toc-item', `toc-l${entry.level}`, { persian: isRtl(entry.text) }]"
