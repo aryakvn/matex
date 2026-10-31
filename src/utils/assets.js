@@ -67,6 +67,38 @@ export function createAssetStore() {
       return { markdown: Array.isArray(markdown) ? list : list[0], files }
     },
 
+    get: (url) => byUrl.get(url) ?? null, // { name, blob } of a blob URL this store made
+
     clear,
   }
+}
+
+const TYPES = { jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp' }
+const EXT = { 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/png': 'png' }
+
+// Name of `name` turned by `turns` quarter-turns, and the type it is re-encoded as (JPEG and WebP stay,
+// anything else, SVG included, becomes PNG): photo.jpg, 1 → { name: 'photo-rot90.jpg', type: 'image/jpeg' }.
+export function rotatedName(name, turns) {
+  const ext = /\.(\w+)$/.exec(name)?.[1].toLowerCase()
+  const type = TYPES[ext] ?? 'image/png'
+  return { name: `${name.replace(/\.\w+$/, '') || 'image'}-rot${turns * 90}.${EXT[type]}`, type }
+}
+
+// The image at `url` turned `turns` quarter-turns clockwise, drawn on a canvas and re-encoded.
+// Throws for an image from the web (the canvas is tainted) or one with no size (some SVGs).
+export async function rotateImage(url, turns, type) {
+  const img = new Image()
+  img.src = url
+  await img.decode()
+  const { naturalWidth: w, naturalHeight: h } = img
+  if (!w || !h) throw new Error('This image has no size to rotate.')
+  const canvas = document.createElement('canvas')
+  canvas.width = turns % 2 ? h : w
+  canvas.height = turns % 2 ? w : h
+  const g = canvas.getContext('2d')
+  g.translate(canvas.width / 2, canvas.height / 2)
+  g.rotate((turns * Math.PI) / 2)
+  g.drawImage(img, -w / 2, -h / 2)
+  return new Promise((resolve, reject) =>
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Could not encode the rotated image.'))), type, 0.95))
 }

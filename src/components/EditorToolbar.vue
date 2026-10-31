@@ -5,7 +5,7 @@ import { computed, ref, nextTick, watch } from 'vue'
 import {
   Undo2, Redo2, Bold, Italic, Strikethrough, Code, Link, List, ListOrdered,
   Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, FileCode, CodeXml, CaseSensitive, Superscript, Columns2, Captions,
-  AlignStartVertical, AlignCenterVertical, AlignEndVertical, Contrast, SunDim, FlipHorizontal2, FlipVertical2, TextWrap,
+  AlignStartVertical, AlignCenterVertical, AlignEndVertical, Contrast, SunDim, FlipHorizontal2, FlipVertical2, TextWrap, RotateCcw, RotateCw,
 } from 'lucide-vue-next'
 import ToolbarMenu from './ToolbarMenu.vue'
 import { directionAt } from '../editor/direction.js'
@@ -23,7 +23,7 @@ const props = defineProps({
   dirty: { type: Boolean, default: false },
   panel: { type: String, default: null }, // the side panel that is open, if any
 })
-const emit = defineEmits(['file', 'image', 'panel', 'note', 'sectionCss'])
+const emit = defineEmits(['file', 'image', 'panel', 'note', 'sectionCss', 'rotate'])
 
 const mod = /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘' : 'Ctrl+'
 const chain = () => props.editor.chain().focus()
@@ -363,6 +363,12 @@ function onImagePicked(e) {
               </div>
             </Transition>
           </div>
+          <button type="button" class="tb-btn" title="Rotate left 90°" aria-label="Rotate left" @click="emit('rotate', -1)">
+            <RotateCcw :size="18" />
+          </button>
+          <button type="button" class="tb-btn" title="Rotate right 90°" aria-label="Rotate right" @click="emit('rotate', 1)">
+            <RotateCw :size="18" />
+          </button>
           <button type="button" class="tb-btn" title="Flip horizontally" aria-label="Flip horizontally" :aria-pressed="pic.flipH" @click="setPic({ flipH: !pic.flipH })">
             <FlipHorizontal2 :size="18" />
           </button>

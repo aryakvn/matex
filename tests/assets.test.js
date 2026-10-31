@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createAssetStore } from '../src/utils/assets.js'
+import { createAssetStore, rotatedName } from '../src/utils/assets.js'
 
 const blob = (...bytes) => new Blob([new Uint8Array(bytes)], { type: 'image/png' })
 
@@ -40,5 +40,14 @@ describe('asset store', () => {
     expect(loaded).toMatch(/!\[a\]\(blob:/)
     const { files } = await store.collect(loaded)
     expect(Object.keys(files).sort()).toEqual(['assets/a.png', 'assets/b.png'])
+  })
+})
+
+describe('rotatedName', () => {
+  it('keeps JPEG and WebP, turns the rest into PNG', () => {
+    expect(rotatedName('photo.JPG', 1)).toEqual({ name: 'photo-rot90.jpg', type: 'image/jpeg' })
+    expect(rotatedName('a.webp', 3)).toEqual({ name: 'a-rot270.webp', type: 'image/webp' })
+    expect(rotatedName('logo.svg', 2)).toEqual({ name: 'logo-rot180.png', type: 'image/png' })
+    expect(rotatedName('', 1).name).toBe('image-rot90.png')
   })
 })

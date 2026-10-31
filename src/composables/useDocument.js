@@ -3,7 +3,7 @@
 import { ref, reactive, watch, watchEffect } from 'vue'
 import { EditorState } from '@tiptap/pm/state'
 import { pack, unpack } from '../utils/archive.js'
-import { createAssetStore } from '../utils/assets.js'
+import { createAssetStore, rotateImage, rotatedName } from '../utils/assets.js'
 import { defaultLayout, normalizeLayout } from '../utils/layout.js'
 import { hasScripts } from '../utils/scripts.js'
 import { openFile, saveFile, ask, showError, setTitle } from '../utils/platform.js'
@@ -92,5 +92,33 @@ export function useDocument(editor) {
     target.chain().focus().insertContentAt(at, { type: 'image', attrs: { src, alt: file.name } }).run()
   }
 
-  return { name, dirty, layout, scriptsOn, newDoc, openDoc, save: () => write(false), saveAs: () => write(true), insertImage }
+  // Rotate the selected image a quarter turn (1 clockwise, -1 counter-clockwise) by redrawing its pixels
+  // into a new asset, so it takes the right room on the page and shows turned in any Markdown viewer.
+  // Every turn is drawn from the original image, so turning again doesn't re-compress a JPEG, and
+  // turning all the way back gives the original file. ponytail: forgotten on reopen (one more encode then).
+  const turned = new Map() // rotated blob URL -> { from: original src, turns }
+  async function rotate(delta, target = editor.value) {
+    const pos = target.state.selection.from
+    const node = target.state.doc.nodeAt(pos)
+    if (node?.type.name !== 'image') return
+    const { src } = node.attrs
+    const { from, turns: had } = turned.get(src) ?? { from: src, turns: 0 }
+    const turns = (((had + delta) % 4) + 4) % 4
+    let next = from
+    if (turns) {
+      const { name, type } = rotatedName(assets.get(from)?.name ?? 'image.png', turns)
+      try {
+        next = assets.add(await rotateImage(from, turns, type), name)
+      } catch (e) {
+        return showError(`Can't rotate this image: ${e.message}`)
+      }
+      turned.set(next, { from, turns })
+    }
+    // Drawing takes a moment: the image may have moved meanwhile, so look for it by its src.
+    let at = target.state.doc.nodeAt(pos)?.attrs.src === src ? pos : null
+    if (at == null) target.state.doc.descendants((n, p) => { if (at == null && n.type.name === 'image' && n.attrs.src === src) at = p })
+    if (at != null) target.chain().setNodeSelection(at).updateAttributes('image', { src: next }).run()
+  }
+
+  return { name, dirty, layout, scriptsOn, newDoc, openDoc, save: () => write(false), saveAs: () => write(true), insertImage, rotateImage: rotate }
 }

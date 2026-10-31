@@ -337,6 +337,7 @@ function selectedImage() {
 function placeImageBox() {
   const img = selectedImage()
   if (!img?.getBoundingClientRect || editing.value) return (imgBox.value = null)
+  if (!img.complete) img.addEventListener('load', placeImageBox, { once: true }) // a new src (rotate) has no size yet
   const page = pageEl.value.getBoundingClientRect()
   const r = img.getBoundingClientRect()
   imgBox.value = { left: r.left - page.left, top: r.top - page.top, width: r.width, height: r.height }
@@ -407,7 +408,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 <template>
   <EditorToolbar
     :editor="activeEditor" :name="name" :dirty="dirty" :panel="panel"
-    @file="fileActions[$event]()" @image="doc.insertImage($event, undefined, activeEditor)" @panel="togglePanel" @note="insertNote" @section-css="styleSection"
+    @file="fileActions[$event]()" @image="doc.insertImage($event, undefined, activeEditor)" @panel="togglePanel" @note="insertNote" @section-css="styleSection" @rotate="doc.rotateImage($event, activeEditor)"
   />
   <div class="workspace">
   <main class="desk">
