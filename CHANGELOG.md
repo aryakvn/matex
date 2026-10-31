@@ -58,6 +58,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - The number of columns is set per section (toolbar's columns menu) instead of in Page setup; Page setup keeps the gap between columns.
 
 - The CSS panel and HTML blocks edit code in Monaco (the VS Code editor) with CSS/HTML autocomplete, hover docs, colour swatches and checks; loaded the first time a code field opens, and works offline.
+- A section's CSS background now fills its whole sheets, margins included (and prints), instead of only the text area.
 ### Fixed
 - Stop code block backgrounds and quote borders from running through the bottom margin and the gap between sheets when they split across pages.
 - Let a code block or quote split across pages run through both sheets' margins, clearing only the gap between sheets.

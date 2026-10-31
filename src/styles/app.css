@@ -182,7 +182,9 @@ body {
 .side code { font-family: Consolas, "Cascadia Mono", Menlo, monospace; font-size: 12px; }
 /* The page is a transparent column; App.vue draws one white .sheet per page behind the text. */
 .desk .page { position: relative; isolation: isolate; background: none; }
-.sheet { position: absolute; inset-inline: 0; z-index: -1; height: var(--sheet-h); background: #fff; box-shadow: var(--shadow-4); }
+.sheet { position: absolute; inset-inline: 0; z-index: -1; height: var(--sheet-h); background: #fff; box-shadow: var(--shadow-4); print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+/* A section's background is painted on its sheets (App.vue paintSheets), so not on the section too. */
+.page:not(.bg-read) .ProseMirror > .section { background: none !important; }
 /* A page break inside a block with a background or side border (code, quote) would drag it across
    the gap. The block keeps running through both sheets' margins; only the gap is painted back to
    canvas, with the sheet's bottom shadow redrawn at its top edge. */

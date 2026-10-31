@@ -136,6 +136,36 @@ const css = computed(() =>
 watch(css, (text) => { stylesSheet.textContent = text }, { immediate: true })
 onBeforeUnmount(() => stylesSheet.remove())
 
+// A section's background is the paper of its sheets, margins included: read off each section (app.css
+// hides it there except under .bg-read) and painted on every sheet from the one the section starts on.
+const sheetBg = shallowRef([]) // per sheet: background style, or null for plain white
+function paintSheets() {
+  const e = editor.value
+  const page = pageEl.value
+  if (!e || !page) return
+  const tops = [...page.querySelectorAll(':scope > .sheet')].map((s) => s.getBoundingClientRect().top)
+  const starts = [] // [sheet index, style] per section
+  page.classList.add('bg-read')
+  e.state.doc.forEach((node, pos) => {
+    const el = e.view.nodeDOM(pos)
+    if (!el?.getBoundingClientRect) return
+    const top = el.getBoundingClientRect().top
+    const s = getComputedStyle(el)
+    // Zero alpha only: rgba(…, 0) or color(… / 0); rgb(0, 128, 0) is green.
+    const none = s.backgroundImage === 'none' && /^transparent$|^rgba\(.*, 0\)$|\/ 0\)$/.test(s.backgroundColor)
+    starts.push([Math.max(0, tops.findLastIndex((t) => t <= top)), none ? null : {
+      backgroundColor: s.backgroundColor,
+      backgroundImage: s.backgroundImage,
+      backgroundSize: s.backgroundSize,
+      backgroundPosition: s.backgroundPosition,
+      backgroundRepeat: s.backgroundRepeat,
+    }])
+  })
+  page.classList.remove('bg-read')
+  sheetBg.value = tops.map((_, k) => starts.findLast(([n]) => n <= k)?.[1] ?? null)
+}
+watch([css, pages, breaks], () => nextTick(paintSheets))
+
 // Paper, margins (header and footer heights are the top and bottom ones), the column gap and styles
 // all change where lines fall, so they re-flow the pages.
 watch(
@@ -335,7 +365,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       }"
       @mousedown.capture="onPageMouseDown"
     >
-      <div v-for="n in pages" :id="`sheet-${n}`" :key="n" class="sheet" :style="{ top: `calc(${n - 1} * (var(--sheet-h) + var(--page-gap)))` }">
+      <div v-for="n in pages" :id="`sheet-${n}`" :key="n" class="sheet" :style="[{ top: `calc(${n - 1} * (var(--sheet-h) + var(--page-gap)))` }, sheetBg[n - 1]]">
         <template v-for="z in ['header', 'footer']" :key="z">
           <div v-if="sheetZones[n - 1]?.[z]" :id="`${z}-${n}`" :class="['hf', `hf-${z}`]">
             <div
