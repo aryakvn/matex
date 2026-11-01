@@ -52,6 +52,19 @@ describe('captions and references', () => {
     expect(editor.commands.insertCaption()).toBe(false)
   })
 
+  it('captions an equation block as EQ-n and refers to it', () => {
+    const editor = make('$$\nx^2\n$$\n\nSee')
+    editor.view.dispatch(editor.state.tr.setSelection(NodeSelection.create(editor.state.doc, 1)))
+    expect(editor.commands.insertCaption()).toBe(true)
+    editor.commands.insertContent('Square')
+    editor.commands.focus('end')
+    editor.commands.insertMediaRef('EQ-1')
+    const out = editor.getMarkdown().trim()
+    expect(out).toBe('$$\nx^2\n$$\n\n: eq-1: Square {#EQ-1}\n\nSee[EQ-1]')
+    expect(make(out).getMarkdown().trim()).toBe(out)
+    expect(shown(make(out))).toEqual(['eq-1'])
+  })
+
   it('gives a copied caption a new key', () => {
     const editor = make(': fig-1: A {#IMG-1}\n\n: fig-1: B {#IMG-1}')
     editor.commands.insertContent('x') // any edit

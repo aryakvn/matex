@@ -17,7 +17,7 @@ MaTex exists because writing a Persian thesis offline on Linux, with your own fo
 
 ## Later
 
-- [x] Math (KaTeX, saved as `$…$` / `$$…$$` in Markdown).
+- [x] Math (KaTeX, saved as `$…$` / `$$…$$` in Markdown). Equation blocks take captions and `[EQ-n]` references.
 - [ ] Page layouts and templates (thesis, article, book).
 - [x] Footnotes and references (Wikipedia style), with a references list.
 - [ ] Citation styles and a bibliography database (BibTeX).

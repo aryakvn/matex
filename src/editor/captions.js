@@ -3,17 +3,17 @@ import { Plugin, PluginKey, TextSelection, NodeSelection } from '@tiptap/pm/stat
 import { Decoration, DecorationSet } from '@tiptap/pm/view'
 import { escapeAttrs } from './ids.js'
 
-// Captions and cross-references for images, tables and HTML blocks (shapes, SVG drawings).
+// Captions and cross-references for images, charts, tables, equation blocks and HTML blocks (shapes, SVG drawings).
 // A caption is a block under its media whose text starts with its label: "fig-1: A map of Tehran".
-// It also has a fixed key (IMG-1, TBL-1, SHP-1) that references point at, so the label is just
+// It also has a fixed key (IMG-1, TBL-1, EQ-1, SHP-1) that references point at, so the label is just
 // text: rename it and every reference follows. In Markdown:
 //
 //   : fig-1: A map of Tehran {#IMG-1}      (the caption line, Pandoc-like)
 //   As [IMG-1] shows, …                    (a reference; shown as "fig-1")
 
-const PREFIX = { image: 'IMG', mermaid: 'IMG', table: 'TBL', htmlBlock: 'SHP' }
-const LABEL = { IMG: 'fig', TBL: 'tbl', SHP: 'shape' }
-const KEY = '(?:IMG|TBL|SHP)-\\d+'
+const PREFIX = { image: 'IMG', mermaid: 'IMG', table: 'TBL', blockMath: 'EQ', htmlBlock: 'SHP' }
+const LABEL = { IMG: 'fig', TBL: 'tbl', EQ: 'eq', SHP: 'shape' }
+const KEY = '(?:IMG|TBL|EQ|SHP)-\\d+'
 const CAPTION = new RegExp(`^: ?(.*?)[ \\t]*\\{#(${KEY})\\}[ \\t]*(?:\\n+|$)`)
 // Not a link, span or reference-style link: `[IMG-1](…)`, `[IMG-1]{#x}`, `[IMG-1][x]`, `[IMG-1]: …`.
 const REF = new RegExp(`\\[(${KEY})\\](?![({\\[:])`)
@@ -51,7 +51,7 @@ function nextKey(doc, prefix) {
   return `${prefix}-${max + 1}`
 }
 
-// The image, table or HTML block the selection is on (a selected image/block, or the cursor in a table).
+// The image, chart, equation, table or HTML block the selection is on (a selected image/block, or the cursor in a table).
 export function mediaAt(state) {
   const { selection } = state
   if (selection instanceof NodeSelection && PREFIX[selection.node.type.name]) return { node: selection.node, pos: selection.from }
@@ -126,7 +126,7 @@ export const Caption = Node.create({
 
   addCommands() {
     return {
-      // Caption under the selected image/table/HTML block, prefilled "fig-N: ", cursor at its end.
+      // Caption under the selected image/chart/equation/table/HTML block, prefilled "fig-N: ", cursor at its end.
       insertCaption: () => ({ state, tr, dispatch }) => {
         const media = mediaAt(state)
         if (!media) return false

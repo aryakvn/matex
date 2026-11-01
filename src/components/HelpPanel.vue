@@ -95,7 +95,7 @@ const keys = [
       <p><b>Pictures:</b> Insert → Image…, or paste or drop an image on the page. Select it for the Picture group: width (% of the text column), align, wrap text around it, filters, brightness and contrast, rotate and flip. Drag its bottom corners to resize.</p>
       <p><b>Tables:</b> Insert → Insert table. With the cursor in a table, add rows and columns from Insert and delete them from the same list.</p>
       <p><b>Charts:</b> Insert → Chart (Mermaid) adds a chart; click it to edit its code (flowchart, sequence, pie, gantt…). Errors show under the code. See mermaid.js.org for the chart types.</p>
-      <p><b>Equations:</b> Insert → Equation (inline or block), or the Σ button, then type LaTeX (<code>\frac{a}{b}</code>, <code>\sqrt{x}</code>, <code>\sum_{i=1}^n</code>). Click an equation to edit it. They are saved as <code>$x$</code> and <code>$$ … $$</code>, like Pandoc; a <code>$</code> typed as text stays text. KaTeX draws them; see katex.org for the commands it knows. Number a block with <code>\tag{1}</code>.</p>
+      <p><b>Equations:</b> Insert → Equation (inline or block), or the Σ button, then type LaTeX (<code>\frac{a}{b}</code>, <code>\sqrt{x}</code>, <code>\sum_{i=1}^n</code>). Click an equation to edit it. They are saved as <code>$x$</code> and <code>$$ … $$</code>, like Pandoc; a <code>$</code> typed as text stays text. KaTeX draws them; see katex.org for the commands it knows. Give a block a caption (Insert → Add caption, <code>eq-1: …</code>) to refer to it as <code>[EQ-1]</code>, or number it in place with <code>\tag{1}</code>.</p>
       <p><b>HTML blocks:</b> Insert → HTML block, for what Markdown can't express. It is drawn without scripts or <code>&lt;style&gt;</code>; style it from the CSS panel.</p>
     </section>
 
@@ -104,7 +104,7 @@ const keys = [
       <p><b>Footnote:</b> Insert → Footnote, then type its text at the bottom of the page. It prints at the bottom of the sheet its number is on.</p>
       <p><b>Reference:</b> Insert → New reference adds <code>[1]</code>; Cite reuses an existing one. Insert → References list puts the list where you want it.</p>
       <p>Click a number or a list entry to edit or delete the note. Numbers update by themselves.</p>
-      <p><b>Captions:</b> select an image, chart, table or HTML block, then Insert → Add caption. The text before the first <code>:</code> is its label (<code>fig-1</code>). Refer to it from Insert → Refer to…, or type <code>[IMG-1]</code>; the reference follows when the label changes.</p>
+      <p><b>Captions:</b> select an image, chart, equation block, table or HTML block, then Insert → Add caption. The text before the first <code>:</code> is its label (<code>fig-1</code>). Refer to it from Insert → Refer to…, or type <code>[IMG-1]</code>; the reference follows when the label changes.</p>
       <p><b>Table of contents:</b> Insert → Table of contents lists every heading with its page. Click its title to rename it; use an entry's … to leave a heading out.</p>
     </section>
 

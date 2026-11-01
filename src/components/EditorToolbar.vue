@@ -87,12 +87,12 @@ function noteItems() {
   ]
 }
 
-// Captions (captions.js): add one under the selected image/table/HTML block, or refer to one.
+// Captions (captions.js): add one under the selected image/chart/equation/table/HTML block, or refer to one.
 function captionItems() {
   const can = props.editor.can().insertCaption()
   const captions = captionEntries(props.editor.state.doc)
   return [
-    { label: can ? 'Add caption' : 'Add caption (select an image, chart, table or HTML block)', disabled: !can, run: () => chain().insertCaption().run() },
+    { label: can ? 'Add caption' : 'Add caption (select an image, chart, equation block, table or HTML block)', disabled: !can, run: () => chain().insertCaption().run() },
     ...(captions.length ? [null, ...captions.map((c) => ({ label: `Refer to ${excerpt(c.text) || c.ref}`, hint: `[${c.ref}]`, run: () => chain().insertMediaRef(c.ref).run() }))] : []),
   ]
 }
