@@ -22,6 +22,8 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-01
+
 ### Added
 - Add header, footer and page numbers (File → Page setup…): text in left/centre/right slots with `{page}`/`{pages}`, adjustable heights (which are the page margins) and text size, number position, format, start value, Persian digits, skip first page. Saved as `page.json` in the `.matex` archive.
 - Add WYSIWYG editor: Markdown typed as you write becomes formatting, Docs-style toolbar (text style, bold/italic/strike/code, links, lists, quotes, divider, images, tables).
