@@ -136,7 +136,7 @@ const doc = useDocument(editor)
 const { name, dirty, layout, scriptsOn, fonts } = doc
 
 const setup = ref(null)
-const fileActions = { new: doc.newDoc, open: doc.openDoc, save: doc.save, saveAs: doc.saveAs, pageSetup: () => setup.value.open(), print: () => window.print() }
+const fileActions = { new: doc.newDoc, open: doc.openDoc, save: doc.save, saveAs: doc.saveAs, pageSetup: () => setup.value.open(), print: () => { printing.value = true; nextTick(() => window.print()) } }
 
 // Paper size for print, paragraph styles (fonts, sizes), then the document's own CSS (CSS panel), as
 // a stylesheet over document.css; it prints too.
@@ -200,12 +200,41 @@ const runFor = (n) => (code) => (scriptsOn.value ? runScript(code, scriptVars(n)
 const sheetAt = (pos) => Math.min(pageAt(breaks.value, pos), pages.value)
 watch(editor, (e) => { if (e) e.storage.field.text = (code, pos) => runFor(sheetAt(pos))(code) }, { immediate: true })
 watch([scriptsOn, () => layout.script, () => layout.number.start, name, breaks, pages], () => editor.value?.commands.refreshFields())
-// [{ header: [html × 3] | null, footer }] per sheet; null = nothing in that zone.
+// Lazy sheets: headers, footers and footnotes are drawn (and their scripts run) only on sheets within
+// a screen of the view. The empty .sheet boxes stay: pagination, backgrounds and margin hit-testing
+// read them. Print draws every sheet.
+const nearSheets = shallowRef(new Set()) // sheet numbers
+const printing = ref(false)
+const drawn = (n) => printing.value || nearSheets.value.has(n)
+const sheetWatch = new IntersectionObserver((entries) => {
+  const near = new Set(nearSheets.value)
+  for (const e of entries) near[e.isIntersecting ? 'add' : 'delete'](Number(e.target.id.slice('sheet-'.length)))
+  nearSheets.value = near
+}, { rootMargin: '100% 0px' })
+function watchSheets() {
+  sheetWatch.disconnect()
+  pageEl.value?.querySelectorAll(':scope > .sheet').forEach((s) => sheetWatch.observe(s))
+}
+onMounted(watchSheets)
+watch(pages, watchSheets, { flush: 'post' })
+const printAll = () => { printing.value = true }
+const printDone = () => { printing.value = false }
+onMounted(() => {
+  window.addEventListener('beforeprint', printAll)
+  window.addEventListener('afterprint', printDone)
+})
+onBeforeUnmount(() => {
+  sheetWatch.disconnect()
+  window.removeEventListener('beforeprint', printAll)
+  window.removeEventListener('afterprint', printDone)
+})
+// [{ header: [html × 3] | null, footer }] per sheet; null = nothing in that zone or not drawn.
 const sheetZones = computed(() => {
   const shared = new Map()
   const once = (md) => (shared.has(md) ? shared : shared.set(md, slotHtml(md))).get(md)
   return Array.from({ length: pages.value }, (_, k) => {
     const n = k + 1
+    if (!drawn(n)) return null
     const out = {}
     for (const z of ['header', 'footer']) {
       const html = layout[z].map((md, i) => {
@@ -513,7 +542,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       </div>
       <template v-for="(list, k) in sheetNotes" :key="`fn${k}`">
         <ol
-          v-if="list.length" :id="`footnotes-${k + 1}`" class="fn-area" :dir="noteDir(list[0].text)"
+          v-if="list.length && (drawn(k + 1) || list.some((n) => n.id === editingNote))" :id="`footnotes-${k + 1}`" class="fn-area" :dir="noteDir(list[0].text)"
           :style="{ top: `calc(${k + 1} * (var(--sheet-h) + var(--page-gap)) - var(--page-gap) - var(--margin-bottom))` }"
         >
           <li v-for="n in list" :id="`footnote-text-${n.number}`" :key="n.id" class="fn-item" :dir="noteDir(n.text)" @click="editFootnote(n.id)">

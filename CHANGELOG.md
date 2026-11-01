@@ -36,6 +36,9 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Fix the cursor jumping to the left on a new empty line after Persian text: a line with no letter yet keeps the previous paragraph's direction, and the first letter typed decides it as before.
 - Fix zoom drifting toward the page's top-left: the sheet stays centred and the spot in the middle of the view stays put while zooming.
 
+### Changed
+- Draw headers, footers and footnotes only on sheets within a screen of the view (their scripts run only there), so long documents scroll lighter; printing still draws every sheet.
+
 ## [0.2.0] - 2026-11-01
 
 ### Added
