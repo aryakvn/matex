@@ -190,3 +190,15 @@ describe('list direction', () => {
     expect(dirs(editor)).toEqual(['rtl', 'rtl', 'rtl', 'ltr', 'ltr'])
   })
 })
+
+describe('Mermaid charts', () => {
+  it('reads a mermaid fence as a chart and saves it back verbatim', () => {
+    const md = 'Before\n\n```mermaid\nflowchart LR\n  A --> B\n```\n\nAfter'
+    expect(make(md).getJSON().content[0].content.map((n) => n.type)).toEqual(['paragraph', 'mermaid', 'paragraph'])
+    expect(roundTrip(md)).toBe(md)
+  })
+
+  it('leaves other fences as code blocks', () => {
+    expect(make('```js\nlet x\n```').getJSON().content[0].content[0].type).toBe('codeBlock')
+  })
+})

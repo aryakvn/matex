@@ -20,6 +20,7 @@ MaTex is the editor that was missing. It's small, it works offline on Linux, mac
   - links, lists, quotes, code blocks, divider lines
   - images (insert, paste, or drop) and tables
 - **Style with CSS:** every element has a class (`.heading-1`, `.persian`, `.toc-item`) and an id. The CSS panel styles the document live and in print; select text and press … → *Style in CSS* to target exactly that.
+- **Charts:** Mermaid diagrams (flowchart, sequence, pie, gantt, …) drawn live, saved as ```` ```mermaid ```` fences.
 - **HTML where Markdown stops:** HTML blocks are drawn live (sanitized) and saved verbatim; code fields are Monaco with CSS/HTML autocomplete.
 - **Print-first:** the page is plain HTML styled by one plain CSS file (`src/styles/document.css`). Nothing is drawn on a canvas, so what you see is what the browser's print engine produces.
 

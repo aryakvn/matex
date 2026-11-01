@@ -11,7 +11,7 @@ import { escapeAttrs } from './ids.js'
 //   : fig-1: A map of Tehran {#IMG-1}      (the caption line, Pandoc-like)
 //   As [IMG-1] shows, …                    (a reference; shown as "fig-1")
 
-const PREFIX = { image: 'IMG', table: 'TBL', htmlBlock: 'SHP' }
+const PREFIX = { image: 'IMG', mermaid: 'IMG', table: 'TBL', htmlBlock: 'SHP' }
 const LABEL = { IMG: 'fig', TBL: 'tbl', SHP: 'shape' }
 const KEY = '(?:IMG|TBL|SHP)-\\d+'
 const CAPTION = new RegExp(`^: ?(.*?)[ \\t]*\\{#(${KEY})\\}[ \\t]*(?:\\n+|$)`)

@@ -136,6 +136,9 @@
 .page .wrap-caption.align-left { float: left; clear: left; margin: -0.4em 1em 0.6em 0; }
 .page .wrap-caption.align-right { float: right; clear: right; margin: -0.4em 0 0.6em 1em; }
 .page .section::after { content: ""; display: block; clear: both; }
+/* Mermaid charts (editor/mermaid.js): centred, and like images never taller than a sheet's text area. */
+.page .mermaid-block { margin: 0 0 0.8em; }
+.page .mermaid-render svg { display: block; margin: 0 auto; max-height: var(--text-h); }
 .page table { border-collapse: collapse; width: 100%; margin: 0 0 0.8em; }
 .page th, .page td { border: 1px solid #bbb; padding: 0.3em 0.6em; vertical-align: top; text-align: start; }
 .page th { background: #f2f2f2; }

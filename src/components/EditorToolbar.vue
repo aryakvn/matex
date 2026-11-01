@@ -4,7 +4,7 @@
 import { computed, ref, nextTick, watch } from 'vue'
 import {
   Undo2, Redo2, Bold, Italic, Strikethrough, Code, Link, List, ListOrdered,
-  Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, FileCode, CodeXml, CaseSensitive, Superscript, Columns2, Captions,
+  Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, FileCode, CodeXml, CaseSensitive, Superscript, Columns2, Captions, Workflow,
   AlignStartVertical, AlignCenterVertical, AlignEndVertical, Contrast, SunDim, FlipHorizontal2, FlipVertical2, TextWrap, RotateCcw, RotateCw,
 } from 'lucide-vue-next'
 import ToolbarMenu from './ToolbarMenu.vue'
@@ -90,7 +90,7 @@ function captionItems() {
   const can = props.editor.can().insertCaption()
   const captions = captionEntries(props.editor.state.doc)
   return [
-    { label: can ? 'Add caption' : 'Add caption (select an image, table or HTML block)', disabled: !can, run: () => chain().insertCaption().run() },
+    { label: can ? 'Add caption' : 'Add caption (select an image, chart, table or HTML block)', disabled: !can, run: () => chain().insertCaption().run() },
     ...(captions.length ? [null, ...captions.map((c) => ({ label: `Refer to ${excerpt(c.text) || c.ref}`, hint: `[${c.ref}]`, run: () => chain().insertMediaRef(c.ref).run() }))] : []),
   ]
 }
@@ -301,6 +301,12 @@ function onImagePicked(e) {
             v-if="editor.commands.insertHtmlBlock"
             type="button" class="tb-btn" title="HTML block" aria-label="HTML block" @click="chain().insertHtmlBlock().run()">
             <CodeXml :size="18" />
+          </button>
+
+          <button
+            v-if="editor.commands.insertMermaid"
+            type="button" class="tb-btn" title="Chart (Mermaid)" aria-label="Chart (Mermaid)" @click="chain().insertMermaid().run()">
+            <Workflow :size="18" />
           </button>
         </div>
         <div class="tb-row">

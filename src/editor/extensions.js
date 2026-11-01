@@ -11,6 +11,7 @@ import { Direction, DirectionMarkdown, withDirMark } from './direction.js'
 import { PersianFont } from './persian.js'
 import { noteExtensions, NoteMarkdown } from './notes.js'
 import { HtmlBlock } from './html.js'
+import { Mermaid } from './mermaid.js'
 import { Picture } from './image.js'
 import { captionExtensions } from './captions.js'
 import { BlockIds, ElementIds, Span, escapeAttrs, attrBlock } from './ids.js'
@@ -69,6 +70,7 @@ export const extensions = [
   // Block-level HTML is kept verbatim (html.js). ponytail: inline HTML with no matching extension
   // (<kbd>, <mark> in a sentence) keeps its text but loses the tag; add an inline HTML atom if needed.
   HtmlBlock,
+  Mermaid, // ```mermaid fences; other fences stay code blocks
   ...captionExtensions,
   DirectionMarkdown,
   NoteMarkdown, // after DirectionMarkdown: wraps the manager it creates
@@ -82,8 +84,8 @@ export const extensions = [
 export const editorOptions = { extensions, textDirection: 'auto', contentType: 'markdown' }
 
 // Header/footer slots and note text: the body's editor without sheets, sections, a table of contents,
-// notes, captions or ids (a slot repeats on every sheet, so its ids would too).
-const bodyOnly = [Pagination, SectionDocument, Section, SectionMarkdown, TableOfContents, ...noteExtensions, NoteMarkdown, ...captionExtensions, ElementIds]
+// notes, captions, charts or ids (a slot repeats on every sheet, so its ids would too).
+const bodyOnly = [Mermaid, Pagination, SectionDocument, Section, SectionMarkdown, TableOfContents, ...noteExtensions, NoteMarkdown, ...captionExtensions, ElementIds]
 export const slotEditorOptions = {
   ...editorOptions,
   extensions: [Document, ...extensions.filter((e) => !bodyOnly.includes(e))],
