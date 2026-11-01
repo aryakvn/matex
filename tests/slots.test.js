@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { runScripts, hasScripts, EXAMPLES } from '../src/utils/scripts.js'
+import { runScript, hasScripts, EXAMPLES } from '../src/utils/scripts.js'
+import { fieldContent } from '../src/editor/fields.js'
 import { slotHtml as render, isDynamic } from '../src/editor/slots.js'
 
 const slotHtml = (...a) => render(...a).replaceAll(' dir="auto"', '')
@@ -10,16 +11,27 @@ describe('header/footer scripts', () => {
   const vars = { page: 3, pages: 9, number: 3, title: 'Thesis', date: new Date(2026, 0, 2) }
 
   it('runs expressions and statement bodies, shows errors in place', () => {
-    expect(runScripts('p {{ page * 2 }} of {{pages}}', vars)).toBe('p 6 of 9')
-    expect(runScripts('{{ if (page % 2) return "odd"; return "even" }}', vars)).toBe('odd')
-    expect(runScripts('{{ title.toUpperCase() }}', vars)).toBe('THESIS')
-    expect(runScripts('{{ nope() }}', vars)).toMatch(/^⚠ /)
+    expect(runScript('page * 2', vars)).toBe('6')
+    expect(runScript('if (page % 2) return "odd"; return "even"', vars)).toBe('odd')
+    expect(runScript('title.toUpperCase()', vars)).toBe('THESIS')
+    expect(runScript('nope()', vars)).toMatch(/^⚠ /)
     expect(hasScripts('a {{ b }}')).toBe(true)
     expect(hasScripts('a {page}')).toBe(false)
+    expect(hasScripts('a \\{{ b }}')).toBe(false) // escaped: literal text
+  })
+
+  it('puts the document script in scope of every script', () => {
+    const script = 'const part = 2\nfunction tag() { return page % 2 ? title : `p${page}` } // trailing comment'
+    expect(runScript('tag() + part', vars, script)).toBe('Thesis2')
+    expect(runScript('if (part) return tag()', { ...vars, page: 4 }, script)).toBe('p4')
+    expect(runScript('part', vars, 'const part = (')).toMatch(/^⚠ /)
+    expect(runScript('part', vars)).toMatch(/^⚠ /) // nothing left over from another script
   })
 
   it('every example in the side panel runs', () => {
-    for (const x of EXAMPLES) expect(runScripts(x.code, vars), x.code).not.toMatch(/⚠|\{\{/)
+    for (const x of EXAMPLES) {
+      for (const f of fieldContent(x.code).filter((n) => n.type === 'field')) expect(runScript(f.attrs.code, vars), x.code).not.toMatch(/⚠/)
+    }
   })
 
   it('keeps {page} tokens apart from {{ page }} scripts', () => {

@@ -1,10 +1,11 @@
-// Header/footer slot Markdown → HTML for one sheet: placeholders and scripts are filled in the
-// text, the page number is added to the last line, and the result goes through the slot editor's
+// Header/footer slot Markdown → HTML for one sheet: script fields become run(code), placeholders
+// are filled in the text, the page number is added to the last line, and the result goes through the slot editor's
 // schema, so a slot shows exactly what its editor can make.
 import { Editor, getHTMLFromFragment } from '@tiptap/core'
 import { Node } from '@tiptap/pm/model'
 import { slotEditorOptions } from './extensions.js'
 import { markPersian } from './persian.js'
+import { fillFields, showCode } from './fields.js'
 
 let converter
 const parsed = new Map() // markdown → doc JSON
@@ -38,9 +39,9 @@ function lastTextblock(node) {
 // Whether a slot looks different per sheet (then it is rendered per sheet).
 export const isDynamic = (md) => /\{\{|\{pages?\}/.test(md)
 
-export function slotHtml(md, fill = (t) => t, suffix = '') {
+export function slotHtml(md, fill = (t) => t, suffix = '', run = showCode) {
   if (!md.trim() && !suffix) return ''
-  const doc = mapText(parse(md), fill)
+  const doc = mapText(fillFields(parse(md), run), fill)
   doc.content ??= []
   if (suffix) {
     const block = lastTextblock(doc)

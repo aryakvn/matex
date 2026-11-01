@@ -1,9 +1,11 @@
-// {{ code }} in a header/footer slot: JavaScript run once per sheet, its result shown as text.
+// {{ code }} anywhere in the document (a `field` node, editor/fields.js): JavaScript run for the
+// sheet it is on, its result shown as text.
 // It runs with the app's full rights (chosen over a sandbox); useDocument asks before running
 // the scripts of a document opened from disk.
 // An expression ({{ page * 2 }}) is returned as is; statements need a `return`.
+// The document script (layout.script, the scripts panel, saved as script.js) runs before each one,
+// so its functions and variables are in scope there and it sees the page's variables too.
 
-const SCRIPT = /\{\{([\s\S]+?)\}\}/g
 // What a script can use; also the side panel's reference (ScriptReference.vue). App.vue fills them.
 export const VARIABLES = [
   { name: 'page', type: 'number', about: 'This sheet, counted from 1.' },
@@ -23,17 +25,25 @@ export const EXAMPLES = [
 ]
 const NAMES = VARIABLES.map((v) => v.name)
 const compiled = new Map()
+let compiledFor = '' // the document script the cache was built with
 
-export const hasScripts = (text) => /\{\{[\s\S]+?\}\}/.test(text)
+// Whether Markdown has a field; `\{{` (escaped, literal text) doesn't count.
+export const hasScripts = (text) => /\{\{[\s\S]+?\}\}/.test(text.replace(/\\[\s\S]/g, ''))
 
-function compile(code) {
+// ponytail: the document script reruns for every {{ }} on every sheet; fine for helpers, run it once
+// into a scope object if documents start doing heavy work there.
+function compile(code, script) {
+  if (script !== compiledFor) {
+    compiled.clear()
+    compiledFor = script
+  }
   if (!compiled.has(code)) {
     let fn
     try {
-      fn = new Function(...NAMES, `return (${code}\n)`)
+      fn = new Function(...NAMES, `${script}\nreturn (${code}\n)`)
     } catch {
       try {
-        fn = new Function(...NAMES, code)
+        fn = new Function(...NAMES, `${script}\n${code}`)
       } catch (err) {
         fn = () => { throw err }
       }
@@ -43,14 +53,13 @@ function compile(code) {
   return compiled.get(code)
 }
 
-// vars: { page, pages, number, title, date }. A failing script shows its error in place.
-export function runScripts(text, vars) {
-  return text.replace(SCRIPT, (_, code) => {
-    try {
-      const value = compile(code.trim())(...NAMES.map((n) => vars[n]))
-      return value == null ? '' : String(value)
-    } catch (err) {
-      return `⚠ ${err.message}`
-    }
-  })
+// One field's code → its text. vars: { page, pages, number, title, date }; script: the document
+// script. A failing script shows its error in place.
+export function runScript(code, vars, script = '') {
+  try {
+    const value = compile(code.trim(), script)(...NAMES.map((n) => vars[n]))
+    return value == null ? '' : String(value)
+  } catch (err) {
+    return `⚠ ${err.message}`
+  }
 }

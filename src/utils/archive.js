@@ -1,17 +1,20 @@
 // A .matex file is a plain zip: DOCUMENT.md at the root plus assets/<name> files, page.json (layout)
-// and style.css (the document's own CSS, layout.css in memory).
+// style.css (the document's own CSS, layout.css in memory) and script.js (layout.script, the
+// header/footer scripts' shared code).
 import { zipSync, unzipSync, strToU8, strFromU8 } from 'fflate'
 import { normalizeLayout, isDefaultLayout } from './layout.js'
 
 const DOC = 'DOCUMENT.md'
 const LAYOUT = 'page.json' // header/footer/page numbers; absent = defaults
 const STYLE = 'style.css' // absent = none
+const SCRIPT = 'script.js' // absent = none
 
 export function pack({ markdown, files, layout }) {
-  const { css = '', ...rest } = layout ?? {}
+  const { css = '', script = '', ...rest } = layout ?? {}
   const extra = {}
-  if (layout && !isDefaultLayout({ ...rest, css: '' })) extra[LAYOUT] = strToU8(JSON.stringify(rest))
+  if (layout && !isDefaultLayout({ ...rest, css: '', script: '' })) extra[LAYOUT] = strToU8(JSON.stringify(rest))
   if (css.trim()) extra[STYLE] = strToU8(css)
+  if (script.trim()) extra[SCRIPT] = strToU8(script)
   return zipSync({ [DOC]: strToU8(markdown), ...extra, ...files })
 }
 
@@ -32,5 +35,6 @@ export function unpack(bytes) {
     if (LAYOUT in entries) layout = normalizeLayout(JSON.parse(strFromU8(entries[LAYOUT])))
   } catch {} // a damaged page.json costs the layout, not the document
   if (STYLE in entries) layout = { ...(layout ?? normalizeLayout(null)), css: strFromU8(entries[STYLE]) }
+  if (SCRIPT in entries) layout = { ...(layout ?? normalizeLayout(null)), script: strFromU8(entries[SCRIPT]) }
   return { markdown: strFromU8(entries[DOC]), files, layout }
 }

@@ -48,6 +48,7 @@ const CLASSES = [
   ['.sheet .hf-header .hf-footer .hf-slot', 'Sheets, headers and footers'],
   ['.span', 'Text you gave an id with …'],
   ['.html-block', 'HTML blocks (</> button)'],
+  ['.field', 'Script fields ({{ }}) in the text'],
 ]
 const IDS = [
   ['#paragraph-3', 'The 3rd paragraph. Every element has one: #heading-2-1, #list-item-4, #persian-5, #footnote-2'],

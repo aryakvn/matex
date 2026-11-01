@@ -5,7 +5,7 @@ import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 
 const code = defineModel({ type: String, default: '' })
 const props = defineProps({
-  language: { type: String, required: true }, // 'css' | 'html'
+  language: { type: String, required: true }, // 'css' | 'html' | 'javascript'
   label: { type: String, required: true },
   placeholder: { type: String, default: '' },
   minHeight: { type: Number, default: 240 },

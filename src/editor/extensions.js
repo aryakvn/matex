@@ -13,6 +13,7 @@ import { noteExtensions, NoteMarkdown } from './notes.js'
 import { HtmlBlock } from './html.js'
 import { Mermaid } from './mermaid.js'
 import { InlineMath, BlockMath, MathMarkdown } from './math.js'
+import { Field, FieldMarkdown } from './fields.js'
 import { Picture } from './image.js'
 import { captionExtensions } from './captions.js'
 import { BlockIds, ElementIds, Span, escapeAttrs, attrBlock } from './ids.js'
@@ -74,9 +75,11 @@ export const extensions = [
   Mermaid, // ```mermaid fences; other fences stay code blocks
   InlineMath, // $x$
   BlockMath, // $$ … $$
+  Field, // {{ script }}
   ...captionExtensions,
   DirectionMarkdown,
   MathMarkdown, // after DirectionMarkdown: patches the manager it creates
+  FieldMarkdown, // same
   NoteMarkdown, // after DirectionMarkdown: wraps the manager it creates
   BlockIds, // same
   SectionMarkdown, // last: gathers what the others leave into sections

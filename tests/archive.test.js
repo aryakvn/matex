@@ -21,6 +21,13 @@ describe('archive', () => {
     expect(unpack(bytes).layout).toEqual({ ...normalizeLayout(null), css })
   })
 
+  it('keeps the document script in script.js', () => {
+    const script = 'function f() { return 1 }'
+    const bytes = pack({ markdown: 'x', files: {}, layout: { ...normalizeLayout(null), script } })
+    expect(Object.keys(unzipSync(bytes)).sort()).toEqual(['DOCUMENT.md', 'script.js'])
+    expect(unpack(bytes).layout).toEqual({ ...normalizeLayout(null), script })
+  })
+
   it('unpack rejects random bytes', () => {
     expect(() => unpack(strToU8('just some text'))).toThrow(/Not a MaTex document/)
   })

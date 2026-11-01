@@ -218,6 +218,7 @@ function insertItems() {
     has('insertHtmlBlock') && { label: 'HTML block', run: () => chain().insertHtmlBlock().run() },
     has('insertMermaid') && { label: 'Chart (Mermaid)', run: () => chain().insertMermaid().run() },
     ...mathItems(),
+    has('insertField') && { label: 'Script field', hint: '{{ }}', run: () => chain().insertField().run() },
     { label: 'Divider line', run: () => chain().setHorizontalRule().run() },
     has('insertTableOfContents') && { label: 'Table of contents', run: () => chain().insertTableOfContents().run() },
     has('insertSection') && { label: 'Section break (next page)', disabled: !sectionAt(props.editor.state), run: () => chain().insertSection().run() },

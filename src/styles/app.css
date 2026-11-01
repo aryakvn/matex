@@ -254,10 +254,10 @@ html, .side-body, .desk { scrollbar-width: thin; }
 @media print { .img-handle, .img-ghost { display: none; } }
 
 /* HTML block (HtmlBlockView.vue): its code floats under it while selected, out of the text flow. */
-.html-block, .mermaid-block, .block-math, .inline-math { position: relative; }
-.html-block.ProseMirror-selectednode, .mermaid-block.ProseMirror-selectednode, .block-math.ProseMirror-selectednode, .inline-math.ProseMirror-selectednode { outline: 2px solid #1a55c4; outline-offset: 2px; }
+.html-block, .mermaid-block, .block-math, .inline-math, .field { position: relative; }
+.html-block.ProseMirror-selectednode, .mermaid-block.ProseMirror-selectednode, .block-math.ProseMirror-selectednode, .inline-math.ProseMirror-selectednode, .field.ProseMirror-selectednode { outline: 2px solid #1a55c4; outline-offset: 2px; }
 /* An inline equation is narrow; its popup gets its own width. */
-.inline-math .html-pop { inset-inline: 0 auto; width: 420px; line-height: normal; }
+.inline-math .html-pop, .field .html-pop { inset-inline: 0 auto; width: 420px; line-height: normal; }
 .html-empty { margin: 0; padding: 0.4em 0.6em; border: 1px dashed #bbb; border-radius: 4px; color: #888; font: var(--font-ui); }
 .html-pop {
   position: absolute;

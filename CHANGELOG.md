@@ -25,6 +25,8 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 ### Added
 - Add LaTeX equations drawn by KaTeX (bundled, offline): inline `$x^2$` and display `$$ … $$` blocks (Pandoc syntax), inserted from Insert → Equation or the Σ button, or typed as `$$x$$` / `$$$x$$$`; click one to edit its LaTeX in a popup. Prices like `$5 and $10` stay text, and a `$` typed as text is saved as `\$`. Equations also show in headers, footers and footnotes.
 - Add captions and cross-references for equation blocks: select one, Insert → Add caption (`eq-1: …`, saved `{#EQ-1}`), refer to it with Refer to… or `[EQ-1]`.
+- Add a Document script editor (JavaScript, Monaco) to the Header & footer scripts panel: its functions and variables are in scope in every `{{ }}` of the headers and footers; saved as `script.js` in the `.matex` file.
+- Add `{{ }}` script fields anywhere in the document (paragraphs, headings, tables, captions, footnotes, references, headers and footers): typed or Insert → Script field, drawn as their result for the page they are on, clicked to edit the code. `\{{` is the escape for literal braces (typed `\{{ … }}` keeps the text; text braces are saved as `\{{`). Bold/italic around a field are kept.
 
 ## [0.2.0] - 2026-11-01
 

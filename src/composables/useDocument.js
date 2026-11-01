@@ -59,7 +59,7 @@ export function useDocument(editor) {
       const lay = normalizeLayout(saved)
       const [body, ...slots] = assets.load([markdown, ...lay.header, ...lay.footer], files)
       Object.assign(lay, { header: slots.slice(0, 3), footer: slots.slice(3) })
-      const risky = slots.some(hasScripts)
+      const risky = [body, ...slots].some(hasScripts) // body includes its notes
       scriptsOn.value = !risky // off until answered, so nothing runs behind the question
       show(body, file, lay)
       if (risky) scriptsOn.value = await ask(RUN_SCRIPTS)

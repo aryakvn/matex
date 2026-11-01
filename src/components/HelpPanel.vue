@@ -119,7 +119,8 @@ const keys = [
       <h3 class="ref-h">Header, footer and page numbers</h3>
       <p>Double-click a sheet's top or bottom margin to type in its left, centre and right slots. Double-click the body or press Esc to go back.</p>
       <p><code>{page}</code> and <code>{pages}</code> fill in the page number and count. Page setup sets the number's position, format, first value, Persian digits and whether page 1 skips it.</p>
-      <p><code v-pre>{{ code }}</code> runs JavaScript per page, such as <code v-pre>{{ page.toLocaleString('fa') }}</code>. Edit → Header and footer scripts… lists what scripts can use. MaTex asks before running scripts in a document you open.</p>
+      <p><code v-pre>{{ code }}</code> runs JavaScript for the page it is on, such as <code v-pre>{{ page.toLocaleString('fa') }}</code>, here and anywhere in the text: paragraphs, headings, tables, captions, notes. Type it or use Insert → Script field; click one to edit its code. Edit → Header and footer scripts… lists what scripts can use, and its Document script holds functions and variables every <code v-pre>{{ }}</code> can call. MaTex asks before running scripts in a document you open.</p>
+      <p>For literal braces type <code v-pre>\{{ … }}</code>: the backslash goes and the text stays. Pressing Ctrl+Z right after a field appears also turns it back into text. In the saved Markdown, literal braces are written <code v-pre>\{{</code>.</p>
     </section>
 
     <section id="help-css">

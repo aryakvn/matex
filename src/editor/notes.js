@@ -4,6 +4,7 @@ import { Decoration, DecorationSet } from '@tiptap/pm/view'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import ReferencesView from '../components/ReferencesView.vue'
 import { markPersian, isRtl } from './persian.js'
+import { fillFields, showCode } from './fields.js'
 
 // Footnotes and references (Wikipedia style). Both are an inline `note` marker whose text is an attr;
 // markers sharing an id are one note (a source cited twice). In Markdown both are Pandoc footnotes:
@@ -33,21 +34,28 @@ export const pageAt = (breaks, pos) => 1 + breaks.filter((b) => b.pos <= pos).le
 // references rows: their text sits in a `dir="auto"` paragraph, which a row's own `dir="auto"` skips.
 export const noteDir = (md) => (isRtl(md) ? 'rtl' : 'ltr')
 
-// A note's Markdown text as HTML, through the body's schema; Persian runs get their font.
+// A note's Markdown text as HTML, through the body's schema; Persian runs get their font. Script
+// fields become run(code) (their value on the note's sheet), else their code.
 const htmlCache = new Map()
-export function noteHtml(editor, md) {
+const parsedCache = new Map()
+export function noteHtml(editor, md, run = showCode) {
   if (!md?.trim()) return ''
-  if (!htmlCache.has(md)) {
-    if (htmlCache.size > 200) htmlCache.clear() // ponytail: crude bound, like slots.js
-    const doc = editor.schema.nodeFromJSON(editor.markdown.parse(md))
+  if (htmlCache.size > 200) htmlCache.clear() // ponytail: crude bound, like slots.js
+  if (parsedCache.size > 200) parsedCache.clear()
+  if (!parsedCache.has(md)) parsedCache.set(md, editor.markdown.parse(md))
+  const values = []
+  const json = fillFields(parsedCache.get(md), (code) => values[values.push(run(code)) - 1])
+  const key = `${md}\0${values.join('\0')}`
+  if (!htmlCache.has(key)) {
+    const doc = editor.schema.nodeFromJSON(json)
     // The body's parse wraps everything in a section (sections.js); a note is just its content.
     const body = doc.firstChild?.type.name === 'section' ? doc.firstChild.content : doc.content
     const tpl = document.createElement('template')
     tpl.innerHTML = getHTMLFromFragment(body, editor.schema)
     markPersian(tpl.content)
-    htmlCache.set(md, tpl.innerHTML)
+    htmlCache.set(key, tpl.innerHTML)
   }
-  return htmlCache.get(md)
+  return htmlCache.get(key)
 }
 
 const numbersKey = new PluginKey('noteNumbers')

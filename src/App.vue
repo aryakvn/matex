@@ -3,7 +3,8 @@ import { ref, shallowRef, computed, watch, nextTick, onMounted, onBeforeUnmount 
 import { useEditor, Editor, EditorContent } from '@tiptap/vue-3'
 import { editorOptions, slotEditorOptions } from './editor/extensions.js'
 import { slotHtml, isDynamic } from './editor/slots.js'
-import { runScripts } from './utils/scripts.js'
+import { runScript } from './utils/scripts.js'
+import { showCode, fieldContent } from './editor/fields.js'
 import EditorToolbar from './components/EditorToolbar.vue'
 import PageSetup from './components/PageSetup.vue'
 import SidePanel from './components/SidePanel.vue'
@@ -191,8 +192,14 @@ const scriptVars = (n) => ({
   title: name.value.replace(/\.matex$/i, ''),
   date: new Date(),
 })
-const fillFor = (n) => (text) =>
-  fillTokens(layout, scriptsOn.value ? runScripts(text, scriptVars(n)) : text, n, pages.value)
+const fillFor = (n) => (text) => fillTokens(layout, text, n, pages.value)
+// A script field's text on sheet n: its result, or its code while scripts are off.
+const runFor = (n) => (code) => (scriptsOn.value ? runScript(code, scriptVars(n), layout.script) : showCode(code))
+// Fields in the body (editor/fields.js) show their value on the sheet they are on; it changes with
+// the breaks, the document script and the rest of scriptVars, not only with the doc.
+const sheetAt = (pos) => Math.min(pageAt(breaks.value, pos), pages.value)
+watch(editor, (e) => { if (e) e.storage.field.text = (code, pos) => runFor(sheetAt(pos))(code) }, { immediate: true })
+watch([scriptsOn, () => layout.script, () => layout.number.start, name, breaks, pages], () => editor.value?.commands.refreshFields())
 // [{ header: [html × 3] | null, footer }] per sheet; null = nothing in that zone.
 const sheetZones = computed(() => {
   const shared = new Map()
@@ -203,7 +210,7 @@ const sheetZones = computed(() => {
     for (const z of ['header', 'footer']) {
       const html = layout[z].map((md, i) => {
         const number = slotNumber(layout, z, i, n, pages.value)
-        return number || isDynamic(md) ? slotHtml(md, fillFor(n), number) : once(md)
+        return number || isDynamic(md) ? slotHtml(md, fillFor(n), number, runFor(n)) : once(md)
       })
       out[z] = html.some(Boolean) ? html : null
     }
@@ -302,8 +309,9 @@ async function openHelp(topic) {
   await nextTick()
   helpPanel.value?.show(topic)
 }
+// The scripts panel's Insert: at the cursor of the focused editor (text, header/footer or note).
 function insertScript(code) {
-  focusedSlot.value?.chain().focus().insertContent(code).run()
+  activeEditor.value?.chain().focus().insertContent(fieldContent(code)).run()
 }
 
 // A "…" button over the end of a selection in the body; its menu sends the selection's id to the
@@ -494,7 +502,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
               v-if="editingNote === n.id" :body="editor" :id="n.id" :text="n.text"
               @focus="focusedNote = $event" @done="finishNote(n.pos)"
             />
-            <span v-else class="fn-text" v-html="noteHtml(editor, n.text) || '&nbsp;'" />
+            <span v-else class="fn-text" v-html="noteHtml(editor, n.text, runFor(sheetAt(n.pos))) || '&nbsp;'" />
           </li>
         </ol>
       </template>
@@ -502,7 +510,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       <ol v-if="footnotes.length" class="fn-area fn-measure" dir="auto" aria-hidden="true">
         <li v-for="n in footnotes" :key="n.id" :data-note="n.id" class="fn-item" :dir="noteDir(n.text)">
           <span class="fn-num">{{ n.number }}</span>
-          <span class="fn-text" v-html="noteHtml(editor, n.text) || '&nbsp;'" />
+          <span class="fn-text" v-html="noteHtml(editor, n.text, runFor(sheetAt(n.pos))) || '&nbsp;'" />
         </li>
       </ol>
       <div v-if="popupNote" class="note-pop" :style="{ left: `${popup.left}px`, top: `${popup.top}px` }">
@@ -553,8 +561,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
     <template #default="{ showHelp }">
       <StylesPanel v-if="panel === 'styles'" :editor="activeEditor" :styles="layout.styles" :show-help="showHelp" />
       <ScriptReference
-        v-if="panel === 'scripts'"
-        :vars="scriptVars(editing?.n ?? 1)" :can-insert="!!focusedSlot" :scripts-on="scriptsOn" :show-help="showHelp"
+        v-if="panel === 'scripts'" v-model:script="layout.script"
+        :vars="scriptVars(editing?.n ?? caretPage)" :scripts-on="scriptsOn" :show-help="showHelp"
         @insert="insertScript"
       />
       <CssPanel v-if="panel === 'css'" ref="cssPanel" v-model="layout.css" :show-help="showHelp" />

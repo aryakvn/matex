@@ -101,7 +101,7 @@ export const Caption = Node.create({
   name: 'caption',
   group: 'block',
   // One line in Markdown, so no hard breaks.
-  content: '(text | note | mediaRef)*',
+  content: '(text | note | mediaRef | field)*',
 
   addAttributes: () => refAttr,
   parseHTML: () => [{ tag: 'p[data-ref]', priority: 60 }],

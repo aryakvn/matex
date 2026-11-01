@@ -1,5 +1,5 @@
 // Monaco (the VS Code editor) for the app's code fields, loaded on first use by CodeEdit.vue.
-// Only what CSS and HTML need, not editor.main (which bundles TypeScript and JSON, ~15 MB):
+// Only what CSS and HTML need (and JavaScript highlighting, without its TypeScript service), not editor.main (which bundles TypeScript and JSON, ~15 MB):
 // the core, editing contributions, and the CSS/HTML language services with their completions,
 // hover docs and checks. Their workers are bundled by Vite, so everything works offline.
 import * as monaco from 'monaco-editor/editor/editor.api.js'
@@ -25,6 +25,7 @@ import 'monaco-editor/editor/contrib/wordHighlighter/browser/wordHighlighter.js'
 import 'monaco-editor/editor/contrib/wordOperations/browser/wordOperations.js'
 import 'monaco-editor/languages/definitions/css/register.js'
 import 'monaco-editor/languages/definitions/html/register.js'
+import 'monaco-editor/languages/definitions/javascript/register.js'
 import { cssDefaults } from 'monaco-editor/languages/features/css/register.js'
 import 'monaco-editor/languages/features/html/register.js'
 

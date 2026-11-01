@@ -50,6 +50,7 @@ export const defaultLayout = () => ({
   number: { where: 'footer', align: 'center', format: 'n', persian: false, start: 1, skipFirst: false },
   styles: defaultStyles(),
   css: '',
+  script: '', // shared code for the {{ }} scripts (scripts.js), saved as script.js
 })
 
 const num = (v, min, max, fallback) => (Number.isFinite(+v) && v !== '' && v !== null ? Math.min(max, Math.max(min, +v)) : fallback)
@@ -83,6 +84,7 @@ export function normalizeLayout(raw) {
     },
     styles: normalizeStyles(r.styles),
     css: typeof r.css === 'string' ? r.css : '',
+    script: typeof r.script === 'string' ? r.script : '',
   }
 }
 
