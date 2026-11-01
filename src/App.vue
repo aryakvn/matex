@@ -135,7 +135,7 @@ const doc = useDocument(editor)
 const { name, dirty, layout, scriptsOn } = doc
 
 const setup = ref(null)
-const fileActions = { new: doc.newDoc, open: doc.openDoc, save: doc.save, saveAs: doc.saveAs, pageSetup: () => setup.value.open() }
+const fileActions = { new: doc.newDoc, open: doc.openDoc, save: doc.save, saveAs: doc.saveAs, pageSetup: () => setup.value.open(), print: () => window.print() }
 
 // Paper size for print, paragraph styles (fonts, sizes), then the document's own CSS (CSS panel), as
 // a stylesheet over document.css; it prints too.

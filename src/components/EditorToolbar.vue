@@ -37,6 +37,7 @@ const fileItems = [
   { label: 'Save as…', hint: `${mod}Shift+S`, run: () => emit('file', 'saveAs') },
   null,
   { label: 'Page setup…', run: () => emit('file', 'pageSetup') },
+  { label: 'Print…', hint: `${mod}P`, run: () => emit('file', 'print') },
 ]
 
 const marks = [

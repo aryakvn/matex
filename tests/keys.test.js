@@ -9,6 +9,7 @@ describe('fileAction', () => {
     expect(fileAction(ev('S', 'KeyS', { shiftKey: true }))).toBe('saveAs')
     expect(fileAction(ev('o', 'KeyO'))).toBe('open')
     expect(fileAction(ev('n', 'KeyN', { ctrlKey: false, metaKey: true }))).toBe('new')
+    expect(fileAction(ev('p', 'KeyP'))).toBe('print')
   })
 
   it('works on the Persian keyboard layout', () => {

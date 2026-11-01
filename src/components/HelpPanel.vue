@@ -32,6 +32,7 @@ defineExpose({ show })
 const keys = [
   ['New / Open', `${mod}N / ${mod}O`],
   ['Save / Save as', `${mod}S / ${mod}Shift+S`],
+  ['Print', `${mod}P`],
   ['Undo / Redo', `${mod}Z / ${mod}Y`],
   ['Bold / Italic', `${mod}B / ${mod}I`],
   ['Strikethrough', `${mod}Shift+X`],
@@ -57,6 +58,7 @@ const keys = [
       <p>MaTex is a word processor that saves Markdown. Type on the page; the ribbon and the Edit and Insert menus format what you select.</p>
       <p>File → New, Open, Save and Save as work on <code>.matex</code> files. A <code>.matex</code> file is a zip holding <code>DOCUMENT.md</code> (the text), <code>style.css</code> (your CSS), <code>page.json</code> (page setup and styles) and <code>assets/</code> (the images). Rename it to <code>.zip</code> to look inside.</p>
       <p>The title bar shows the file name and "Unsaved changes" until you save. MaTex asks before closing or opening another file over unsaved work.</p>
+      <p>File → Print… prints the pages exactly as they look on screen, one sheet per page, without the app around them. To get a PDF, pick a PDF printer in the print dialog.</p>
       <p>The status bar shows the page the cursor is on, the word count and the zoom. Zoom only changes the screen; lines and page breaks stay as they print.</p>
     </section>
 

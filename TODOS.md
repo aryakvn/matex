@@ -10,7 +10,7 @@ MaTex exists because writing a Persian thesis offline on Linux, with your own fo
 - [x] **Per-document CSS.** Add a `style.css` inside the `.matex` archive, applied on top of `document.css`.
   - [x] Edit it in an in-app CSS editor with live preview (CSS panel; every element has a class and an id).
   - This is the programmer feature: page size, margins, heading numbering, and how tables and code look are all just CSS.
-- [ ] **Print / PDF.** Print the page through the webview's print engine using `document.css` + `style.css`.
+- [x] **Print / PDF.** File → Print… (Ctrl/Cmd+P); PDF through the dialog's PDF printer. Print the page through the webview's print engine using `document.css` + `style.css`.
   - Support `@page` margins, page breaks (`break-before`), and running headers/footers where the engine supports them.
 - [ ] **Base direction per document.** Choose RTL for mostly-Persian documents, so new empty lines start on the right.
 - [ ] **Persian-friendly defaults.** Bundle one good Persian font as the default, and handle Persian digits and ZWNJ (half-space) input.
