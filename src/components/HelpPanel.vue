@@ -88,6 +88,7 @@ const keys = [
       <h3 class="ref-h">Text styles and fonts</h3>
       <p>The style box in the Font group (or Edit → Normal, Heading 1–3, Code) sets the paragraph's style.</p>
       <p>The Aa button (Edit → Styles and fonts…) opens the Styles panel: click a style to apply it, the pencil to change it. Each style has a Latin font and a Persian font with its own size, plus bold, italic and colour.</p>
+      <p>A font that isn't installed (on an iPad, fonts usually can't be) can be added with Add font… at the bottom of the Styles panel: pick TTF, OTF, WOFF or WOFF2 files. They are saved inside the .matex, so the document looks the same on any device. Add each weight (Regular, Bold) as its own file.</p>
     </section>
 
     <section id="help-media">

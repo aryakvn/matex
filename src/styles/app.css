@@ -189,6 +189,10 @@ html, .side-body, .desk { scrollbar-width: thin; }
 .style-form input[type="color"] { width: 32px; height: 24px; padding: 0; border: 1px solid var(--stroke-ctl); border-radius: 4px; background: none; }
 .style-row { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .style-reset { margin-inline-start: auto; }
+.font-list { margin: 0 0 8px; padding: 0; list-style: none; }
+.font-list li { display: flex; align-items: center; gap: 8px; min-height: 36px; border-bottom: 1px solid var(--stroke); }
+.add-font { display: inline-flex; align-items: center; gap: 6px; }
+.font-list span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Script reference (ScriptReference.vue) */
 .ref-text, .ref-hint, .ref-warn { margin: 0 0 8px; }

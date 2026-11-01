@@ -25,7 +25,7 @@ export const defaultStyles = () => ({
 })
 
 // Font names go into CSS strings, so anything that could end the string or the rule is dropped.
-const fontName = (v) => (typeof v === 'string' ? v.replace(/["\\;{}<>\n\r]/g, '').trim().slice(0, 100) : '')
+export const fontName = (v) => (typeof v === 'string' ? v.replace(/["\\;{}<>\n\r]/g, '').trim().slice(0, 100) : '')
 const size = (v, fallback) => (Number.isFinite(+v) && +v > 0 ? Math.min(96, Math.max(6, +v)) : fallback)
 
 export function normalizeStyles(raw) {

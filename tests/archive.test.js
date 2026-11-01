@@ -28,6 +28,12 @@ describe('archive', () => {
     expect(unpack(bytes).layout).toEqual({ ...normalizeLayout(null), script })
   })
 
+  it('keeps font files in fonts/', () => {
+    const out = unpack(pack({ markdown: 'x', files: {}, fonts: { 'fonts/a.ttf': new Uint8Array([7]) } }))
+    expect(Object.keys(out.files)).toEqual([])
+    expect([...out.fonts['fonts/a.ttf']]).toEqual([7])
+  })
+
   it('unpack rejects random bytes', () => {
     expect(() => unpack(strToU8('just some text'))).toThrow(/Not a MaTex document/)
   })

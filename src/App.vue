@@ -133,7 +133,7 @@ function insertNote({ kind, id }) {
 }
 
 const doc = useDocument(editor)
-const { name, dirty, layout, scriptsOn } = doc
+const { name, dirty, layout, scriptsOn, fonts } = doc
 
 const setup = ref(null)
 const fileActions = { new: doc.newDoc, open: doc.openDoc, save: doc.save, saveAs: doc.saveAs, pageSetup: () => setup.value.open(), print: () => window.print() }
@@ -559,7 +559,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   </main>
   <SidePanel v-model:show-help="panelHelp" :open="!!panel" :title="PANELS[panel] ?? ''" :help="panel !== 'help'" @update:open="panel = null">
     <template #default="{ showHelp }">
-      <StylesPanel v-if="panel === 'styles'" :editor="activeEditor" :styles="layout.styles" :show-help="showHelp" />
+      <StylesPanel
+        v-if="panel === 'styles'" :editor="activeEditor" :styles="layout.styles" :fonts :show-help="showHelp"
+        @add-fonts="doc.addFonts" @remove-font="doc.removeFont"
+      />
       <ScriptReference
         v-if="panel === 'scripts'" v-model:script="layout.script"
         :vars="scriptVars(editing?.n ?? caretPage)" :scripts-on="scriptsOn" :show-help="showHelp"
