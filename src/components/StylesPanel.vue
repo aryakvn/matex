@@ -41,7 +41,8 @@ const fontList = (script) => [...new Set([...props.fonts.map((f) => f.family), .
 const fontLook = (f) => ({ fontFamily: `"${f.family}"`, fontWeight: f.weight, fontStyle: f.style })
 const fontLabel = (f) => `${f.family}${f.weight !== 400 ? ` ${f.weight}` : ''}${f.style === 'italic' ? ' italic' : ''}`
 
-// No accept filter: iPadOS greys out font files it has no type for, so the file is checked after picking.
+// Extensions and MIME types both, so each platform's picker finds a match; the file is still checked after picking.
+const FONT_TYPES = '.ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2'
 const fontInput = ref(null)
 function onFontsPicked(e) {
   const files = [...(e.target.files ?? [])]
@@ -122,7 +123,7 @@ const sameAs = (key) => (key === 'p' ? 'Default' : 'Same as Normal')
   </ul>
   <p class="ref-hint">Font files (TTF, OTF, WOFF, WOFF2) saved inside the .matex, for devices where fonts can't be installed. Then type the font's name in a style.</p>
   <button type="button" class="pop-btn add-font" @click="fontInput.click()"><Plus :size="16" /> Add font…</button>
-  <input ref="fontInput" type="file" multiple hidden @change="onFontsPicked" />
+  <input ref="fontInput" type="file" :accept="FONT_TYPES" multiple hidden @change="onFontsPicked" />
 
   <datalist id="fonts-latin"><option v-for="f in fontList('latin')" :key="f" :value="f" /></datalist>
   <datalist id="fonts-persian"><option v-for="f in fontList('persian')" :key="f" :value="f" /></datalist>
