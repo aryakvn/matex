@@ -41,8 +41,10 @@ const fontList = (script) => [...new Set([...props.fonts.map((f) => f.family), .
 const fontLook = (f) => ({ fontFamily: `"${f.family}"`, fontWeight: f.weight, fontStyle: f.style })
 const fontLabel = (f) => `${f.family}${f.weight !== 400 ? ` ${f.weight}` : ''}${f.style === 'italic' ? ' italic' : ''}`
 
-// Extensions and MIME types both, so each platform's picker finds a match; the file is still checked after picking.
-const FONT_TYPES = '.ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2'
+// Only font files in the picker, except on iPad/iPhone: iOS greys out font files it has no type for
+// (an iPad also reports itself as a Mac, with touch). The file is checked after picking either way.
+const appleTouch = /iPad|iPhone/.test(navigator.userAgent) || (/Mac/.test(navigator.platform) && navigator.maxTouchPoints > 1)
+const FONT_TYPES = appleTouch ? '' : '.ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2'
 const fontInput = ref(null)
 function onFontsPicked(e) {
   const files = [...(e.target.files ?? [])]
