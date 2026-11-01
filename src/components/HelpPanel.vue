@@ -5,7 +5,7 @@ export const HELP_TOPICS = [
   { key: 'writing', title: 'Writing with Markdown' },
   { key: 'persian', title: 'Persian and English' },
   { key: 'styles', title: 'Text styles and fonts' },
-  { key: 'media', title: 'Pictures, tables and charts' },
+  { key: 'media', title: 'Pictures, tables, charts and equations' },
   { key: 'notes', title: 'Footnotes, references and captions' },
   { key: 'pages', title: 'Pages, sections and columns' },
   { key: 'header', title: 'Header, footer and page numbers' },
@@ -72,6 +72,7 @@ const keys = [
         <li><code>&gt; </code>: quote; <code>---</code>: divider line</li>
         <li><code>```js</code> + Enter: code block, coloured for that language</li>
         <li><code>```mermaid</code> + Enter: chart</li>
+        <li><code>$$x^2$$</code>: inline equation; <code>$$$x^2$$$</code> on its own line: equation block</li>
       </ul>
       <p>To write text that looks like Markdown (a line starting with <code>#</code>), just type it; MaTex escapes it when saving.</p>
     </section>
@@ -90,10 +91,11 @@ const keys = [
     </section>
 
     <section id="help-media">
-      <h3 class="ref-h">Pictures, tables and charts</h3>
+      <h3 class="ref-h">Pictures, tables, charts and equations</h3>
       <p><b>Pictures:</b> Insert → Image…, or paste or drop an image on the page. Select it for the Picture group: width (% of the text column), align, wrap text around it, filters, brightness and contrast, rotate and flip. Drag its bottom corners to resize.</p>
       <p><b>Tables:</b> Insert → Insert table. With the cursor in a table, add rows and columns from Insert and delete them from the same list.</p>
       <p><b>Charts:</b> Insert → Chart (Mermaid) adds a chart; click it to edit its code (flowchart, sequence, pie, gantt…). Errors show under the code. See mermaid.js.org for the chart types.</p>
+      <p><b>Equations:</b> Insert → Equation (inline or block), or the Σ button, then type LaTeX (<code>\frac{a}{b}</code>, <code>\sqrt{x}</code>, <code>\sum_{i=1}^n</code>). Click an equation to edit it. They are saved as <code>$x$</code> and <code>$$ … $$</code>, like Pandoc; a <code>$</code> typed as text stays text. KaTeX draws them; see katex.org for the commands it knows. Number a block with <code>\tag{1}</code>.</p>
       <p><b>HTML blocks:</b> Insert → HTML block, for what Markdown can't express. It is drawn without scripts or <code>&lt;style&gt;</code>; style it from the CSS panel.</p>
     </section>
 

@@ -4,7 +4,7 @@
 import { computed, ref, nextTick, watch } from 'vue'
 import {
   Undo2, Redo2, Bold, Italic, Strikethrough, Code, Link, List, ListOrdered,
-  Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, FileCode, CodeXml, CaseSensitive, Superscript, Columns2, Captions, Workflow,
+  Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, FileCode, CodeXml, CaseSensitive, Superscript, Columns2, Captions, Workflow, Sigma,
   AlignStartVertical, AlignCenterVertical, AlignEndVertical, Contrast, SunDim, FlipHorizontal2, FlipVertical2, TextWrap, RotateCcw, RotateCw,
 } from 'lucide-vue-next'
 import ToolbarMenu from './ToolbarMenu.vue'
@@ -205,11 +205,19 @@ function editItems() {
     { label: 'Document CSS…', run: () => emit('panel', 'css') },
   ]
 }
+// Equations (editor/math.js): inline in the sentence, or a centred block of its own.
+function mathItems() {
+  return [
+    has('insertInlineMath') && { label: 'Equation (inline)', hint: '$$x$$', run: () => chain().insertInlineMath().run() },
+    has('insertBlockMath') && { label: 'Equation (block)', hint: '$$$x$$$', run: () => chain().insertBlockMath().run() },
+  ].filter(Boolean)
+}
 function insertItems() {
   return [
     { label: 'Image…', run: () => imageInput.value.click() },
     has('insertHtmlBlock') && { label: 'HTML block', run: () => chain().insertHtmlBlock().run() },
     has('insertMermaid') && { label: 'Chart (Mermaid)', run: () => chain().insertMermaid().run() },
+    ...mathItems(),
     { label: 'Divider line', run: () => chain().setHorizontalRule().run() },
     has('insertTableOfContents') && { label: 'Table of contents', run: () => chain().insertTableOfContents().run() },
     has('insertSection') && { label: 'Section break (next page)', disabled: !sectionAt(props.editor.state), run: () => chain().insertSection().run() },
@@ -360,6 +368,10 @@ function onImagePicked(e) {
             type="button" class="tb-btn" title="Chart (Mermaid)" aria-label="Chart (Mermaid)" @click="chain().insertMermaid().run()">
             <Workflow :size="18" />
           </button>
+
+          <ToolbarMenu v-if="editor.commands.insertInlineMath" label="Equation" :items="mathItems()">
+            <Sigma :size="18" aria-hidden="true" />
+          </ToolbarMenu>
         </div>
         <div class="tb-row">
           <button

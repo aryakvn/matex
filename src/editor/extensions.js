@@ -12,6 +12,7 @@ import { PersianFont } from './persian.js'
 import { noteExtensions, NoteMarkdown } from './notes.js'
 import { HtmlBlock } from './html.js'
 import { Mermaid } from './mermaid.js'
+import { InlineMath, BlockMath, MathMarkdown } from './math.js'
 import { Picture } from './image.js'
 import { captionExtensions } from './captions.js'
 import { BlockIds, ElementIds, Span, escapeAttrs, attrBlock } from './ids.js'
@@ -71,8 +72,11 @@ export const extensions = [
   // (<kbd>, <mark> in a sentence) keeps its text but loses the tag; add an inline HTML atom if needed.
   HtmlBlock,
   Mermaid, // ```mermaid fences; other fences stay code blocks
+  InlineMath, // $x$
+  BlockMath, // $$ … $$
   ...captionExtensions,
   DirectionMarkdown,
+  MathMarkdown, // after DirectionMarkdown: patches the manager it creates
   NoteMarkdown, // after DirectionMarkdown: wraps the manager it creates
   BlockIds, // same
   SectionMarkdown, // last: gathers what the others leave into sections

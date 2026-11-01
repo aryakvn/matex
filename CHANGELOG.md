@@ -22,6 +22,9 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 
 ## [Unreleased]
 
+### Added
+- Add LaTeX equations drawn by KaTeX (bundled, offline): inline `$x^2$` and display `$$ … $$` blocks (Pandoc syntax), inserted from Insert → Equation or the Σ button, or typed as `$$x$$` / `$$$x$$$`; click one to edit its LaTeX in a popup. Prices like `$5 and $10` stay text, and a `$` typed as text is saved as `\$`. Equations also show in headers, footers and footnotes.
+
 ## [0.2.0] - 2026-11-01
 
 ### Added
