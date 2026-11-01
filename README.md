@@ -6,9 +6,9 @@ A lightweight, offline, cross-platform word processor for programmers. You write
 
 ## Why
 
-My girlfriend at the time ran Linux and had to write her thesis in Persian. There was no solid offline editor on Linux that handled Persian properly and let her use her own fonts. The options were either heavy office suites that fought right-to-left text, or LaTeX, with a learning curve a thesis deadline doesn't leave room for.
+Writing a thesis in Persian on Linux is harder than it should be. There was no solid offline editor on Linux that handled Persian properly and let you use your own fonts. The options were either heavy office suites that fought right-to-left text, or LaTeX, with a learning curve a thesis deadline doesn't leave room for.
 
-MaTex is the editor she needed. It's small, it works offline on Linux, macOS and Windows, and it treats Persian as a first-class language. It's built for people who already think in Markdown, HTML and CSS. If you can write a stylesheet, you can lay out your document.
+MaTex is the editor that was missing. It's small, it works offline on Linux, macOS and Windows, and it treats Persian as a first-class language. It's built for people who already think in Markdown, HTML and CSS. If you can write a stylesheet, you can lay out your document.
 
 ## What it does today
 
