@@ -28,6 +28,9 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Add a Document script editor (JavaScript, Monaco) to the Header & footer scripts panel: its functions and variables are in scope in every `{{ }}` of the headers and footers; saved as `script.js` in the `.matex` file.
 - Add `{{ }}` script fields anywhere in the document (paragraphs, headings, tables, captions, footnotes, references, headers and footers): typed or Insert → Script field, drawn as their result for the page they are on, clicked to edit the code. `\{{` is the escape for literal braces (typed `\{{ … }}` keeps the text; text braces are saved as `\{{`). Bold/italic around a field are kept.
 
+### Fixed
+- Fix menu items whose text wrapped out of their box (the disabled Add caption item spilled over the page): menu items stay on one line in every menu and grow instead of clipping; the reason Add caption is disabled is now a small note under it, which no longer stretches the Insert menu.
+
 ## [0.2.0] - 2026-11-01
 
 ### Added

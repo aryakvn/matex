@@ -6,7 +6,7 @@ import { ChevronDown, Check } from 'lucide-vue-next'
 
 defineProps({
   label: { type: String, required: true },
-  // [{ label, hint?, disabled?, checked?, run }] ; null = divider. `checked` (true/false) makes a radio item.
+  // [{ label, hint?, note?, disabled?, checked?, run }] ; null = divider. `note` = small second line. `checked` (true/false) makes a radio item.
   items: { type: Array, required: true },
   chevron: { type: Boolean, default: true },
 })
@@ -55,7 +55,7 @@ onBeforeUnmount(close)
               type="button" :role="item.checked === undefined ? 'menuitem' : 'menuitemradio'" :aria-checked="item.checked"
               :disabled="item.disabled" @click="choose(item)"
             >
-              <span>{{ item.label }}</span>
+              <span class="menu-text">{{ item.label }}<small v-if="item.note" class="menu-note">{{ item.note }}</small></span>
               <kbd v-if="item.hint">{{ item.hint }}</kbd>
               <Check v-if="item.checked" :size="16" aria-hidden="true" />
             </button>
