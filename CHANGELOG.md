@@ -34,6 +34,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 ### Fixed
 - Fix menu items whose text wrapped out of their box (the disabled Add caption item spilled over the page): menu items stay on one line in every menu and grow instead of clipping; the reason Add caption is disabled is now a small note under it, which no longer stretches the Insert menu.
 - Fix the cursor jumping to the left on a new empty line after Persian text: a line with no letter yet keeps the previous paragraph's direction, and the first letter typed decides it as before.
+- Fix zoom drifting toward the page's top-left: the sheet stays centred and the spot in the middle of the view stays put while zooming.
 
 ## [0.2.0] - 2026-11-01
 

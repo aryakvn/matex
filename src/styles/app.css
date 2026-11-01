@@ -119,7 +119,7 @@ html, .side-body, .desk { scrollbar-width: thin; }
 /* App.vue's zoom: the page keeps its print width and is scaled from its top-left corner; the box
    around it takes up the scaled size, so the desk scrolls (sideways too) only as far as the pages go. */
 .zoom-box { width: calc(var(--box-w) * var(--zoom)); height: calc(var(--box-h) * var(--zoom)); margin: 0 auto; }
-.zoom-box > .page { max-width: none; transform: scale(var(--zoom)); transform-origin: 0 0; }
+.zoom-box > .page { max-width: none; margin: 0; transform: scale(var(--zoom)); transform-origin: 0 0; }
 
 /* Side panel (SidePanel.vue): a Fluent card docked beside the pages, sticky under the toolbar; the
    desk gives up the room. --chrome-h is the toolbar's height, measured in App.vue. The page keeps

@@ -416,7 +416,27 @@ onBeforeUnmount(() => chromeResize?.disconnect())
 const ZOOM_MIN = 0.25
 const ZOOM_MAX = 3
 const zoom = ref(1)
-const setZoom = (z) => { zoom.value = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(z * 100) / 100)) }
+const deskEl = ref(null)
+// Keeps the page point at the middle of the visible desk (between toolbar and status bar) in place.
+function setZoom(z) {
+  const next = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(z * 100) / 100))
+  const old = zoom.value
+  const desk = deskEl.value, page = pageEl.value
+  zoom.value = next
+  if (next === old || !desk || !page) return
+  const d = desk.getBoundingClientRect()
+  const top = Math.max(d.top, document.querySelector('.toolbar')?.getBoundingClientRect().bottom ?? 0)
+  const bottom = Math.min(d.bottom, document.querySelector('.statusbar')?.getBoundingClientRect().top ?? innerHeight)
+  const x = (Math.max(d.left, 0) + Math.min(d.right, innerWidth)) / 2
+  const y = (top + bottom) / 2
+  const p = page.getBoundingClientRect()
+  const px = (x - p.left) / old, py = (y - p.top) / old
+  nextTick(() => {
+    const n = page.getBoundingClientRect()
+    desk.scrollLeft += n.left + px * next - x
+    window.scrollBy(0, n.top + py * next - y)
+  })
+}
 // One step = the next multiple of 10%, so odd values from the slider land back on the grid.
 const stepZoom = (dir) => setZoom((Math.round(zoom.value * 10) + dir) / 10)
 function onWheel(e) {
@@ -455,7 +475,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
     @file="fileActions[$event]()" @image="doc.insertImage($event, undefined, activeEditor)" @panel="togglePanel" @note="insertNote" @section-css="styleSection" @rotate="doc.rotateImage($event, activeEditor)" @help="openHelp"
   />
   <div class="workspace">
-  <main class="desk" @wheel="onWheel">
+  <main ref="deskEl" class="desk" @wheel="onWheel">
     <div
       class="zoom-box"
       :style="{
