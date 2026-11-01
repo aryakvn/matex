@@ -39,6 +39,8 @@ onMounted(async () => {
     overviewRulerLanes: 0,
     scrollbar: { vertical: 'hidden', alwaysConsumeMouseWheel: false },
   })
+  // Always \n, never Windows' \r\n, since the text goes into the saved Markdown and CSS.
+  editor.getModel().setEOL(monaco.editor.EndOfLineSequence.LF)
   // Grow with the text; the panel or page scrolls, not the editor.
   const fit = () => { host.value.style.height = `${Math.max(props.minHeight, editor.getContentHeight())}px` }
   editor.onDidContentSizeChange(fit)
@@ -51,9 +53,16 @@ onMounted(async () => {
 watch(code, (value) => { if (editor && value !== editor.getValue()) editor.setValue(value) })
 onBeforeUnmount(() => editor?.dispose())
 
-defineExpose({ ready: () => loaded })
+// Takes focus at once, Monaco's once it has loaded. Until then keys land on the empty box, not on
+// whatever had focus before (a selected block in the page would be replaced by the first key).
+function focus() {
+  host.value?.focus()
+  loaded.then((e) => e.focus())
+}
+
+defineExpose({ ready: () => loaded, focus })
 </script>
 
 <template>
-  <div ref="host" class="code-edit" dir="ltr" :style="{ height: `${minHeight}px` }" />
+  <div ref="host" class="code-edit" dir="ltr" tabindex="-1" :style="{ height: `${minHeight}px` }" />
 </template>

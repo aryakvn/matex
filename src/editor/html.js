@@ -1,6 +1,7 @@
 import { Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import DOMPurify from 'dompurify'
+import { TextSelection } from '@tiptap/pm/state'
 import HtmlBlockView from '../components/HtmlBlockView.vue'
 
 // Raw HTML between Markdown blocks (`<div align="center">…</div>`, `<details>`, `<svg>`), saved in
@@ -9,6 +10,20 @@ import HtmlBlockView from '../components/HtmlBlockView.vue'
 // in the CSS panel), so opening someone else's document can't run code. Header/footer `{{ }}`
 // stay the only scripts, and they ask first.
 export const cleanHtml = (html) => DOMPurify.sanitize(html, { FORBID_TAGS: ['style'] })
+
+// Done/Esc in a block's code popup (block at `at`): cursor into the text after the block, adding a
+// paragraph when nothing follows it (the block is last), so the popup always closes.
+// Size from the doc, not the node view's `props.node`: Vue's proxy breaks ProseMirror's isLeaf, so it says 2.
+export function leaveBlock(editor, at) {
+  const { state, view } = editor
+  const pos = at + state.doc.nodeAt(at).nodeSize
+  const tr = state.tr
+  const next = TextSelection.findFrom(state.doc.resolve(pos), 1, true)
+  if (next) tr.setSelection(next)
+  else tr.insert(pos, state.schema.nodes.paragraph.create()).setSelection(TextSelection.create(tr.doc, pos + 1))
+  view.dispatch(tr)
+  view.focus()
+}
 
 export const HtmlBlock = Node.create({
   name: 'htmlBlock',

@@ -78,3 +78,6 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Make the left-to-right / right-to-left buttons work in bulleted and numbered lists: the list item now takes the direction, so its bullet or number and indent move to that side (also when reopened).
 - Lists and the table of contents now read in the direction of their first item: a list starting with Persian puts every bullet or number on the right (and one starting with English on the left), unless an item's direction is set by hand. Before, both were always left to right, because `dir="auto"` skips child elements that have their own direction.
 - Keep a caption on the same sheet as its image or table; a figure near a sheet's bottom no longer leaves its caption on the next one.
+- Fix Done/Esc in an HTML block's code popup doing nothing when the block was the last thing in the document (the node view's Vue proxy made ProseMirror think the block was two positions long); it now adds a paragraph after the block when nothing follows it.
+- Fix the first keys typed right after inserting an HTML block replacing the block with text: focus moves into the code field at once, before Monaco has loaded.
+- Fix code fields (CSS panel, HTML blocks) writing Windows line endings (CRLF) into the saved document; they always use LF.

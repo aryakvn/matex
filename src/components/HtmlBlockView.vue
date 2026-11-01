@@ -4,9 +4,8 @@
 // breaks. A new, empty block selects itself and puts the cursor in the field. Esc or Done: back to the text.
 import { computed, ref, onMounted, nextTick } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
-import { Selection } from '@tiptap/pm/state'
 import CodeEdit from './CodeEdit.vue'
-import { cleanHtml } from '../editor/html.js'
+import { cleanHtml, leaveBlock } from '../editor/html.js'
 
 const props = defineProps(nodeViewProps)
 
@@ -21,15 +20,11 @@ onMounted(async () => {
   if (html.value) return
   props.editor.commands.setNodeSelection(props.getPos())
   await nextTick()
-  ;(await code.value?.ready())?.focus()
+  // After the toolbar's focus(), which gives the page focus back on the next frame.
+  requestAnimationFrame(() => code.value?.focus())
 })
 
-function done() {
-  const { state, view } = props.editor
-  const $after = state.doc.resolve(props.getPos() + props.node.nodeSize)
-  view.dispatch(state.tr.setSelection(Selection.near($after)))
-  view.focus()
-}
+const done = () => leaveBlock(props.editor, props.getPos())
 </script>
 
 <template>
