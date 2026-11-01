@@ -191,6 +191,23 @@ describe('list direction', () => {
   })
 })
 
+describe('new line direction', () => {
+  const dirs = (editor) => [...editor.view.dom.querySelectorAll('p')].map((p) => p.getAttribute('dir'))
+
+  it('keeps the previous block\'s direction until a letter is typed', () => {
+    const editor = make('سلام')
+    editor.commands.focus('end')
+    editor.commands.splitBlock()
+    expect(dirs(editor)).toEqual(['auto', 'rtl'])
+    editor.commands.insertContent('12 ')
+    expect(dirs(editor)).toEqual(['auto', 'rtl'])
+    editor.commands.insertContent('hi')
+    expect(dirs(editor)).toEqual(['auto', 'auto'])
+    editor.commands.splitBlock()
+    expect(dirs(editor)).toEqual(['auto', 'auto', 'ltr'])
+  })
+})
+
 describe('Mermaid charts', () => {
   it('reads a mermaid fence as a chart and saves it back verbatim', () => {
     const md = 'Before\n\n```mermaid\nflowchart LR\n  A --> B\n```\n\nAfter'

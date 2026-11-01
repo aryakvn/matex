@@ -69,22 +69,40 @@ export function directionAt(state) {
   return state.selection.$from.parent.attrs.dir ?? 'auto'
 }
 
+// Direction a block shows: forced, else its first letter; null when it has no letter yet.
+const ownDir = (node) => MARKS[node.attrs.dir] ? node.attrs.dir : /\p{L}/u.test(node.textContent) ? (isRtl(node.textContent) ? 'rtl' : 'ltr') : null
+
 // A list reads in the direction of its first item: its own forced dir, else its first letter. The
 // list, its items and their paragraphs get that dir unless forced. `dir="auto"` can't do this: it
 // skips descendants that have a dir of their own, and every block has one, so lists came out LTR.
-function listDecorations(doc) {
+// A block with no letter yet (a new empty line) keeps the previous block's direction, so the
+// cursor stays on the same side until the first letter decides.
+function directionDecorations(doc) {
   const decos = []
-  const set = (node, pos, dir) => { if (!MARKS[node.attrs.dir]) decos.push(Decoration.node(pos, pos + node.nodeSize, { dir })) }
+  const given = new Map()
+  let last = 'ltr'
+  const set = (node, pos, dir) => {
+    if (MARKS[node.attrs.dir]) return
+    decos.push(Decoration.node(pos, pos + node.nodeSize, { dir }))
+    given.set(pos, dir)
+  }
   doc.descendants((node, pos) => {
-    if (!LISTS.includes(node.type.name) || !node.firstChild) return
-    const first = node.firstChild
-    const dir = MARKS[first.attrs.dir] ? first.attrs.dir : isRtl(first.textContent) ? 'rtl' : 'ltr'
-    set(node, pos, dir)
-    node.forEach((item, at) => {
-      const itemPos = pos + 1 + at
-      set(item, itemPos, dir)
-      item.forEach((child, i) => { if (TYPES.includes(child.type.name)) set(child, itemPos + 1 + i, dir) })
-    })
+    if (LISTS.includes(node.type.name) && node.firstChild) {
+      const first = node.firstChild
+      const dir = ownDir(first) ?? last
+      set(node, pos, dir)
+      node.forEach((item, at) => {
+        const itemPos = pos + 1 + at
+        set(item, itemPos, dir)
+        item.forEach((child, i) => { if (TYPES.includes(child.type.name)) set(child, itemPos + 1 + i, dir) })
+      })
+    } else if (TYPES.includes(node.type.name)) {
+      const dir = given.get(pos) ?? ownDir(node)
+      if (!dir) set(node, pos, last)
+      // Dropping a decoration removes `dir` from the DOM instead of restoring "auto", so say it.
+      else if (!given.has(pos) && !MARKS[node.attrs.dir]) set(node, pos, 'auto')
+      if (dir) last = dir
+    }
   })
   return DecorationSet.create(doc, decos)
 }
@@ -96,8 +114,8 @@ export const Direction = Extension.create({
   addProseMirrorPlugins: () => [new Plugin({
     key: listsKey,
     state: {
-      init: (_, { doc }) => listDecorations(doc),
-      apply: (tr, set) => (tr.docChanged ? listDecorations(tr.doc) : set),
+      init: (_, { doc }) => directionDecorations(doc),
+      apply: (tr, set) => (tr.docChanged ? directionDecorations(tr.doc) : set),
     },
     props: { decorations: (state) => listsKey.getState(state) },
   })],
