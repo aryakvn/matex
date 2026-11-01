@@ -8,6 +8,7 @@ import {
   AlignStartVertical, AlignCenterVertical, AlignEndVertical, Contrast, SunDim, FlipHorizontal2, FlipVertical2, TextWrap, RotateCcw, RotateCw,
 } from 'lucide-vue-next'
 import ToolbarMenu from './ToolbarMenu.vue'
+import { HELP_TOPICS } from './HelpPanel.vue'
 import { directionAt } from '../editor/direction.js'
 import { noteEntries } from '../editor/notes.js'
 import { captionEntries } from '../editor/captions.js'
@@ -23,7 +24,7 @@ const props = defineProps({
   dirty: { type: Boolean, default: false },
   panel: { type: String, default: null }, // the side panel that is open, if any
 })
-const emit = defineEmits(['file', 'image', 'panel', 'note', 'sectionCss', 'rotate'])
+const emit = defineEmits(['file', 'image', 'panel', 'note', 'sectionCss', 'rotate', 'help'])
 
 const mod = /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘' : 'Ctrl+'
 const chain = () => props.editor.chain().focus()
@@ -179,6 +180,52 @@ function removeLink() {
   chain().extendMarkRange('link').unsetLink().run()
 }
 
+// Edit and Insert menus in the title bar: the ribbon's actions again, as lists. A command the focused
+// editor lacks (TOC, notes, sections... in a header/footer slot) is left out, like its ribbon button.
+const has = (cmd) => !!props.editor.commands[cmd]
+const toggled = (item, on) => ({ label: item.label, hint: item.hint, checked: on, run: item.run })
+function editItems() {
+  const e = props.editor
+  return [
+    { label: 'Undo', hint: `${mod}Z`, disabled: !e.can().undo(), run: () => chain().undo().run() },
+    { label: 'Redo', hint: `${mod}Y`, disabled: !e.can().redo(), run: () => chain().redo().run() },
+    null,
+    ...marks.map((m) => toggled(m, e.isActive(m.name))),
+    { label: 'Link…', checked: e.isActive('link'), run: openLink },
+    null,
+    ...STYLES.map((s) => ({ label: s.label, checked: blockType.value === s.key, run: () => applyStyle(e, s.key) })),
+    { label: 'Styles and fonts…', run: () => emit('panel', 'styles') },
+    null,
+    ...blocks.map((b) => toggled(b, e.isActive(b.name))),
+    ...directions.map((d) => ({ label: d.label, checked: directionAt(e.state) === d.dir, run: () => chain().toggleDirection(d.dir).run() })),
+    ...(has('insertSection') ? [null, ...layoutItems().filter((i) => !i || !i.label.startsWith('Section break'))] : []),
+    null,
+    { label: 'Header and footer scripts…', run: () => emit('panel', 'scripts') },
+    { label: 'Document CSS…', run: () => emit('panel', 'css') },
+  ]
+}
+function insertItems() {
+  return [
+    { label: 'Image…', run: () => imageInput.value.click() },
+    has('insertHtmlBlock') && { label: 'HTML block', run: () => chain().insertHtmlBlock().run() },
+    has('insertMermaid') && { label: 'Chart (Mermaid)', run: () => chain().insertMermaid().run() },
+    { label: 'Divider line', run: () => chain().setHorizontalRule().run() },
+    has('insertTableOfContents') && { label: 'Table of contents', run: () => chain().insertTableOfContents().run() },
+    has('insertSection') && { label: 'Section break (next page)', disabled: !sectionAt(props.editor.state), run: () => chain().insertSection().run() },
+    null,
+    ...tableItems.value,
+    ...(has('insertNote') ? [null, ...noteItems()] : []),
+    ...(has('insertCaption') ? [null, ...captionItems()] : []),
+  ].filter((i) => i !== false)
+}
+
+// Help menu: each topic opens the Help panel (HelpPanel.vue) at that topic.
+const helpItems = [
+  ...HELP_TOPICS.map((t) => ({ label: t.title, run: () => emit('help', t.key) })),
+  null,
+  { label: 'About MaTex', run: () => emit('help', 'about') },
+]
+
 const imageInput = ref(null)
 function onImagePicked(e) {
   const file = e.target.files?.[0]
@@ -190,18 +237,22 @@ function onImagePicked(e) {
 <template>
   <header v-if="editor" class="toolbar">
     <div class="titlebar">
-      <img :src="appIcon" alt="" width="20" height="20" />
+      <!-- Icon, then the menus as Fluent tabs; the document name stays centred on the window. -->
+      <div class="title-start">
+        <img :src="appIcon" alt="" width="20" height="20" />
+        <nav class="menubar" aria-label="Menu">
+          <ToolbarMenu label="File" :items="fileItems" :chevron="false" />
+          <ToolbarMenu label="Edit" :items="editItems()" :chevron="false" />
+          <ToolbarMenu label="Insert" :items="insertItems()" :chevron="false" />
+          <ToolbarMenu label="Help" :items="helpItems" :chevron="false" />
+        </nav>
+      </div>
       <!-- Office keeps the document name centred in the title bar, its save state beside it. -->
       <span class="doc-title">
         <span class="doc-name">{{ name }}</span>
         <span v-if="dirty" class="doc-state">Unsaved changes</span>
       </span>
     </div>
-
-    <!-- Menu row above the ribbon, where Word keeps its tabs; drawn as Fluent tabs. -->
-    <nav class="menubar" aria-label="Menu">
-      <ToolbarMenu label="File" :items="fileItems" :chevron="false" />
-    </nav>
 
     <div class="cmdbar" role="toolbar" aria-label="Formatting">
       <!-- Word's Home ribbon: groups of two button rows with a caption under each. -->

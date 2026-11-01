@@ -205,6 +205,15 @@ html, .side-body, .desk { scrollbar-width: thin; }
 .ref-examples span { grid-column: 1; color: var(--muted); font-size: 12px; }
 .ref-examples .ref-insert { grid-column: 2; grid-row: 1 / span 2; }
 .ref-code { overflow-wrap: anywhere; }
+/* Help panel */
+.help p { margin: 0 0 8px; line-height: 1.5; }
+.help-toc { margin: 0 0 8px; padding-inline-start: 18px; }
+.help-toc a { color: var(--brand-ink); text-decoration: none; }
+.help-toc a:hover { text-decoration: underline; }
+.help-list { margin: 0 0 8px; padding-inline-start: 18px; line-height: 1.6; }
+.help-keys { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; margin: 0 0 8px; }
+.help-keys dd { margin: 0; }
+.help-keys kbd { font: inherit; font-size: 12px; color: var(--muted); white-space: nowrap; }
 
 /* Code field (CodeEdit.vue: CSS panel, HTML blocks): a Monaco editor in a Fluent input frame. */
 .code-edit {
@@ -390,6 +399,7 @@ html, .side-body, .desk { scrollbar-width: thin; }
   height: 40px;
   padding: 0 4px;
 }
+.title-start { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .titlebar img { flex: none; }
 .doc-title { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
 .doc-name {
@@ -399,9 +409,10 @@ html, .side-body, .desk { scrollbar-width: thin; }
 }
 .doc-state { flex: none; color: var(--muted); font-size: 12px; }
 
-/* Tab row (File): Fluent tabs, text only, with the 3px rounded indicator under the label:
-   grey on hover, brand while its menu is open. */
-.menubar { display: flex; gap: 2px; padding: 0 0 4px; }
+/* Menus in the title bar (File, Edit, Insert, Help): Fluent tabs, text only, with the 3px rounded
+   indicator under the label: grey on hover, brand while its menu is open. Long menus scroll. */
+.menubar { display: flex; gap: 2px; }
+.menubar .menu-list { max-height: calc(100vh - 56px); overflow-y: auto; white-space: nowrap; }
 .menubar .tb-btn { position: relative; height: 32px; padding: 0 10px; }
 .menubar .tb-btn:hover:not(:disabled), .menubar .tb-btn[aria-expanded="true"] { background: none; }
 .menubar .tb-btn[aria-expanded="true"] { color: var(--ink); }

@@ -11,6 +11,7 @@ import ScriptReference from './components/ScriptReference.vue'
 import StylesPanel from './components/StylesPanel.vue'
 import NoteField from './components/NoteField.vue'
 import CssPanel from './components/CssPanel.vue'
+import HelpPanel from './components/HelpPanel.vue'
 import ToolbarMenu from './components/ToolbarMenu.vue'
 import { Ellipsis, Minus, Plus } from 'lucide-vue-next'
 import { pinSelection } from './editor/ids.js'
@@ -285,7 +286,7 @@ function stopEditing() {
 }
 
 // Right-hand side panel: one at a time, by name; the toolbar button toggles it.
-const PANELS = { styles: 'Styles', scripts: 'Header & footer scripts', css: 'CSS' }
+const PANELS = { styles: 'Styles', scripts: 'Header & footer scripts', css: 'CSS', help: 'Help' }
 const panel = ref(null) // closed until asked for
 const panelHelp = ref(false) // the panel's help text is showing
 const togglePanel = (key) => (panel.value = panel.value === key ? null : key)
@@ -293,6 +294,13 @@ const togglePanel = (key) => (panel.value = panel.value === key ? null : key)
 function openScriptHelp() {
   panel.value = 'scripts'
   panelHelp.value = true
+}
+// Help menu: the Help panel, scrolled to the chosen topic.
+const helpPanel = ref(null)
+async function openHelp(topic) {
+  panel.value = 'help'
+  await nextTick()
+  helpPanel.value?.show(topic)
 }
 function insertScript(code) {
   focusedSlot.value?.chain().focus().insertContent(code).run()
@@ -436,7 +444,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 <template>
   <EditorToolbar
     :editor="activeEditor" :name="name" :dirty="dirty" :panel="panel"
-    @file="fileActions[$event]()" @image="doc.insertImage($event, undefined, activeEditor)" @panel="togglePanel" @note="insertNote" @section-css="styleSection" @rotate="doc.rotateImage($event, activeEditor)"
+    @file="fileActions[$event]()" @image="doc.insertImage($event, undefined, activeEditor)" @panel="togglePanel" @note="insertNote" @section-css="styleSection" @rotate="doc.rotateImage($event, activeEditor)" @help="openHelp"
   />
   <div class="workspace">
   <main class="desk" @wheel="onWheel">
@@ -541,7 +549,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
     </article>
     </div>
   </main>
-  <SidePanel v-model:show-help="panelHelp" :open="!!panel" :title="PANELS[panel] ?? ''" help @update:open="panel = null">
+  <SidePanel v-model:show-help="panelHelp" :open="!!panel" :title="PANELS[panel] ?? ''" :help="panel !== 'help'" @update:open="panel = null">
     <template #default="{ showHelp }">
       <StylesPanel v-if="panel === 'styles'" :editor="activeEditor" :styles="layout.styles" :show-help="showHelp" />
       <ScriptReference
@@ -550,6 +558,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         @insert="insertScript"
       />
       <CssPanel v-if="panel === 'css'" ref="cssPanel" v-model="layout.css" :show-help="showHelp" />
+      <HelpPanel v-if="panel === 'help'" ref="helpPanel" />
     </template>
   </SidePanel>
   </div>

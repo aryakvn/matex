@@ -59,6 +59,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Add image rotation (rotate left/right 90° in the Picture group). The turn is drawn into the image itself as a new asset (`photo-rot90.jpg`), so the image takes the right room on the page and shows turned in any Markdown viewer. Each turn is redrawn from the original (no repeated JPEG re-compression within a session), and turning back to 0° gives the original file. JPEG and WebP stay in their format; others, SVG included, become PNG. Images from the web can't be rotated.
 - Add zoom (25–300%): slider, −/+ and a reset-to-100% button at the right of the status bar, plus Ctrl + = / - / 0 and Ctrl + mouse wheel. The pages are scaled on screen only, so lines and page breaks stay exactly as printed; the window scrolls sideways when zoomed past its width (also at 100% in a narrow window, instead of squeezing the page).
 - Add Mermaid charts (Chart button in Insert): flowcharts, sequence, pie, gantt and other diagrams, drawn live and printed as vector graphics; the code is edited in a popup under the chart, which also shows syntax errors (the page keeps the last chart that drew). Charts are centred and never taller than a sheet's text area. Saved as a ```mermaid fence, so any Markdown viewer that knows Mermaid draws it too. Charts can be captioned as figures. Mermaid loads on the first chart only and runs in strict mode (no scripts or click handlers).
+- Add Edit and Insert menus with the ribbon's actions (undo/redo, marks, link, text styles, lists, direction, columns, panels; image, HTML block, chart, divider, TOC, section break, table, notes, captions), and a Help menu whose topics open a Help side panel covering every feature plus keyboard shortcuts.
 ### Changed
 - Replace the app icon with the new MaTex logo (desktop icons regenerated from `app-icon.png`, browser favicon, title strip) and show it at the top of the README.
 - Excluded headings now leave the table of contents on screen too (it shows what will print); bring them back from the excluded-headings menu beside the title.
@@ -71,6 +72,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - The toolbar is a Word-style ribbon: a menu row (File) on top, then Undo, Font, Paragraph, Insert and Layout groups, each two rows of buttons with a caption underneath.
 - Closer to Office 2023 / Fluent 2: the document name is centred in the title bar, File is a Fluent tab (underline indicator on hover and while open), ribbon group dividers stop short of the edges, icons are drawn thinner, and scrollbars are thin.
 - Side panels slide in and out, pushing the pages aside smoothly, instead of the pages jumping to make room when one opens or closes.
+- The menus (File, Edit, Insert, Help) sit in the title bar after the app icon instead of a row of their own; the document name stays centred.
 ### Fixed
 - Pasting text copied from a MaTex document no longer starts a new section; it joins the section it is pasted into.
 - Stop code block backgrounds and quote borders from running through the bottom margin and the gap between sheets when they split across pages.
