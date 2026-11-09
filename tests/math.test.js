@@ -1,9 +1,17 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
 import { Editor } from '@tiptap/core'
 import { editorOptions, slotEditorOptions } from '../src/editor/extensions.js'
 import { slotHtml } from '../src/editor/slots.js'
 
-const make = (md, options = editorOptions) => new Editor({ ...options, element: document.createElement('div'), content: md })
+// Mounted editors keep a DOM observer timer; destroy them so it can't fire after jsdom is gone.
+const editors = []
+afterEach(() => editors.splice(0).forEach((editor) => editor.destroy()))
+
+const make = (md, options = editorOptions) => {
+  const editor = new Editor({ ...options, element: document.createElement('div'), content: md })
+  editors.push(editor)
+  return editor
+}
 const roundTrip = (md) => make(md).getMarkdown().trim()
 const types = (editor) => {
   const list = []

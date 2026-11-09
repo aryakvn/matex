@@ -26,6 +26,10 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 
 - Deploy the web build to GitHub Pages on a custom subdomain on every push to main (`.github/workflows/pages.yml`).
 
+### Fixed
+
+- Destroy the editors in the equation tests so a late ProseMirror timer can't fail CI after jsdom is torn down.
+
 ## [1.0.0] - 2026-11-01
 
 ### Added
