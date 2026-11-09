@@ -29,6 +29,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 ### Fixed
 
 - Destroy the editors in the equation tests so a late ProseMirror timer can't fail CI after jsdom is torn down.
+- Wait for ProseMirror's pending DOM-observer flush after every test file (`tests/setup.js`); the per-file editor cleanup above didn't cover the other editor tests.
 
 ## [1.0.0] - 2026-11-01
 

@@ -5,5 +5,5 @@ export default defineConfig({
   plugins: [vue()],
   clearScreen: false,
   server: { port: 1420, strictPort: true },
-  test: { environment: 'jsdom' },
+  test: { environment: 'jsdom', setupFiles: ['tests/setup.js'] },
 })
