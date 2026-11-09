@@ -34,6 +34,7 @@ const keys = [
   ['Save / Save as', `${mod}S / ${mod}Shift+S`],
   ['Print', `${mod}P`],
   ['Find / Replace', `${mod}F / ${mod}H`],
+  ['Paste (Markdown read) / Paste plain text', `${mod}V / ${mod}Shift+V`],
   ['Undo / Redo', `${mod}Z / ${mod}Y`],
   ['Bold / Italic', `${mod}B / ${mod}I`],
   ['Strikethrough', `${mod}Shift+X`],
@@ -77,6 +78,7 @@ const keys = [
         <li><code>```mermaid</code> + Enter: chart</li>
         <li><code>$$x^2$$</code>: inline equation; <code>$$$x^2$$$</code> on its own line: equation block</li>
       </ul>
+      <p>Pasted plain text is read as Markdown too, so a copied Markdown table, list or <code>**bold**</code> arrives formatted (text copied from a web page or Word keeps its own formatting). <kbd>Ctrl+Shift+V</kbd> pastes plain text with no formatting, one paragraph per line.</p>
       <p>To write text that looks like Markdown (a line starting with <code>#</code>), just type it; MaTex escapes it when saving.</p>
     </section>
 

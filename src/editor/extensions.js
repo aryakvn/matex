@@ -19,6 +19,7 @@ import { captionExtensions } from './captions.js'
 import { BlockIds, ElementIds, Span, escapeAttrs, attrBlock } from './ids.js'
 import { Section, SectionDocument, SectionMarkdown } from './sections.js'
 import { Search } from './search.js'
+import { MarkdownPaste } from './paste.js'
 
 // A paragraph whose text starts like block syntax ("2) ", "- ", "# ", "---", 4 spaces)
 // (or is "[TOC]", "[TOC: Title]", "[REFERENCES]" or a ":::" section fence) would reopen as a list/heading/rule/code block/TOC/references list,
@@ -79,6 +80,7 @@ export const extensions = [
   Field, // {{ script }}
   ...captionExtensions,
   Search, // Find and replace (body only)
+  MarkdownPaste, // Ctrl+V reads plain text as Markdown; Ctrl+Shift+V pastes plain
   DirectionMarkdown,
   MathMarkdown, // after DirectionMarkdown: patches the manager it creates
   FieldMarkdown, // same
