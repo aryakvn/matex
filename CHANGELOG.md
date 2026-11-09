@@ -26,6 +26,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 
 - Deploy the web build to GitHub Pages on a custom subdomain on every push to main (`.github/workflows/pages.yml`).
 - Add Find and replace (Ctrl+F / Ctrl+H, Edit menu, Editing group): a side panel that highlights every match in the body, steps through them, replaces one or all (one undo), with match case, whole words (Persian-aware) and regular expressions; Arabic ي/ك also find Persian ی/ک.
+- Make the web build an installable PWA that works offline: a web manifest, and a service worker (`src/sw.js`, written to `dist/sw.js` with every built file by the `pwa()` plugin in `vite.config.js`) that caches the whole app on first visit. A new deploy takes over once every MaTex tab is closed. Not used by the desktop app.
 
 ### Fixed
 

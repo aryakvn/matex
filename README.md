@@ -58,6 +58,7 @@ The project is laid out like this:
 | `src/composables/useDocument.js` | New / Open / Save / Save as, unsaved-changes guard, images |
 | `src/utils/archive.js`, `assets.js` | `.matex` zip ⇄ Markdown + images |
 | `src/utils/platform.js` | The only file that knows Tauri from the browser |
+| `src/sw.js`, `public/manifest.webmanifest` | Installable, offline web build (the `pwa()` plugin in `vite.config.js` writes `dist/sw.js`) |
 | `src/styles/document.css` | The document's stylesheet, kept print-ready |
 | `src-tauri/` | Tauri 2 desktop shell |
 

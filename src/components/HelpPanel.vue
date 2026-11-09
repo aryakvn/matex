@@ -61,6 +61,7 @@ const keys = [
       <p>The title bar shows the file name and "Unsaved changes" until you save. MaTex asks before closing or opening another file over unsaved work.</p>
       <p>File → Print… prints the pages exactly as they look on screen, one sheet per page, without the app around them. To get a PDF, pick a PDF printer in the print dialog.</p>
       <p>Edit → Find… (<code>Ctrl+F</code>) and Replace… (<code>Ctrl+H</code>) open the Find and replace panel. Every match is highlighted; Enter goes to the next, Shift+Enter to the previous. Replace changes the selected match and moves on; Replace all changes them all at once and is undone in one step. It searches the body text and captions, not footnote text, headers or footers. Options: match case, whole words, and regular expressions (<code>$1</code> in the replacement).</p>
+      <p>In a browser, MaTex can be installed as an app (the install button in the address bar, or Add to Home screen). After the first visit it works offline. A new version is picked up the next time MaTex starts after every MaTex tab or window has been closed.</p>
       <p>The status bar shows the page the cursor is on, the word count and the zoom. Zoom only changes the screen; lines and page breaks stay as they print.</p>
     </section>
 
