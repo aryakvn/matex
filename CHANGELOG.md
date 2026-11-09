@@ -32,6 +32,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 ### Changed
 
 - Move the Document script out of the scripts panel into a JavaScript editor panel of its own, like Document CSS (ƒ button in Layout, Edit → Document script…); the old panel is now Script fields (variables and examples), and each links to the other.
+- Redo the README as a product page: badges, download links to the latest release, the web app at matex.aryakvn.ir, and an up-to-date feature list.
 
 ### Fixed
 
