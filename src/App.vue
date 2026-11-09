@@ -12,6 +12,7 @@ import ScriptReference from './components/ScriptReference.vue'
 import StylesPanel from './components/StylesPanel.vue'
 import NoteField from './components/NoteField.vue'
 import CssPanel from './components/CssPanel.vue'
+import ScriptPanel from './components/ScriptPanel.vue'
 import HelpPanel from './components/HelpPanel.vue'
 import FindPanel from './components/FindPanel.vue'
 import ToolbarMenu from './components/ToolbarMenu.vue'
@@ -323,7 +324,7 @@ function stopEditing() {
 }
 
 // Right-hand side panel: one at a time, by name; the toolbar button toggles it.
-const PANELS = { styles: 'Styles', scripts: 'Header & footer scripts', css: 'CSS', help: 'Help', find: 'Find and replace' }
+const PANELS = { styles: 'Styles', scripts: 'Script fields', js: 'Document script', css: 'CSS', help: 'Help', find: 'Find and replace' }
 const panel = ref(null) // closed until asked for
 const panelHelp = ref(false) // the panel's help text is showing
 const togglePanel = (key) => (panel.value = panel.value === key ? null : key)
@@ -623,10 +624,11 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         @add-fonts="doc.addFonts" @remove-font="doc.removeFont"
       />
       <ScriptReference
-        v-if="panel === 'scripts'" v-model:script="layout.script"
+        v-if="panel === 'scripts'"
         :vars="scriptVars(editing?.n ?? caretPage)" :scripts-on="scriptsOn" :show-help="showHelp"
-        @insert="insertScript"
+        @insert="insertScript" @script="panel = 'js'"
       />
+      <ScriptPanel v-if="panel === 'js'" v-model="layout.script" :scripts-on="scriptsOn" :show-help="showHelp" @fields="panel = 'scripts'" />
       <CssPanel v-if="panel === 'css'" ref="cssPanel" v-model="layout.css" :show-help="showHelp" />
       <HelpPanel v-if="panel === 'help'" ref="helpPanel" />
       <FindPanel v-if="panel === 'find'" ref="findPanel" :editor="editor" />

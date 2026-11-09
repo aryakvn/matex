@@ -5,7 +5,7 @@ import { computed, ref, nextTick, watch } from 'vue'
 import {
   Undo2, Redo2, Bold, Italic, Strikethrough, Code, Link, List, ListOrdered,
   Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, FileCode, CodeXml, CaseSensitive, Superscript, Columns2, Captions, Workflow, Sigma,
-  AlignStartVertical, AlignCenterVertical, AlignEndVertical, Contrast, SunDim, FlipHorizontal2, FlipVertical2, TextWrap, RotateCcw, RotateCw, Search, Replace,
+  AlignStartVertical, AlignCenterVertical, AlignEndVertical, Contrast, SunDim, FlipHorizontal2, FlipVertical2, TextWrap, RotateCcw, RotateCw, Search, Replace, SquareFunction,
 } from 'lucide-vue-next'
 import ToolbarMenu from './ToolbarMenu.vue'
 import { HELP_TOPICS } from './HelpPanel.vue'
@@ -204,7 +204,8 @@ function editItems() {
     ...directions.map((d) => ({ label: d.label, checked: directionAt(e.state) === d.dir, run: () => chain().toggleDirection(d.dir).run() })),
     ...(has('insertSection') ? [null, ...layoutItems().filter((i) => !i || !i.label.startsWith('Section break'))] : []),
     null,
-    { label: 'Header and footer scripts…', run: () => emit('panel', 'scripts') },
+    { label: 'Script fields…', run: () => emit('panel', 'scripts') },
+    { label: 'Document script…', run: () => emit('panel', 'js') },
     { label: 'Document CSS…', run: () => emit('panel', 'css') },
   ]
 }
@@ -461,10 +462,16 @@ function onImagePicked(e) {
         </div>
         <div class="tb-row">
           <button
-            type="button" class="tb-btn" title="Header and footer scripts" aria-label="Header and footer scripts"
+            type="button" class="tb-btn" title="Script fields" aria-label="Script fields"
             :aria-pressed="panel === 'scripts'" @click="emit('panel', 'scripts')"
           >
             <Braces :size="18" />
+          </button>
+          <button
+            type="button" class="tb-btn" title="Document script" aria-label="Document script"
+            :aria-pressed="panel === 'js'" @click="emit('panel', 'js')"
+          >
+            <SquareFunction :size="18" />
           </button>
           <button
             type="button" class="tb-btn" title="Document CSS" aria-label="Document CSS"

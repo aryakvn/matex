@@ -29,6 +29,10 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Make the web build an installable PWA that works offline: a web manifest, and a service worker (`src/sw.js`, written to `dist/sw.js` with every built file by the `pwa()` plugin in `vite.config.js`) that caches the whole app on first visit. A new deploy takes over once every MaTex tab is closed. Not used by the desktop app.
 - Paste plain text as Markdown with Ctrl+V (a copied Markdown table, list or `**bold**` arrives formatted; Markdown copied from a code editor too), and paste plain text without any formatting, one paragraph per line, with Ctrl+Shift+V (`src/editor/paste.js`). Text copied with formatting (web page, Word) keeps it on Ctrl+V.
 
+### Changed
+
+- Move the Document script out of the scripts panel into a JavaScript editor panel of its own, like Document CSS (ƒ button in Layout, Edit → Document script…); the old panel is now Script fields (variables and examples), and each links to the other.
+
 ### Fixed
 
 - Destroy the editors in the equation tests so a late ProseMirror timer can't fail CI after jsdom is torn down.
