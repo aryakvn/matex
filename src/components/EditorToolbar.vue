@@ -5,7 +5,7 @@ import { computed, ref, nextTick, watch } from 'vue'
 import {
   Undo2, Redo2, Bold, Italic, Strikethrough, Code, Link, List, ListOrdered,
   Quote, Minus, Image, Table, TableOfContents, ChevronDown, PilcrowRight, PilcrowLeft, Braces, FileCode, CodeXml, CaseSensitive, Superscript, Columns2, Captions, Workflow, Sigma,
-  AlignStartVertical, AlignCenterVertical, AlignEndVertical, Contrast, SunDim, FlipHorizontal2, FlipVertical2, TextWrap, RotateCcw, RotateCw,
+  AlignStartVertical, AlignCenterVertical, AlignEndVertical, Contrast, SunDim, FlipHorizontal2, FlipVertical2, TextWrap, RotateCcw, RotateCw, Search, Replace,
 } from 'lucide-vue-next'
 import ToolbarMenu from './ToolbarMenu.vue'
 import { HELP_TOPICS } from './HelpPanel.vue'
@@ -190,6 +190,9 @@ function editItems() {
   return [
     { label: 'Undo', hint: `${mod}Z`, disabled: !e.can().undo(), run: () => chain().undo().run() },
     { label: 'Redo', hint: `${mod}Y`, disabled: !e.can().redo(), run: () => chain().redo().run() },
+    null,
+    { label: 'Find…', hint: `${mod}F`, run: () => emit('file', 'find') },
+    { label: 'Replace…', hint: `${mod}H`, run: () => emit('file', 'replace') },
     null,
     ...marks.map((m) => toggled(m, e.isActive(m.name))),
     { label: 'Link…', checked: e.isActive('link'), run: openLink },
@@ -471,6 +474,23 @@ function onImagePicked(e) {
           </button>
         </div>
         <span class="tb-label" aria-hidden="true">Layout</span>
+      </div>
+
+      <div class="tb-group" role="group" aria-label="Editing">
+        <div class="tb-row">
+          <button
+            type="button" class="tb-btn" :title="`Find (${mod}F)`" aria-label="Find"
+            :aria-pressed="panel === 'find'" @click="emit('file', 'find')"
+          >
+            <Search :size="18" />
+          </button>
+        </div>
+        <div class="tb-row">
+          <button type="button" class="tb-btn" :title="`Replace (${mod}H)`" aria-label="Replace" @click="emit('file', 'replace')">
+            <Replace :size="18" />
+          </button>
+        </div>
+        <span class="tb-label" aria-hidden="true">Editing</span>
       </div>
     </div>
   </header>

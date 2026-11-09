@@ -13,6 +13,7 @@ import StylesPanel from './components/StylesPanel.vue'
 import NoteField from './components/NoteField.vue'
 import CssPanel from './components/CssPanel.vue'
 import HelpPanel from './components/HelpPanel.vue'
+import FindPanel from './components/FindPanel.vue'
 import ToolbarMenu from './components/ToolbarMenu.vue'
 import { Ellipsis, Minus, Plus } from 'lucide-vue-next'
 import { pinSelection } from './editor/ids.js'
@@ -136,7 +137,7 @@ const doc = useDocument(editor)
 const { name, dirty, layout, scriptsOn, fonts } = doc
 
 const setup = ref(null)
-const fileActions = { new: doc.newDoc, open: doc.openDoc, save: doc.save, saveAs: doc.saveAs, pageSetup: () => setup.value.open(), print: () => { printing.value = true; nextTick(() => window.print()) } }
+const fileActions = { new: doc.newDoc, open: doc.openDoc, save: doc.save, saveAs: doc.saveAs, pageSetup: () => setup.value.open(), find: () => openFind('find'), replace: () => openFind('replace'), print: () => { printing.value = true; nextTick(() => window.print()) } }
 
 // Paper size for print, paragraph styles (fonts, sizes), then the document's own CSS (CSS panel), as
 // a stylesheet over document.css; it prints too.
@@ -322,7 +323,7 @@ function stopEditing() {
 }
 
 // Right-hand side panel: one at a time, by name; the toolbar button toggles it.
-const PANELS = { styles: 'Styles', scripts: 'Header & footer scripts', css: 'CSS', help: 'Help' }
+const PANELS = { styles: 'Styles', scripts: 'Header & footer scripts', css: 'CSS', help: 'Help', find: 'Find and replace' }
 const panel = ref(null) // closed until asked for
 const panelHelp = ref(false) // the panel's help text is showing
 const togglePanel = (key) => (panel.value = panel.value === key ? null : key)
@@ -338,6 +339,15 @@ async function openHelp(topic) {
   await nextTick()
   helpPanel.value?.show(topic)
 }
+// Ctrl+F / Ctrl+H, Edit menu, Editing group: the Find panel (body text only), on its Find or
+// Replace field. Closing it goes back to the text, on the last match found.
+const findPanel = ref(null)
+async function openFind(field) {
+  panel.value = 'find'
+  await nextTick()
+  findPanel.value?.focus(field)
+}
+watch(panel, (now, was) => { if (was === 'find' && !now) editor.value?.commands.focus() })
 // The scripts panel's Insert: at the cursor of the focused editor (text, header/footer or note).
 function insertScript(code) {
   activeEditor.value?.chain().focus().insertContent(fieldContent(code)).run()
@@ -606,7 +616,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
     </article>
     </div>
   </main>
-  <SidePanel v-model:show-help="panelHelp" :open="!!panel" :title="PANELS[panel] ?? ''" :help="panel !== 'help'" @update:open="panel = null">
+  <SidePanel v-model:show-help="panelHelp" :open="!!panel" :title="PANELS[panel] ?? ''" :help="!['help', 'find'].includes(panel)" @update:open="panel = null">
     <template #default="{ showHelp }">
       <StylesPanel
         v-if="panel === 'styles'" :editor="activeEditor" :styles="layout.styles" :fonts :show-help="showHelp"
@@ -619,6 +629,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       />
       <CssPanel v-if="panel === 'css'" ref="cssPanel" v-model="layout.css" :show-help="showHelp" />
       <HelpPanel v-if="panel === 'help'" ref="helpPanel" />
+      <FindPanel v-if="panel === 'find'" ref="findPanel" :editor="editor" />
     </template>
   </SidePanel>
   </div>

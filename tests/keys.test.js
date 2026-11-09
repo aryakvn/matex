@@ -10,6 +10,8 @@ describe('fileAction', () => {
     expect(fileAction(ev('o', 'KeyO'))).toBe('open')
     expect(fileAction(ev('n', 'KeyN', { ctrlKey: false, metaKey: true }))).toBe('new')
     expect(fileAction(ev('p', 'KeyP'))).toBe('print')
+    expect(fileAction(ev('ب', 'KeyF'))).toBe('find')
+    expect(fileAction(ev('h', 'KeyH'))).toBe('replace')
   })
 
   it('works on the Persian keyboard layout', () => {

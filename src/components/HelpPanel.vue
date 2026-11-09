@@ -33,6 +33,7 @@ const keys = [
   ['New / Open', `${mod}N / ${mod}O`],
   ['Save / Save as', `${mod}S / ${mod}Shift+S`],
   ['Print', `${mod}P`],
+  ['Find / Replace', `${mod}F / ${mod}H`],
   ['Undo / Redo', `${mod}Z / ${mod}Y`],
   ['Bold / Italic', `${mod}B / ${mod}I`],
   ['Strikethrough', `${mod}Shift+X`],
@@ -59,6 +60,7 @@ const keys = [
       <p>File → New, Open, Save and Save as work on <code>.matex</code> files. A <code>.matex</code> file is a zip holding <code>DOCUMENT.md</code> (the text), <code>style.css</code> (your CSS), <code>page.json</code> (page setup and styles) and <code>assets/</code> (the images). Rename it to <code>.zip</code> to look inside.</p>
       <p>The title bar shows the file name and "Unsaved changes" until you save. MaTex asks before closing or opening another file over unsaved work.</p>
       <p>File → Print… prints the pages exactly as they look on screen, one sheet per page, without the app around them. To get a PDF, pick a PDF printer in the print dialog.</p>
+      <p>Edit → Find… (<code>Ctrl+F</code>) and Replace… (<code>Ctrl+H</code>) open the Find and replace panel. Every match is highlighted; Enter goes to the next, Shift+Enter to the previous. Replace changes the selected match and moves on; Replace all changes them all at once and is undone in one step. It searches the body text and captions, not footnote text, headers or footers. Options: match case, whole words, and regular expressions (<code>$1</code> in the replacement).</p>
       <p>The status bar shows the page the cursor is on, the word count and the zoom. Zoom only changes the screen; lines and page breaks stay as they print.</p>
     </section>
 

@@ -194,6 +194,27 @@ html, .side-body, .desk { scrollbar-width: thin; }
 .add-font { display: inline-flex; align-items: center; gap: 6px; }
 .font-list span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* Find and replace (FindPanel.vue); matches on the page are search.js decorations, screen only. */
+.find { display: grid; gap: 8px; }
+.find-field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+.find-field input {
+  height: 32px; padding: 0 8px;
+  border: 1px solid var(--stroke-ctl); border-bottom-color: var(--stroke-access); border-radius: 4px;
+  background: var(--surface); color: var(--ink); font-size: 14px;
+}
+.find-field input:focus { outline: none; border-bottom-color: var(--brand-ink); box-shadow: inset 0 -1px 0 var(--brand-ink); }
+.find-nav, .find-actions { display: flex; align-items: center; gap: 4px; }
+.find-actions { justify-content: flex-end; gap: 8px; }
+.find-status { flex: 1; min-width: 0; color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+.find-status.error { color: #c42b1c; }
+.find-options { display: grid; gap: 6px; margin: 4px 0 0; padding: 0; border: 0; }
+.find-options legend { margin-bottom: 6px; padding: 0; font-size: 12px; color: var(--muted); }
+.find .check { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.find .ref-hint { margin-top: 4px; }
+.search-match { background: #fde68a; border-radius: 2px; }
+.search-current { background: #f59e0b; }
+@media print { .search-match { background: none; } }
+
 /* Script reference (ScriptReference.vue) */
 .ref-text, .ref-hint, .ref-warn { margin: 0 0 8px; }
 .ref-hint { color: var(--muted); font-size: 12px; }

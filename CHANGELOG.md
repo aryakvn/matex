@@ -25,6 +25,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 ### Added
 
 - Deploy the web build to GitHub Pages on a custom subdomain on every push to main (`.github/workflows/pages.yml`).
+- Add Find and replace (Ctrl+F / Ctrl+H, Edit menu, Editing group): a side panel that highlights every match in the body, steps through them, replaces one or all (one undo), with match case, whole words (Persian-aware) and regular expressions; Arabic ي/ك also find Persian ی/ک.
 
 ### Fixed
 

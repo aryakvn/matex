@@ -18,6 +18,7 @@ import { Picture } from './image.js'
 import { captionExtensions } from './captions.js'
 import { BlockIds, ElementIds, Span, escapeAttrs, attrBlock } from './ids.js'
 import { Section, SectionDocument, SectionMarkdown } from './sections.js'
+import { Search } from './search.js'
 
 // A paragraph whose text starts like block syntax ("2) ", "- ", "# ", "---", 4 spaces)
 // (or is "[TOC]", "[TOC: Title]", "[REFERENCES]" or a ":::" section fence) would reopen as a list/heading/rule/code block/TOC/references list,
@@ -77,6 +78,7 @@ export const extensions = [
   BlockMath, // $$ … $$
   Field, // {{ script }}
   ...captionExtensions,
+  Search, // Find and replace (body only)
   DirectionMarkdown,
   MathMarkdown, // after DirectionMarkdown: patches the manager it creates
   FieldMarkdown, // same
@@ -92,7 +94,7 @@ export const editorOptions = { extensions, textDirection: 'auto', contentType: '
 
 // Header/footer slots and note text: the body's editor without sheets, sections, a table of contents,
 // notes, captions, charts or ids (a slot repeats on every sheet, so its ids would too).
-const bodyOnly = [Mermaid, Pagination, SectionDocument, Section, SectionMarkdown, TableOfContents, ...noteExtensions, NoteMarkdown, ...captionExtensions, ElementIds]
+const bodyOnly = [Mermaid, Pagination, SectionDocument, Section, SectionMarkdown, TableOfContents, ...noteExtensions, NoteMarkdown, ...captionExtensions, ElementIds, Search]
 export const slotEditorOptions = {
   ...editorOptions,
   extensions: [Document, ...extensions.filter((e) => !bodyOnly.includes(e))],
