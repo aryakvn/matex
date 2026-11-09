@@ -22,6 +22,10 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 
 ## [Unreleased]
 
+### Added
+
+- Deploy the web build to GitHub Pages on a custom subdomain on every push to main (`.github/workflows/pages.yml`).
+
 ## [1.0.0] - 2026-11-01
 
 ### Added
