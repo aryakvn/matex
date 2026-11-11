@@ -74,13 +74,13 @@ function findBreaks(view, page) {
   const at = (clientY) => (clientY - origin) / z + shift
 
   // Spacer at `pos` moving content whose top is `top` to the next sheet. `extra` = margin the spacer
-  // stops from collapsing.
-  function breakAt(pos, top, inline, extra = 0) {
+  // stops from collapsing. `cols` > 0: the spacer is a table row that many columns wide.
+  function breakAt(pos, top, inline, extra = 0, cols = 0) {
     const height = sheetTop(k + 1) - top - extra
     k++
     sheetStart = pos
     if (height <= 0) return // already past this sheet (after a block taller than a sheet)
-    breaks.push({ pos, height: height - gap, inline })
+    breaks.push({ pos, height: height - gap, inline, cols })
     shift += height
   }
   // Like Word's "keep with next": a heading left alone at a sheet's bottom moves with its block.
@@ -130,29 +130,54 @@ function findBreaks(view, page) {
     heading = node.type.name === 'heading' && from === start ? { pos: start, top: at(view.coordsAtPos(start).top) - lead, page: k } : null
   }
 
-  function whole(node, pos) {
+  // The block at `pos` moves to the next sheet while its part down to `bottom` (doc position `end`)
+  // crosses the bottom margin. A caption right under it moves with it.
+  function whole(node, pos, bottom, end = pos + node.nodeSize) {
     const el = view.nodeDOM(pos)
     if (!el?.getBoundingClientRect) return
     const rect = el.getBoundingClientRect()
     let prev = el.previousElementSibling
     while (prev?.classList.contains('page-gap')) prev = prev.previousElementSibling
     const extra = prev ? Math.min(parseFloat(getComputedStyle(prev).marginBottom), parseFloat(getComputedStyle(el).marginTop)) : 0
-    // A caption right under an image or table moves to the next sheet with it.
-    let end = pos + node.nodeSize
-    let bottom = rect.bottom
-    const next = view.state.doc.nodeAt(end)
+    bottom ??= rect.bottom
+    const next = end === pos + node.nodeSize ? view.state.doc.nodeAt(end) : null
     if (next?.type.name === 'caption') {
       bottom = Math.max(bottom, view.nodeDOM(end)?.getBoundingClientRect?.().bottom ?? 0)
       end += next.nodeSize
     }
-    // ponytail: tables and the table of contents move whole; one taller than a sheet runs over its margin.
+    // ponytail: the table of contents and images move whole; one taller than a sheet runs over its margin.
     while (at(bottom) > limit(end) && at(rect.top) > sheetTop(k) + 1) breakBefore(pos, at(rect.top), false, extra)
+    heading = null
+  }
+
+  // Tables break between rows, like Word. The first row moves with the whole table (its margin,
+  // the heading above); the last one with the caption below.
+  // ponytail: header rows aren't repeated on the next sheet, and a row taller than a sheet runs over.
+  function table(node, pos) {
+    const cols = node.firstChild?.content.content.reduce((n, cell) => n + (cell.attrs.colspan || 1), 0) || 1
+    const tableEnd = pos + node.nodeSize
+    node.forEach((row, offset, i) => {
+      const p = pos + 1 + offset
+      const rect = view.nodeDOM(p)?.getBoundingClientRect?.()
+      if (!rect) return
+      const last = i === node.childCount - 1
+      if (i === 0) return whole(node, pos, rect.bottom, last ? tableEnd : p + row.nodeSize)
+      let bottom = rect.bottom
+      let end = p + row.nodeSize
+      const next = last ? view.state.doc.nodeAt(tableEnd) : null
+      if (next?.type.name === 'caption') {
+        bottom = Math.max(bottom, view.nodeDOM(tableEnd)?.getBoundingClientRect?.().bottom ?? 0)
+        end = tableEnd + next.nodeSize
+      }
+      while (at(bottom) > limit(end) && at(rect.top) > sheetTop(k) + 1) breakAt(p, at(rect.top), false, 0, cols)
+    })
     heading = null
   }
 
   function visit(node, pos) {
     if (node.isTextblock) textblock(node, pos)
-    else if (node.isAtom || node.type.name === 'table') whole(node, pos)
+    else if (node.type.name === 'table') table(node, pos)
+    else if (node.isAtom) whole(node, pos)
     else node.forEach((child, offset) => visit(child, pos + 1 + offset))
   }
 
@@ -197,15 +222,22 @@ function findBreaks(view, page) {
   return { breaks, pages: k + 1 }
 }
 
-function spacer({ pos, height, inline }) {
+function spacer({ pos, height, inline, cols }) {
   const toDOM = () => {
     const el = document.createElement(inline ? 'span' : 'div')
     el.className = 'page-gap'
     el.contentEditable = 'false'
     el.style.height = `calc(${height}px + var(--page-gap, 0px))`
-    return el
+    if (!cols) return el
+    // Between table rows: an empty, borderless row holding the spacer.
+    const row = document.createElement('tr')
+    row.className = 'page-gap-row'
+    row.contentEditable = 'false'
+    row.insertCell().colSpan = cols
+    row.cells[0].append(el)
+    return row
   }
-  return Decoration.widget(pos, toDOM, { side: -1, ignoreSelection: true, height, key: `${inline}:${height.toFixed(1)}` })
+  return Decoration.widget(pos, toDOM, { side: -1, ignoreSelection: true, height, key: `${inline}:${cols}:${height.toFixed(1)}` })
 }
 
 export const Pagination = Extension.create({

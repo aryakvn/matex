@@ -38,6 +38,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 
 - Destroy the editors in the equation tests so a late ProseMirror timer can't fail CI after jsdom is torn down.
 - Wait for ProseMirror's pending DOM-observer flush after every test file (`tests/setup.js`); the per-file editor cleanup above didn't cover the other editor tests.
+- Break long tables between rows onto the next sheet, like Word, instead of running past the bottom margin; the last row keeps its caption, and a table near a sheet's bottom still moves whole if its first row doesn't fit.
 
 ## [1.0.0] - 2026-11-01
 

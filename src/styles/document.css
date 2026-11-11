@@ -53,7 +53,8 @@
 /* Page breaks (src/editor/pagination.js): spacers that carry the next line to the next sheet.
    Hidden while the layout is measured. */
 .page .page-gap { display: block; }
-.page .paginating .page-gap { display: none; }
+.page .paginating :is(.page-gap, .page-gap-row) { display: none; }
+.page .page-gap-row > td { border: 0; padding: 0; background: none; }
 
 /* Header and footer fill the top and bottom margin of each sheet (drawn inside .sheet by App.vue). */
 .page .hf {
