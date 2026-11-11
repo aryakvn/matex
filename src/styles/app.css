@@ -735,3 +735,10 @@ html, .side-body, .desk { scrollbar-width: thin; }
 .setup .setup-warn { margin: 8px 0 0; }
 .setup-actions { display: flex; justify-content: flex-end; gap: 8px; }
 @media print { .setup { display: none; } }
+
+/* MCP panel (McpPanel.vue): an address or command with its Copy button. */
+.mcp .check { display: flex; align-items: center; gap: 8px; margin: 4px 0 8px; font-size: 14px; }
+.mcp-row { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; }
+.mcp-row code { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.statusbar .mcp-on { border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
+.statusbar .mcp-on:hover { color: var(--ink); }

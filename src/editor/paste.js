@@ -38,9 +38,14 @@ export const MarkdownPaste = Extension.create({
 // The transaction that puts `md`, parsed as Markdown, over the selection; runs transformPasted
 // (sections.js unwraps the parsed sections) like a native paste.
 export function pasteMarkdown(editor, view, md) {
+  return insertMarkdown(editor, view, md).setMeta('paste', true).setMeta('uiEvent', 'paste')
+}
+
+// The same without marking it a paste (no paste rules): Markdown typed by an MCP agent.
+export function insertMarkdown(editor, view, md) {
   let slice = Slice.maxOpen(editor.schema.nodeFromJSON(editor.markdown.parse(md)).content)
   view.someProp('transformPasted', (f) => { slice = f(slice, view, true) })
-  return view.state.tr.replaceSelection(slice).scrollIntoView().setMeta('paste', true).setMeta('uiEvent', 'paste')
+  return view.state.tr.replaceSelection(slice).scrollIntoView()
 }
 
 // Lines as paragraphs, marked as a paste but not as a paste event, so paste rules leave it alone.

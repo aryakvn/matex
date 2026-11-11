@@ -27,6 +27,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 - Deploy the web build to GitHub Pages on a custom subdomain on every push to main (`.github/workflows/pages.yml`).
 - Add Find and replace (Ctrl+F / Ctrl+H, Edit menu, Editing group): a side panel that highlights every match in the body, steps through them, replaces one or all (one undo), with match case, whole words (Persian-aware) and regular expressions; Arabic ي/ك also find Persian ی/ک.
 - Make the web build an installable PWA that works offline: a web manifest, and a service worker (`src/sw.js`, written to `dist/sw.js` with every built file by the `pwa()` plugin in `vite.config.js`) that caches the whole app on first visit. A new deploy takes over once every MaTex tab is closed. Not used by the desktop app.
+- Add an MCP server to the desktop app (Edit → AI agents (MCP)…, off by default, remembered): an AI agent such as Claude Code connects to `http://127.0.0.1:7420/mcp` and can read the document as Markdown, edit it, insert at the cursor, read the selection and get/set the document CSS; each change is undoable, and new `{{ }}` script fields need the user's OK. Rust only relays HTTP to the webview (`tiny_http`, `src-tauri/src/lib.rs`); the protocol is `src/utils/mcp.js`, the tools `src/composables/useMcp.js`.
 - Paste plain text as Markdown with Ctrl+V (a copied Markdown table, list or `**bold**` arrives formatted; Markdown copied from a code editor too), and paste plain text without any formatting, one paragraph per line, with Ctrl+Shift+V (`src/editor/paste.js`). Text copied with formatting (web page, Word) keeps it on Ctrl+V.
 
 ### Changed
@@ -38,6 +39,7 @@ Format (based on Keep a Changelog: https://keepachangelog.com/en/1.1.0/):
 
 - Destroy the editors in the equation tests so a late ProseMirror timer can't fail CI after jsdom is torn down.
 - Wait for ProseMirror's pending DOM-observer flush after every test file (`tests/setup.js`); the per-file editor cleanup above didn't cover the other editor tests.
+- Break long tables between rows onto the next sheet, like Word, instead of running past the bottom margin; the last row keeps its caption, and a table near a sheet's bottom still moves whole if its first row doesn't fit.
 
 ## [1.0.0] - 2026-11-01
 

@@ -15,6 +15,7 @@ import CssPanel from './components/CssPanel.vue'
 import ScriptPanel from './components/ScriptPanel.vue'
 import HelpPanel from './components/HelpPanel.vue'
 import FindPanel from './components/FindPanel.vue'
+import McpPanel from './components/McpPanel.vue'
 import ToolbarMenu from './components/ToolbarMenu.vue'
 import { Ellipsis, Minus, Plus } from 'lucide-vue-next'
 import { pinSelection } from './editor/ids.js'
@@ -24,6 +25,7 @@ import { noteEntries, noteHtml, noteDir, pageAt } from './editor/notes.js'
 import { normalizeStyles, stylesCss, scopeCss } from './utils/styles.js'
 import { fillTokens, slotNumber, ALIGNS, sheetSize } from './utils/layout.js'
 import { useDocument } from './composables/useDocument.js'
+import { useMcp } from './composables/useMcp.js'
 import { onCloseRequest } from './utils/platform.js'
 import { fileAction, zoomKey } from './utils/keys.js'
 
@@ -136,6 +138,7 @@ function insertNote({ kind, id }) {
 
 const doc = useDocument(editor)
 const { name, dirty, layout, scriptsOn, fonts } = doc
+const mcp = useMcp({ editor, assets: doc.assets, layout, scriptsOn })
 
 const setup = ref(null)
 const fileActions = { new: doc.newDoc, open: doc.openDoc, save: doc.save, saveAs: doc.saveAs, pageSetup: () => setup.value.open(), find: () => openFind('find'), replace: () => openFind('replace'), print: () => { printing.value = true; nextTick(() => window.print()) } }
@@ -324,7 +327,7 @@ function stopEditing() {
 }
 
 // Right-hand side panel: one at a time, by name; the toolbar button toggles it.
-const PANELS = { styles: 'Styles', scripts: 'Script fields', js: 'Document script', css: 'CSS', help: 'Help', find: 'Find and replace' }
+const PANELS = { styles: 'Styles', scripts: 'Script fields', js: 'Document script', css: 'CSS', help: 'Help', find: 'Find and replace', mcp: 'AI agents (MCP)' }
 const panel = ref(null) // closed until asked for
 const panelHelp = ref(false) // the panel's help text is showing
 const togglePanel = (key) => (panel.value = panel.value === key ? null : key)
@@ -632,12 +635,14 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       <CssPanel v-if="panel === 'css'" ref="cssPanel" v-model="layout.css" :show-help="showHelp" />
       <HelpPanel v-if="panel === 'help'" ref="helpPanel" />
       <FindPanel v-if="panel === 'find'" ref="findPanel" :editor="editor" />
+      <McpPanel v-if="panel === 'mcp'" :on="mcp.on.value" :error="mcp.error.value" :tools="mcp.tools" :show-help="showHelp" @toggle="mcp.setOn" />
     </template>
   </SidePanel>
   </div>
   <footer class="statusbar">
     <span>Page {{ caretPage }} of {{ pages }}</span>
     <span>{{ words.toLocaleString('en') }} {{ words === 1 ? 'word' : 'words' }}</span>
+    <button v-if="mcp.on.value" type="button" class="mcp-on" title="AI agents can use this document" @click="panel = 'mcp'">MCP server on</button>
     <div class="zoom" role="group" aria-label="Zoom">
       <button type="button" class="zoom-btn" title="Zoom out (Ctrl+-)" aria-label="Zoom out" :disabled="zoom <= ZOOM_MIN" @click="stepZoom(-1)">
         <Minus :size="14" aria-hidden="true" />

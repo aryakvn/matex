@@ -10,6 +10,7 @@ export const HELP_TOPICS = [
   { key: 'pages', title: 'Pages, sections and columns' },
   { key: 'header', title: 'Header, footer and page numbers' },
   { key: 'css', title: 'Styling with CSS and HTML' },
+  { key: 'agents', title: 'AI agents (MCP)' },
   { key: 'keys', title: 'Keyboard shortcuts' },
 ]
 </script>
@@ -133,6 +134,13 @@ const keys = [
       <h3 class="ref-h">Styling with CSS and HTML</h3>
       <p>Edit → Document CSS… opens the CSS panel. Its rules style the page live and in print, and win over the Styles panel. <code>&amp;</code> is the page; <code>@page</code> and <code>@font-face</code> work.</p>
       <p>Every element has a class (<code>.paragraph</code>, <code>.heading-1</code>, <code>.persian</code>, <code>.table</code>, <code>.note</code>…) and an id. Select text and press the … beside it → Style in CSS for a rule that targets exactly that. Edit → Style this section in CSS does the same for the section.</p>
+    </section>
+
+    <section id="help-agents">
+      <h3 class="ref-h">AI agents (MCP)</h3>
+      <p>The desktop app can let an AI agent (Claude Code, Claude Desktop, Cursor…) work on the open document through the Model Context Protocol. Edit → AI agents (MCP)… opens its panel; tick <i>Let AI agents use this document</i>. MaTex remembers the choice, and the status bar says <i>MCP server on</i> while it is.</p>
+      <p>The panel shows the server address, <code>http://127.0.0.1:7420/mcp</code>, and the command that adds it to Claude Code. The agent can read the document as Markdown, edit it, insert at your cursor, read your selection and change the document CSS. Every change shows at once and Ctrl+Z undoes it; the agent can't save or open files.</p>
+      <p>Only programs on this computer can connect. MaTex asks before an agent adds a <code v-pre>{{ }}</code> script field, since scripts can do anything the app can.</p>
     </section>
 
     <section id="help-keys">

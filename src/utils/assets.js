@@ -69,6 +69,16 @@ export function createAssetStore() {
 
     get: (url) => byUrl.get(url) ?? null, // { name, blob } of a blob URL this store made
 
+    // Blob URLs → assets/<name> and back, text only (Markdown shown to and taken from an MCP agent).
+    named(md) {
+      for (const [url, { name }] of byUrl) md = replaceTargets(md, url, `assets/${name}`)
+      return md
+    },
+    unnamed(md) {
+      for (const [url, { name }] of byUrl) md = replaceTargets(md, `assets/${name}`, url)
+      return md
+    },
+
     clear,
   }
 }

@@ -207,6 +207,8 @@ function editItems() {
     { label: 'Script fields…', run: () => emit('panel', 'scripts') },
     { label: 'Document script…', run: () => emit('panel', 'js') },
     { label: 'Document CSS…', run: () => emit('panel', 'css') },
+    null,
+    { label: 'AI agents (MCP)…', run: () => emit('panel', 'mcp') },
   ]
 }
 // Equations (editor/math.js): inline in the sentence, or a centred block of its own.
