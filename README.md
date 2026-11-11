@@ -63,6 +63,7 @@ MaTex is the editor that was missing. It's small, it works offline on Linux, mac
 - 🧩 **HTML where Markdown stops.** HTML blocks are drawn live (sanitized) and saved verbatim. Code fields are Monaco, with autocomplete.
 - ⚙️ **Script fields.** `{{ page }}`-style JavaScript fields for page numbers, dates and anything a document script computes.
 - 🔍 **Find and replace.** Match case, whole words and regular expressions; Arabic ي/ك also find Persian ی/ک.
+- 🤖 **AI agents (MCP).** The desktop app can serve the open document to Claude Code, Claude Desktop or any MCP client at `http://127.0.0.1:7420/mcp`: the agent reads and edits the Markdown and CSS, live and undoable (Edit → AI agents).
 - 🖼️ **Images.** Insert, paste or drop; resize, align, wrap, rotate and filter. Tables too.
 - 📴 **Offline.** No account, no cloud. Your files stay on your disk.
 

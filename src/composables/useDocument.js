@@ -149,5 +149,5 @@ export function useDocument(editor) {
     if (at != null) target.chain().setNodeSelection(at).updateAttributes('image', { src: next }).run()
   }
 
-  return { name, dirty, layout, scriptsOn, fonts: fonts.list, addFonts, removeFont, newDoc, openDoc, save: () => write(false), saveAs: () => write(true), insertImage, rotateImage: rotate }
+  return { name, dirty, layout, scriptsOn, assets, fonts: fonts.list, addFonts, removeFont, newDoc, openDoc, save: () => write(false), saveAs: () => write(true), insertImage, rotateImage: rotate }
 }

@@ -17,7 +17,7 @@ npm run tauri build                  # desktop app; needs Rust >= 1.77.2 + Tauri
 
 There is no linter or formatter configured.
 
-Test the UI in a browser with `npm run dev`. The desktop apps are built only by GitHub Actions; the user tests those builds by hand. Rust code can't be compiled on this machine (local Rust is too old), so changes under `src-tauri/` are first compiled in CI.
+Test the UI in a browser with `npm run dev`. The desktop apps are built only by GitHub Actions; the user tests those builds by hand. The default local Rust (1.74) is too old for Tauri, but `cargo +1.91.0 check` in `src-tauri/` type-checks changes there; the apps themselves are built in CI.
 
 Releases come from `.github/workflows/release.yml`. Pushing a `v*` tag creates a draft GitHub Release with deb, macOS universal `.app`, msi and nsis exe. Running the workflow by hand produces the same files as workflow artifacts. CI runs `npm test` before building.
 
@@ -54,6 +54,7 @@ Releases come from `.github/workflows/release.yml`. Pushing a `v*` tag creates a
 - Every element has a class (from `renderHTML`: `HTMLAttributes` in `extensions.js`, heading/note/TOC in their files) and an id (`src/editor/ids.js`): auto `<class>-<n>` ids are body-only decorations, never saved; saved ids are a paragraph/heading `id` attr (`text {#id}`) and the `span` mark (`[text]{#id}`). The CSS panel's text is `layout.css` in memory and `style.css` in the archive; `scopeCss` nests it in `.page { }`.
 - Code fields are `CodeEdit.vue` (Monaco). `src/utils/monaco.js` is the slim Monaco entry (core + chosen contribs + CSS/HTML language services, workers via `?worker`); it is dynamically imported so tests and startup never load it. Add a language there (definition + feature + worker label), never import `editor.main` (bundles TypeScript, ~15 MB).
 - The web build is a PWA: `public/manifest.webmanifest` + `src/sw.js`, registered in `main.js` only in production browser builds (never Tauri). The `pwa()` plugin in `vite.config.js` writes `dist/sw.js` with every built file (minus KaTeX's ttf/woff) and a content hash, so any change gets a new cache; no `skipWaiting`, so an open tab keeps its version's lazy chunks. Lookups use `ignoreVary` (servers send `Vary: Origin`). Pages serves at `/`; a sub-path deploy would need `base` and relative URLs in the manifest/registration.
+- MCP server (desktop only): `src-tauri/src/lib.rs` runs a `tiny_http` server on `127.0.0.1:7420` (commands `mcp_start`/`mcp_stop`/`mcp_respond`) that only relays each request to the webview as an `mcp-request` event. `serveMcp` in `platform.js` listens; `src/utils/mcp.js` checks Host/Origin and speaks JSON-RPC (stateless streamable HTTP, JSON answers, no GET stream); the tools live in `src/composables/useMcp.js` and work on the body Markdown (`assets.named`/`unnamed` swap blob URLs for `assets/<name>`). New fields from an agent go through `ask()`.
 - Image paste and drop are handled in `App.vue` `editorProps` and go through `doc.insertImage(file, pos)`. `tauri.conf.json` sets `dragDropEnabled: false` so the webview receives file drops.
 
 ## Conventions

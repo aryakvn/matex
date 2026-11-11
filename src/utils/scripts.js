@@ -29,6 +29,8 @@ let compiledFor = '' // the document script the cache was built with
 
 // Whether Markdown has a field; `\{{` (escaped, literal text) doesn't count.
 export const hasScripts = (text) => /\{\{[\s\S]+?\}\}/.test(text.replace(/\\[\s\S]/g, ''))
+// Every field in Markdown, once each ({{ page }}, …), same rule.
+export const scriptsIn = (text) => new Set(text.replace(/\\[\s\S]/g, '').match(/\{\{[\s\S]+?\}\}/g))
 
 // ponytail: the document script reruns for every {{ }} on every sheet; fine for helpers, run it once
 // into a scope object if documents start doing heavy work there.

@@ -68,6 +68,27 @@ export async function setTitle(title) {
   }
 }
 
+// MCP server (desktop only, src-tauri/src/lib.rs): listens on 127.0.0.1:port and hands every HTTP
+// request to `handle({ method, url, host, origin, body })` → { status, body }. Resolves to a stop
+// function; throws when the port is taken or in a browser, which can't listen.
+export async function serveMcp(port, handle) {
+  if (!isTauri) throw new Error('The MCP server runs in the desktop app only.')
+  const { invoke } = await import('@tauri-apps/api/core')
+  const { listen } = await import('@tauri-apps/api/event')
+  const unlisten = await listen('mcp-request', async ({ payload: [id, method, url, host, origin, body] }) => {
+    let out
+    try { out = await handle({ method, url, host, origin, body }) } catch { out = { status: 500, body: '' } }
+    await invoke('mcp_respond', { id, status: out.status, body: out.body })
+  })
+  try {
+    await invoke('mcp_start', { port })
+  } catch (e) {
+    unlisten()
+    throw new Error(`Can't listen on port ${port}: ${e}`)
+  }
+  return async () => { unlisten(); await invoke('mcp_stop') }
+}
+
 // Ask before the window closes with unsaved work.
 export async function onCloseRequest(isDirty) {
   if (isTauri) {
